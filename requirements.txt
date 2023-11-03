@@ -1,0 +1,7 @@
+react-native-vector-icons
+@react-navigation/native 
+@react-navigation/native-stack
+@react-navigation/material-top-tabs
+@react-navigation/bottom-tabs
+react-native-screens : Hỗ trợ navigate sang các screen khác
+react-native-safe-area-context

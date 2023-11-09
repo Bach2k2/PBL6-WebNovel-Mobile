@@ -8,20 +8,30 @@ import HomeTabs from './views/home/HomeTabs';
 import Login from './views/account/Login';
 import Register from './views/account/Register';
 import CoinExchange from './views/account/CoinExchange';
+import LoginByEmail from './views/account/LoginByEmail';
 
+import { AuthContext, AuthProvider } from './context/AuthContext';
+import Profile from './views/account/Profile';
+import Reading from './views/reading/Reading';
+import NovelDetail from './views/novelDetail/NovelDetail';
 const Stack = createNativeStackNavigator();
 function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName='Home'>
-        <Stack.Screen name="Home" component={HomeTabs} options={{
-          headerShown: false,
-        }} />
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="CoinExchange" component={CoinExchange} />
-      </Stack.Navigator>
-    </NavigationContainer >
+    <AuthProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName='Home'>
+          <Stack.Screen name="Home" component={HomeTabs} options={{
+            headerShown: false,
+          }} />
+           <Stack.Screen name="NovelDetail" component={NovelDetail} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen name="CoinExchange" component={CoinExchange} />
+          <Stack.Screen name="LoginByEmail" component={LoginByEmail} />
+          <Stack.Screen name="Profile" component={Profile} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 

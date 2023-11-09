@@ -2,9 +2,15 @@ import React from 'react';
 import { Dimensions, View } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
 const heigthWindow = Dimensions.get('window').height;
 const widthWindow = Dimensions.get('window').width;
+
 const Login = ({ navigation }: { navigation: any }) => {
+    const handleLoginByEmail=()=>{
+        navigation.navigate('LoginByEmail');
+        console.log('handleLoginByEmail');
+    }
     return (
         <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../assets/background/background1.jpg')}>
             <SafeAreaView style={styles.container}>
@@ -39,7 +45,7 @@ const Login = ({ navigation }: { navigation: any }) => {
                     <TouchableOpacity style={styles.twitterRoundBtn}>
                         <Icon name='twitter' size={30} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.roundButton}>
+                    <TouchableOpacity style={styles.roundButton} onPress={handleLoginByEmail}>
                         <Icon name='gmail' size={30} color="white" />
                     </TouchableOpacity>
                 </View>

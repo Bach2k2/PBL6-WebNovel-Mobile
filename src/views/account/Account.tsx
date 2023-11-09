@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import { LinearGradient } from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -7,6 +7,7 @@ import Login from './Login'
 import Register from './Register';
 import { useNavigation } from '@react-navigation/native';
 import { User } from '../../models/User';
+import { AuthContext } from '../../context/AuthContext';
 const AccountNavigator = createNativeStackNavigator();
 
 
@@ -29,33 +30,15 @@ function Account() {
                     headerShown: false,
 
                 }}></AccountNavigator.Screen>
-            {/* <AccountNavigator.Screen name="Login" component={Login} options={{
-                title: '',
-                headerStyle: {
-                    backgroundColor: 'black',
-                },
-                headerTintColor: 'white',
-                // headerLeft:'true',
-                // headerRight:'false'
-                // headerShown: false,
-                // headerLeft: () => (
-                //     <Icon.Button
-                //         name="arrow-back"
-                //         color={"white"}
-                //         size={30} 
-                //         onPress={() => {
-                //             navigation.goBack();
-                //         }}
-                //     />
-                // ),
-            }}></AccountNavigator.Screen>
-            <AccountNavigator.Screen name="Register" component={Register}></AccountNavigator.Screen> */}
         </AccountNavigator.Navigator>
     );
 }
 
 const AccountMainPage = ({ navigation }: { navigation: any }) => {
     const [user, setUserData] = useState<User>();
+    const { getUserData } = useContext(AuthContext);
+    const userData = getUserData();
+    console.log("userData: " + userData);
     return (
         <View>
             <ScrollView>
@@ -65,14 +48,35 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                         <Icon name='mail' size={20} color={'gray'} />
                         <Icon name='settings' size={20} color={'gray'} />
                     </View>
-                    <TouchableOpacity onPress={() => {
-                        navigation.navigate('Login');
-                    }}>
-                        <View style={styles.avatar_container}>
-                            <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
-                            <Text style={styles.username}>Bấm để đăng nhập</Text>
-                        </View>
-                    </TouchableOpacity>
+                    {
+                        userData ?
+                            (
+                                <View>
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('Profile');
+                                    }}>
+                                        <View style={styles.avatar_container}>
+                                            <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
+                                            <Text style={styles.username}>Nam Truong</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            ) :
+                            (<View>
+                                <TouchableOpacity onPress={() => {
+                                    navigation.navigate('Login');
+                                }}>
+                                    <View style={styles.avatar_container}>
+                                        <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
+                                        <Text style={styles.username}>Bấm để đăng nhập</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+
+                            )
+                    }
+
+
                     <View style={styles.infor_container}>
                         <View style={styles.coinRow}>
                             <View style={styles.infor_column}>

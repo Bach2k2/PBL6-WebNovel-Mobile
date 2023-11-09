@@ -1,16 +1,26 @@
 import axios from "axios";
-import { serverURL, axiosInstance } from './AxiosInstance.js'
-const getNovelData = async () => {
+import { axiosInstance } from './AxiosInstance.js'
+export const getNovelData = async () => {
     try {
-        const response = await axiosInstance.get(serverURL+'/api/novel');
-        // console.log(response);
+        const response = await axiosInstance.get('/novel');
+        console.log(response);
         return response.data;
     } catch (error) {
         console.error(error);
         throw new Error("Failed to fetch novel data");
     }
 };
-
-export default getNovelData;
+export const getNovelById = async (novelId:any) => {
+    console.log('param: ',novelId);
+    try {
+        const response = await axiosInstance.get(`/novel/${novelId}`);
+        console.log(response);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch novel data detail");
+    }
+}
+// export default { getNovelData, getNovelById };
 
 

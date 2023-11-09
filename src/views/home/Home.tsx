@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import getNovelData from '../../hook/NovelApi';
+
+import useFetch from '../../hook/useFetch';
+import { getNovelData } from '../../hook/NovelApi';
 import { Novel } from '../../models/Novel';
+import NovelRow from '../../components/Home/NovelRow';
 
 import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
 function HotNovels() {
-  const [novels, setNovels] = useState<Novel[]>();
+  const navigation = useNavigation();
+  // const [novels, setNovels] = useState<Novel[]>([]);
+  // const [novels, setNovels] = useState(Array<Novel>());
+  // const [loading, setLoading] = useState(true);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     await getNovelData().then((data) => { // thêm await sẽ tạo 
+  //       setNovels(data);
+  //       console.log('I fire one')
+  //       console.log('novels' + novels);
+  //       setLoading(false); // Đã tải xong dữ liệu
+  //     }).catch((err) => {
+  //       // setNovels(novelsData)
+  //       setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
+  //       console.error(err);
+  //     })
+  //   }
+  //   fetchData();
+  // }, []);
+  const { data: novels, isLoading, error } = useFetch("novel")
   useEffect(() => {
-    const fetchData = async () => {
-      getNovelData().then((data) => {
-        setNovels(data);
-      }).catch((err) => {
-        // setNovels(novelsData)
-        console.error(err);
-      })
-    }
-    fetchData();
-  }, []);
+
+    console.log(novels);
+  })
 
   const [headerSticky, setHeaderSticky] = useState(false);
 
@@ -40,11 +55,13 @@ function HotNovels() {
       <ScrollView>
         <ScrollView onScroll={handleScroll}>
           {/* <RmdNovel></RmdNovel> */}
-          <NovelGrid novelData={novels}/>
+          {novels ? (<NovelGrid novelData={novels} />) : (<View><Text>Running</Text></View>)}
+
         </ScrollView>
+        <NovelRow />
         <ImageRow></ImageRow>
-        <ImageRow></ImageRow>
-        <NovelsList></NovelsList>
+
+        <NovelsList navigation={navigation}></NovelsList>
       </ScrollView>
     </SafeAreaView>
   );
@@ -152,7 +169,8 @@ function ImageRow() {
   );
 }
 
-function NovelsList() {
+function NovelsList({navigation}:any ){
+
   const [loading, setLoading] = useState(true);
   const [novels, setNovels] = useState(Array<Novel>());
   const [error, setError] = useState(null);
@@ -170,7 +188,8 @@ function NovelsList() {
   ];
   useEffect(() => {
     const fetchData = async () => {
-      getNovelData().then((data) => {
+      await getNovelData().then((data) => {
+        console.log('I fire two')
         setNovels(data);
       }).catch((err) => {
         // setNovels(novelsData)
@@ -190,15 +209,22 @@ function NovelsList() {
         <Text style={{ color: "black", fontSize: 24, }}>You may also like:</Text>
       </View>
       {novels.map((novel, index) => (
-        <View style={styles.novelContainer} key={index}>
-          <Image source={{ uri: novel.coverImageUrl }} alt='https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447' style={styles.novelImage} />
-          <View style={styles.novelContent}>
-            <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
-            <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
-            <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
-            <Text numberOfLines={1} style={styles.novelGenre}>{novel.genres} . <Icon name='description' size={16} color="gray" />{novel.views}</Text>
-          </View>
-          <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" />
+        <View key={index}>
+          <TouchableOpacity style={styles.novelContainer} onPress={() => {
+            console.log('Press to novel details' + novel.id);
+            navigation.navigate('NovelDetail',{novelId: novel.id});
+          }}>
+            <Image source={{ uri: novel.imagesURL }} alt='https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447' style={styles.novelImage} />
+            <View style={styles.novelContent}>
+              <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
+              <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
+              <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
+              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.join()} . <Icon name='description' size={16} color="gray" />{novel.views}</Text>
+            </View>
+
+            <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" onPress={() => { console.log('add novel into lib') }} />
+          </TouchableOpacity>
+
         </View>
       ))}
     </ScrollView>

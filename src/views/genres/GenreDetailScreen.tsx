@@ -40,9 +40,7 @@ function GenreDetailScreen({ route }: { route: any }) {
               </View>
               <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" />
             </View>
-
           ))
-
         }
       </ScrollView>
     </SafeAreaView>

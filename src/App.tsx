@@ -14,6 +14,10 @@ import { AuthContext, AuthProvider } from './context/AuthContext';
 import Profile from './views/account/Profile';
 import Reading from './views/reading/Reading';
 import NovelDetail from './views/novelDetail/NovelDetail';
+import ChapterDetail from './views/novelDetail/ChapterDetail';
+import ChapterList from './views/novelDetail/ChapterList';
+import EditProfile from './views/account/EditProfile';
+import SettingAccount from './views/account/SettingAccount';
 const Stack = createNativeStackNavigator();
 function App() {
   return (
@@ -23,15 +27,19 @@ function App() {
           <Stack.Screen name="Home" component={HomeTabs} options={{
             headerShown: false,
           }} />
-           <Stack.Screen name="NovelDetail" component={NovelDetail} />
+          <Stack.Screen name="NovelDetail" component={NovelDetail} />
+          <Stack.Screen name="ChapterList" component={ChapterList} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="CoinExchange" component={CoinExchange} />
           <Stack.Screen name="LoginByEmail" component={LoginByEmail} />
           <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
+          <Stack.Screen name="SettingAccount" component={SettingAccount} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
+    // <ChapterDetail/>
   );
 }
 

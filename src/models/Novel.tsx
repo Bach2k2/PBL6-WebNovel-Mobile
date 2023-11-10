@@ -14,4 +14,5 @@ export interface Novel {
     tags: Array<string>,
     genres: Array<string>
     genreName:Array<string>
+    numChapter:number
 }

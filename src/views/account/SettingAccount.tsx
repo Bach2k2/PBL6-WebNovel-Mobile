@@ -1,10 +1,11 @@
 import { AuthContext } from '../../context/AuthContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { User } from '../../models/User';
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-const EditProfile = () => {
-
+import { useNavigation } from '@react-navigation/native';
+const SettingAccount = () => {
+    const navigation = useNavigation()
     const customUser = {
         email: "namtruong0900@gmail.com",
         id: "dckfGkjWXEG7jy4u0zc_rg",
@@ -19,6 +20,7 @@ const EditProfile = () => {
     }
     const [user, setUserData] = useState<User | null>(null);
     const { getUserData } = useContext(AuthContext);
+    const authContext = useContext(AuthContext);
     // const userData = getUserData();
 
     useEffect(() => {
@@ -31,40 +33,24 @@ const EditProfile = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.coverImgContainer}>
-                <ImageBackground style={styles.coverImg} source={{ uri: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/anh-bia-dep-10.jpg' }} >
-                    <Icon name="photo" size={20} />
-                </ImageBackground>
-            </View>
-            <View style={styles.row}>
-                <View style={styles.avatar_container}>
-                    <Image style={styles.avatar} source={{ uri: 'https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3' }} />
-                </View>
-            </View>
-            <View style={styles.row}>
-                <TouchableOpacity onPress={() => { }}>
-                    <View style={{ marginTop: 5, flexDirection: 'row' }}>
-                        <Icon name='pencil' size={20} />
-                        <Text>Nói cho chúng tôi thêm về sở thích của bạn</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.lastRow}>
-                <View style={{ marginTop: 5, flexDirection: 'row' }}>
-                    <Icon name='calendar' size={20} />
-                    <Text>Đã tham gia vào 2023-11-07 </Text>
-                </View>
-                <View style={{ marginTop: 5, flexDirection: 'row' }}>
-                    <Icon name='account-wrench' size={20} />
-                    <Text>Toàn cầu </Text>
-                </View>
-            </View>
+            {
+                user ? (<Button title='Dang xuat' onPress={() => {
+                    // const logout =asyn
+                    authContext.logout();
+                    navigation.navigate('Account')
+                }}></Button>):(<Button title='Dang nhap' onPress={() => {
+                    // const logout =asyn
+                    // authContext.logout();
+                    navigation.navigate('Login')
+                }}></Button>)
+
+            }
 
         </View>
     );
 };
 
-export default EditProfile;
+export default SettingAccount;
 const styles = StyleSheet.create({
     container: {
         flex: 1,

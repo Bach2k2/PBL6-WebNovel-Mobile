@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import { LinearGradient } from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -35,21 +35,32 @@ function Account() {
 }
 
 const AccountMainPage = ({ navigation }: { navigation: any }) => {
-    const [user, setUserData] = useState<User>();
+    const [user, setUserData] = useState<User | null>(null);
     const { getUserData } = useContext(AuthContext);
-    const userData = getUserData();
-    console.log("userData: " + userData);
+    // const userData = getUserData();
+
+    useEffect(() => {
+        setUserData(getUserData());
+        // console.log(user);
+
+    }, [user, getUserData]); // Cập nhật khi có sự thay đổi cua
     return (
         <View>
             <ScrollView>
                 {/* <Header></Header> */}
                 <View style={styles.container}>
                     <View style={styles.icon_container}>
-                        <Icon name='mail' size={20} color={'gray'} />
-                        <Icon name='settings' size={20} color={'gray'} />
+                        <TouchableOpacity>
+                            <Icon name='mail' size={20} color={'gray'} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => {
+                            navigation.navigate('SettingAccount')
+                        }}>
+                            <Icon name='settings' size={20} color={'gray'} />
+                        </TouchableOpacity>
                     </View>
                     {
-                        userData ?
+                        user ?
                             (
                                 <View>
                                     <TouchableOpacity onPress={() => {
@@ -57,7 +68,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                                     }}>
                                         <View style={styles.avatar_container}>
                                             <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
-                                            <Text style={styles.username}>Nam Truong</Text>
+                                            <Text style={styles.username}>{user?.username}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 </View>

@@ -5,3 +5,10 @@ react-native-vector-icons
 @react-navigation/bottom-tabs
 react-native-screens : Hỗ trợ navigate sang các screen khác
 react-native-safe-area-context
+
+react-native-pdf: read pdf file
+react-native-blob-util: and support for reading pdf file
+
+Text extract:
+react-native-fetch-blob 
+pdf-parse

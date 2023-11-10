@@ -7,7 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { AxiosContext } from '../../context/AxiosContext';
 import * as Keychain from 'react-native-keychain';
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import { getAccountById } from '../../hook/AccountApi';
+import AccountApi from '../../hook/AccountApi';
 // import jwt from 'jsonwebtoken';
 
 const HeigthWindow = Dimensions.get('window').height;
@@ -85,10 +85,9 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
             const userId = decoded.nameidentifier;
 
             console.log(userId);
-
-            const userData = await getAccountById(userId,accessToken);
-            authContext.setUserData(userData);
-
+            const accountApi = AccountApi(authContext);
+            const userData = await accountApi(userId, accessToken);
+            await authContext.setUserData(userData); // thành công, đã check
             navigation.navigate('Account', userData);
 
         } catch (error: any) {

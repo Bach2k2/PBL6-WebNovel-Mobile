@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { Dimensions, View ,Keyboard} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, View, Keyboard } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import RegisterApi from '../../hook/RegisterApi';
 const HeigthWindow = Dimensions.get('window').height;
 const WidthWindow = Dimensions.get('window').width;
 const Register = ({ navigation }: { navigation: any }) => {
+    const [isTouchableEnabled, setIsTouchableEnabled] = useState(false);
     const [showPasswordStatus, SetShowPasswordStatus] = useState(false);
     const [contentHeight, setContentHeight] = useState(HeigthWindow);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const updateContentHeight = () => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
             setContentHeight(HeigthWindow / 2); // You can adjust the height as needed
@@ -25,6 +29,25 @@ const Register = ({ navigation }: { navigation: any }) => {
     // Call the function to update content height when the component mounts
     React.useEffect(updateContentHeight, []);
 
+    const handleRegister = async() => {
+       // console.log(email,password);
+        await RegisterApi(email,password).then((response)=>{
+            console.log(response);
+            navigation.navigate('Login');
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+    useEffect(() => {
+        if (email && password) {
+            setIsTouchableEnabled(true);
+        } else {
+            setIsTouchableEnabled(false);
+        }
+    }, [email, password]);
+    useEffect(() => {
+
+    })
     return (
         <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../assets/background/background1.jpg')}>
             <SafeAreaView style={styles.container}>
@@ -33,13 +56,14 @@ const Register = ({ navigation }: { navigation: any }) => {
                     <Image source={require('../../assets/img/welcome.png')} style={styles.logo} />
                 </View>
 
-                <View style={[styles.content, {height: contentHeight}]}>
+                <View style={[styles.content, { height: contentHeight }]}>
                     <Text style={styles.header}>Tạo tài khoản</Text>
                     <View style={styles.inputContainer}>
                         <Text style={styles.label}>Email</Text>
                         <View style={styles.textboxContainer}>
                             <Icon style={styles.iconInput} name='email' size={30} />
-                            <TextInput style={styles.textInput} placeholder='Nhập email ở đây' />
+                            <TextInput style={styles.textInput} placeholder='Nhập email ở đây'
+                                onChangeText={(email) => setEmail(email)} />
                         </View>
 
                     </View>
@@ -48,14 +72,15 @@ const Register = ({ navigation }: { navigation: any }) => {
                         <Text style={styles.label}>Password</Text>
                         <View style={styles.textboxContainer}>
                             <Icon style={styles.iconInput} name='lock' size={30} />
-                            <TextInput style={styles.textInput} placeholder='Nhập mật khẩu ở đây' />
-                            <TouchableOpacity onPress={() => { SetShowPasswordStatus(!showPasswordStatus) }}>
-                                {showPasswordStatus ? (
-                                    <Image style={styles.passwordShow} source={require('../../assets/logo/show.png')} />
-                                ) : (
-                                    <Image style={styles.passwordShow} source={require('../../assets/logo/hide.png')} />
-                                )}
-                            </TouchableOpacity>
+                            <TextInput style={styles.textInput}
+                                placeholder='Nhập mật khẩu ở đây'
+                                onChangeText={(password) => setPassword(password)}
+                                secureTextEntry={!showPasswordStatus} />
+                            <View style={styles.passwordShowContainer} >
+                                <TouchableOpacity onPress={() => { SetShowPasswordStatus(!showPasswordStatus) }}>
+                                    <Image style={styles.passwordShow} source={showPasswordStatus ? require('../../assets/logo/show.png') : require('../../assets/logo/hide.png')} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                     <View style={styles.warningContainer}>
@@ -64,16 +89,11 @@ const Register = ({ navigation }: { navigation: any }) => {
                     </View>
 
                     <View style={styles.btnContainer}>
-                        <TouchableOpacity onPress={() => { }} style={styles.btnNext}>
-                            <Text>Tiếp tục</Text>
+                        <TouchableOpacity onPress={handleRegister} style={styles.btnNext} disabled={!isTouchableEnabled}>
+                            <Text>Đăng ký</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-
-
-
-
-
             </SafeAreaView >
         </ImageBackground>
     );
@@ -172,7 +192,11 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center'
-    }
+    }, passwordShowContainer: {
+        height: '100%',
+        justifyContent: 'center',
+        alignSelf: 'flex-end',
+    },
 
 });
 export default Register;

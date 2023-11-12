@@ -6,9 +6,12 @@ import { Novel } from "../../models/Novel";
 import { getNovelById } from "../../hook/NovelApi";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
+import { Chapter } from '../../models/Chapter';
+import { getChaptersByNovelId } from '../../hook/ChapterApi';
 const NovelDetail = ({ route }: any) => {
     const navigation = useNavigation();
     const [novel, setNovel] = useState<Novel>();
+    const [chapter, setChapters]= useState<Chapter>();
     const { novelId } = route.params;
     const [isDownload, setDownloadStatus] = useState(false);
 
@@ -23,6 +26,19 @@ const NovelDetail = ({ route }: any) => {
             })
         }
         fetchNovelDetailData();
+    }, []);
+
+    useEffect(() => {
+        // console.log(novelId);
+        const fetchChapterByNovelId = async () => {
+            await getChaptersByNovelId(novelId).then((data) => {
+                console.log('data', data);
+                setChapters(data);
+            }).catch((error) => {
+                console.log(error);
+            })
+        }
+        fetchChapterByNovelId();
     }, []);
     function handleDownloadBtnPress(): void {
         setDownloadStatus(true);

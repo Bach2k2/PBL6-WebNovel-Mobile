@@ -1,73 +1,110 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Dimensions ,ScrollView} from "react-native";
-import { WebView } from 'react-native-webview';
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Dimensions, ScrollView, ActivityIndicator } from "react-native";
 import Pdf from 'react-native-pdf';
-function ChapterDetail({ route }: any) {
-    // const [html, setHtml] = useState('');
+import { Chapter } from "../../models/Chapter";
+import { getChaptersByChapterId } from "../../hook/ChapterApi";
+const ChapterDetail = ({ route }: any) => {
+    const [chapter, setChapter] = useState<Chapter>();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [numOfPages, setNumOfPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(true);
+    const [pdfArray, setPdfArray] = useState<JSX.Element[]>([]);
+    const { chapterId } = route.params;
 
-    // useEffect(() => {
-    //     fetch('https://v2.convertapi.com/convert/pdf/to/html?Secret=3X8foVPTkze1ALke&File=https://webnovel2023.s3-ap-southeast-1.amazonaws.com/be608a5c-3e80-4fc7-818b-8b6993348bde/3a01b7ae-0522-49a9-a2fb-a73e947a3add/text.pdf')
-    //         .then((response) => response.text())
-    //         .then((html) => {
-    //             setHtml(html);
-    //         })
-    //         .catch((error) => {
-    //             console.error(error);
-    //         });
-    // }, []); // The empty dependency array ensures that the effect runs once when the component mounts
+    useEffect(() => {
+        const fetchChapterById = async () => {
+            try {
+                const data = await getChaptersByChapterId(chapterId);
+                console.log("chapter Response:", data);
+                setChapter(data);
 
-    // return (
-    //     <View style={{ flex: 1 }}>
-    //         {html && <Text>{html}</Text>}
-    //     </View>
-    // );
-    const [chapter, setChapter] = useState();
-    const source = { uri: 'https://webnovel2023.s3-ap-southeast-1.amazonaws.com/be608a5c-3e80-4fc7-818b-8b6993348bde/3a01b7ae-0522-49a9-a2fb-a73e947a3add/text.pdf', cache: true };
-    return (
+                if (data.fileContent === undefined) {
+                    setIsLoading(false);
+                } else {
+                    setIsLoading(false);
+                    setNumOfPages(1); // Assuming the file has only one page initially
+                    setPdfArray([renderPdf(1, data.fileContent)]);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
-        <View style={styles.container} >
-            <ScrollView>
+        fetchChapterById();
+    }, [chapterId]);
+
+    const handlePageChange = (page: number, numberOfPages: number) => {
+        console.log(`Current page: ${page}`);
+        setCurrentPage(page);
+    };
+
+    const renderPdf = (page: number, uri: string) => {
+        return (
             <Pdf
                 trustAllCerts={false}
-                source={source}
-                onLoadComplete={(numberOfPages, filePath) => {
+                key={page}
+                source={{ uri: uri, cache: true }}
+                page={page}
+                onLoadComplete={(numberOfPages) => {
                     console.log(`Number of pages: ${numberOfPages}`);
+                    setNumOfPages(numberOfPages);
                 }}
-                onPageChanged={(page, numberOfPages) => {
-                    console.log(`Current page: ${page}`);
-                }}
+                onPageChanged={handlePageChange}
                 onError={(error) => {
                     console.log(error);
                 }}
                 onPressLink={(uri) => {
                     console.log(`Link pressed: ${uri}`);
                 }}
-                 // Tự động điều chỉnh kích thước để vừa với chiều rộng màn hình
-                minScale={1.0} // Khoảng giá trị tối thiểu của tỷ lệ phóng to
-                maxScale={3.0} // Khoảng giá trị tối đa của tỷ lệ phóng to
-                singlePage={false}
-                style={styles.pdf} />
+                style={styles.pdf}
+            />
+        );
+    };
+
+    const renderPages = () => {
+        if (isLoading) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+            );
+        }
+
+        return (
+            <ScrollView
+                horizontal
+                pagingEnabled
+                onMomentumScrollEnd={(event) => {
+                    const offsetX = event.nativeEvent.contentOffset.x;
+                    const page = Math.ceil(offsetX / Dimensions.get('window').width) + 1;
+                    setCurrentPage(page);
+                }}
+            >
+                {pdfArray}
             </ScrollView>
-            
-        </View>
+        );
+    };
+
+    return <View style={styles.container}>{renderPages()}</View>;
+};
 
 
-    );
-}
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        width: '300%',
-        height: '300%',
+        width: '100%',
+        height: '100%',
     },
     pdf: {
         flex: 1,
-        width: Dimensions.get('window').width*1.5,
-        height: Dimensions.get('window').height*1.5,
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
     },
-
-
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
-
 export default ChapterDetail;

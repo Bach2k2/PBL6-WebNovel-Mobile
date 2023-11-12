@@ -3,31 +3,36 @@ import { useEffect, useState, useContext } from "react";
 import { Chapter } from "../../models/Chapter";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { getChaptersByNovelId } from "../../hook/ChapterApi";
+import { useNavigation } from "@react-navigation/native";
 const ChapterList = ({ route }: any) => {
     const [chapterList, setChapterList] = useState<Chapter[]>([]);
     const { NovelId } = route.params;
+    const navigation = useNavigation();
     useEffect(() => {
         console.log(NovelId)
         const fetchChapter = async () => {
             const data = await getChaptersByNovelId(NovelId);
-            console.log('haha ', data);
             setChapterList(data);
 
         }
         fetchChapter();
-    }, [NovelId])
-    //  const source = { uri: 'https://webnovel2023.s3-ap-southeast-1.amazonaws.com/be608a5c-3e80-4fc7-818b-8b6993348bde/3a01b7ae-0522-49a9-a2fb-a73e947a3add/text.pdf', cache: true };
+    }, [NovelId]);
+    
     return (
         <View style={styles.container}>
             <ScrollView>
                 {chapterList.map((chapter, index) => (
-                    <View style={styles.row} key={index}>
-                        <Text style={styles.chapIndex}>{chapter.chapIndex}</Text>
-                        <Text numberOfLines={1} style={styles.chapterName}>{chapter.name}</Text>
-                        {chapter.isLocked && (
-                            <Icon name="lock" size={20} style={styles.lockIcon} />
-                        )}
-                    </View>
+                    <TouchableOpacity key={index} onPress={()=>{
+                        navigation.navigate('ChapterDetail', {chapterId: chapter.id});
+                    }}>
+                        <View style={styles.row}>
+                            <Text style={styles.chapIndex}>{chapter.chapIndex}</Text>
+                            <Text numberOfLines={1} style={styles.chapterName}>{chapter.name}</Text>
+                            {chapter.isLocked && (
+                                <Icon name="lock" size={20} style={styles.lockIcon} />
+                            )}
+                        </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </View>

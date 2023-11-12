@@ -9,34 +9,29 @@ import useFetch from '../../hook/useFetch';
 import { getNovelData } from '../../hook/NovelApi';
 import { Novel } from '../../models/Novel';
 import NovelRow from '../../components/Home/NovelRow';
-
 import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
 function HotNovels() {
   const navigation = useNavigation();
   // const [novels, setNovels] = useState<Novel[]>([]);
-  // const [novels, setNovels] = useState(Array<Novel>());
-  // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     await getNovelData().then((data) => { // thêm await sẽ tạo 
-  //       setNovels(data);
-  //       console.log('I fire one')
-  //       console.log('novels' + novels);
-  //       setLoading(false); // Đã tải xong dữ liệu
-  //     }).catch((err) => {
-  //       // setNovels(novelsData)
-  //       setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
-  //       console.error(err);
-  //     })
-  //   }
-  //   fetchData();
-  // }, []);
-  const { data: novels, isLoading, error } = useFetch("novel")
+  const [novels, setNovels] = useState(Array<Novel>());
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-
-    console.log(novels);
-  })
+    const fetchData = async () => {
+      await getNovelData().then((data) => { // thêm await sẽ tạo 
+        setNovels(data);
+        console.log('I fire one')
+        // console.log('novels' + novels);
+        setLoading(false); // Đã tải xong dữ liệu
+      }).catch((err) => {
+        // setNovels(novelsData)
+        setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
+        console.error(err);
+      })
+    }
+    fetchData();
+  }, []);
+  // const { data: novels, isLoading, error } = useFetch("novel")
 
   const [headerSticky, setHeaderSticky] = useState(false);
 
@@ -55,7 +50,7 @@ function HotNovels() {
       <ScrollView>
         <ScrollView onScroll={handleScroll}>
           {/* <RmdNovel></RmdNovel> */}
-          {novels ? (<NovelGrid novelData={novels} />) : (<View><Text>Running</Text></View>)}
+          <NovelGrid novelData={novels} />
 
         </ScrollView>
         <NovelRow />
@@ -169,30 +164,17 @@ function ImageRow() {
   );
 }
 
-function NovelsList({navigation}:any ){
+function NovelsList({ navigation }: any) {
 
   const [loading, setLoading] = useState(true);
   const [novels, setNovels] = useState(Array<Novel>());
   const [error, setError] = useState(null);
-  const novelsData = [
-    { title: 'Novel 1', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: 'Blood Sniper', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 1', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 2', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 3', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 4', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 5', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 6', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 7', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 8', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 9', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 10', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-  ];
   useEffect(() => {
     const fetchData = async () => {
       await getNovelData().then((data) => {
         console.log('I fire two')
         setNovels(data);
       }).catch((err) => {
-        // setNovels(novelsData)
         console.error(err);
       })
     }
@@ -212,7 +194,7 @@ function NovelsList({navigation}:any ){
         <View key={index}>
           <TouchableOpacity style={styles.novelContainer} onPress={() => {
             console.log('Press to novel details' + novel.id);
-            navigation.navigate('NovelDetail',{novelId: novel.id});
+            navigation.navigate('NovelDetail', { novelId: novel.id });
           }}>
             <Image source={{ uri: novel.imagesURL }} alt='https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447' style={styles.novelImage} />
             <View style={styles.novelContent}>

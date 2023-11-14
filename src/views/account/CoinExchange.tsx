@@ -8,7 +8,7 @@ export default function CoinExchange() {
         {}
     ];
     return (
-        <SafeAreaView style={{flex:1,backgroundColor:'black'}}>
+        <SafeAreaView style={{flex:1,backgroundColor:'black',justifyContent:'center',alignItems:'center'}}>
             <View style={styles.container} >
                 <View style={styles.row}>
                     <Text style={styles.header}>Nạp tiền</Text>

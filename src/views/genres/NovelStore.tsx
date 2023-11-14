@@ -5,7 +5,7 @@ import getGenreData from '../../hook/GenreApi';
 import { Genre } from '../../models/Genre';
 import { NavigationContainer, RouteProp, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import GenreDetailScreen from './GenreDetailScreen';
+import NovelByGenre from './NovelByGenre';
 // import { Navigation } from 'react-native-navigation';
 import Header from '../../components/Header/Header';
 
@@ -44,7 +44,7 @@ function NovelStore() {
         (genreDatas.map((item, index) => (
           <GenreStack.Screen
             name={`${item.name}`}  // KO được đặt tên screen trùng với nhau 
-            component={GenreDetailScreen} // Sử dụng component thay vì hàm
+            component={NovelByGenre} // Sử dụng component thay vì hàm
             initialParams={{ genre: item }} // Truyền params qua initialParams
             key={index}
             options={{

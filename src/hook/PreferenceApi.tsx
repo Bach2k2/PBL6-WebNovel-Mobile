@@ -3,7 +3,7 @@ import { axiosInstance } from './AxiosInstance.js'
 import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 import { User } from "../models/User.js";
-const getBookmarkedData = async (user: User, accessToken: any) => {
+const getPreferenceData = async (user: User, accessToken: any) => {
     console.log("user", user.id);
     const axiosConfig = {
         headers: {
@@ -11,7 +11,7 @@ const getBookmarkedData = async (user: User, accessToken: any) => {
         },
     };
     try {
-        const response = await axiosInstance.get(`/bookmarkeds/AccountId=${user.id}`, axiosConfig);
+        const response = await axiosInstance.get(`preferences/AccountId=${user.id}`, axiosConfig);
         return response.data;
     } catch (error) {
         console.error(error);
@@ -19,5 +19,5 @@ const getBookmarkedData = async (user: User, accessToken: any) => {
     }
 };
 
-export default getBookmarkedData;
+export default getPreferenceData;
 

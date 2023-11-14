@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import RegisterApi from '../../hook/RegisterApi';
 const HeigthWindow = Dimensions.get('window').height;
 const WidthWindow = Dimensions.get('window').width;
+import Toast from 'react-native-toast-message';
 const Register = ({ navigation }: { navigation: any }) => {
     const [isTouchableEnabled, setIsTouchableEnabled] = useState(false);
     const [showPasswordStatus, SetShowPasswordStatus] = useState(false);
@@ -29,13 +30,23 @@ const Register = ({ navigation }: { navigation: any }) => {
     // Call the function to update content height when the component mounts
     React.useEffect(updateContentHeight, []);
 
-    const handleRegister = async() => {
-       // console.log(email,password);
-        await RegisterApi(email,password).then((response)=>{
+    const handleRegister = async () => {
+        // console.log(email,password);
+        await RegisterApi(email, password).then((response) => {
             console.log(response);
+            Toast.show({
+                type: 'success',
+                text1: 'Register Notification!',
+                text2: 'Register successfully👋'
+            });
             navigation.navigate('Login');
         }).catch((error) => {
             console.log(error)
+            Toast.show({
+                type: 'error',
+                text1: 'ERROR',
+                text2: 'Register unsuccessfully'
+            });
         })
     }
     useEffect(() => {
@@ -195,7 +206,9 @@ const styles = StyleSheet.create({
     }, passwordShowContainer: {
         height: '100%',
         justifyContent: 'center',
-        alignSelf: 'flex-end',
+        alignItems: 'flex-end',
+        marginRight: 10,
+        flex: 1,
     },
 
 });

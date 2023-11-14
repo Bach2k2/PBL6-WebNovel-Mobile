@@ -18,9 +18,9 @@ const Header = () => {
                     <Icon name="settings" size={24} color="black"></Icon>
                 </TouchableOpacity>
             </View>
-            <View style={{ marginLeft: 20 }}>
+            {/* <View style={{ marginLeft: 20 }}>
                 <Text>Novels</Text>
-            </View>
+            </View> */}
         </View>
     );
 }

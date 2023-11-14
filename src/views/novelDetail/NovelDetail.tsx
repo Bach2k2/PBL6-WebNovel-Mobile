@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity } from "rea
 
 import { useEffect, useState, useContext } from "react";
 import { Novel } from "../../models/Novel";
-import { getNovelById } from "../../hook/NovelApi";
+import { getNovelByGenre, getNovelById, getNovelData } from "../../hook/NovelApi";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
 import { Chapter } from '../../models/Chapter';
@@ -11,9 +11,12 @@ import { getChaptersByNovelId } from '../../hook/ChapterApi';
 const NovelDetail = ({ route }: any) => {
     const navigation = useNavigation();
     const [novel, setNovel] = useState<Novel>();
-    const [chapter, setChapters]= useState<Chapter>();
+    const [chapter, setChapters] = useState<Chapter>();
     const { novelId } = route.params;
     const [isDownload, setDownloadStatus] = useState(false);
+    const [rcmNovel, setRcmNovels] = useState<Novel[]>([]);
+    const [relatedNovel, setRelatedNovels] = useState<Novel[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // console.log(novelId);
@@ -40,6 +43,34 @@ const NovelDetail = ({ route }: any) => {
         }
         fetchChapterByNovelId();
     }, []);
+
+    useEffect(() => {
+        // Simulate data loading delay (replace with your actual data fetching logic)
+        const fetchRcmData = async () => {
+            await getNovelData().then((data) => {
+                console.log('I fire two')
+                setRcmNovels(data);
+                setLoading(false);
+            }).catch((err) => {
+                console.error(err);
+            })
+        }
+        fetchRcmData();
+    }, []);
+
+    useEffect(() => {
+        const fetchRelatedData = async () => {
+            getNovelByGenre(novel?.genreIds[0]).then((data) => {
+                console.log(data);
+                setRelatedNovels(data);
+            }).catch((err) => {
+                console.log(err);
+            })
+        };
+        fetchRelatedData();
+    }, []);
+
+
     function handleDownloadBtnPress(): void {
         setDownloadStatus(true);
         throw new Error("Function not implemented.");
@@ -67,6 +98,47 @@ const NovelDetail = ({ route }: any) => {
         { id: 8, imageUrl: 'https://i.pinimg.com/474x/37/73/dc/3773dc7aebd77aa7c0155752dad1a41d.jpg' },
     ];
 
+    // Recommend System
+    const renderRCMRow = (row: number) => {
+        return (
+            <View style={styles.row} key={row}>
+                {rcmNovel.slice(row * 4, (row + 1) * 4).map((item, index) => (
+                    <View style={styles.column} key={index}>
+                        <TouchableOpacity style={styles.itemWrapper} onPress={() => {
+                            navigation.navigate('NovelDetail', { novelId: item.id });
+                        }}>
+                            <View style={styles.itemWrapper}>
+                                <Image source={{ uri: item.imagesURL }} style={styles.image} />
+                                <Text numberOfLines={1} style={styles.text}>{item.name}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                ))}
+            </View>
+        );
+    };
+
+    const renderRelatedRow = (row: number) => {
+        return (
+            <View style={styles.row} key={row}>
+                {relatedNovel.slice(row * 4, (row + 1) * 4).map((item, index) => (
+                    <View style={styles.column} key={index}>
+                        <TouchableOpacity style={styles.itemWrapper} onPress={() => {
+                            navigation.navigate('NovelDetail', { novelId: item.id });
+                        }}>
+                            <View style={styles.itemWrapper}>
+                                <Image source={{ uri: item.imagesURL }} style={styles.image} />
+                                <Text numberOfLines={1} style={styles.text}>{item.name}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                ))}
+            </View>
+        );
+    };
+
+
+
     return (
         <View style={styles.container} >
             <ScrollView>
@@ -78,7 +150,7 @@ const NovelDetail = ({ route }: any) => {
                     <View style={styles.inforColumn}>
                         <Text numberOfLines={4} style={styles.nameInfor}>{novel?.name}</Text>
                         <Text style={styles.authorInfor}>by {novel?.author}</Text>
-                        <Text style={styles.authorInfor}>{novel?.genreName[0]}</Text>
+                        <Text style={styles.authorInfor}>{novel?.genreName.join()}</Text>
                     </View>
                 </View>
                 <View style={styles.viewrow}>
@@ -111,29 +183,19 @@ const NovelDetail = ({ route }: any) => {
                     </View>
                 </View>
 
-
-
                 <View style={styles.box1}>
                     <Text style={styles.title}>Bạn cũng có thể thích</Text>
                     <View style={styles.imageGrid}>
-                    {sampleData.map((item, index) => (
-                        <View style={styles.gridItem} key={index}>
-                            <Image source={{ uri: item.imageUrl }} style={styles.gridItemImage} />
-                        </View>
-                    ))}
+                        {Array.from({ length: Math.ceil(8 / 4) }, (_, i) => renderRCMRow(i))}
+                    </View>
                 </View>
-                </View>
-               
+
 
                 <View style={styles.box1}>
                     <Text style={styles.title}>Tác phẩm tương tự</Text>
                     <View style={styles.imageGrid}>
-                    {sampleData.map((item, index) => (
-                        <View style={styles.gridItem} key={index}>
-                            <Image source={{ uri: item.imageUrl }} style={styles.gridItemImage} />
-                        </View>
-                    ))}
-                </View>
+                        {Array.from({ length: Math.ceil(8 / 4) }, (_, i) => renderRelatedRow(i))}
+                    </View>
                 </View>
             </ScrollView>
             <View style={styles.buttonContainer}>
@@ -165,6 +227,7 @@ const styles = StyleSheet.create({
         marginLeft: 7,
     },
     imgContainer: {
+        margin: 10,
         width: '30%',
         height: 200,
     },
@@ -177,7 +240,7 @@ const styles = StyleSheet.create({
         width: '70%',
         marginLeft: 5,
         flexDirection: 'column',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         alignItems: 'flex-start',
     },
     nameInfor: {
@@ -193,7 +256,7 @@ const styles = StyleSheet.create({
     viewrow: {
         margin: 10,
         backgroundColor: '#FFFFFF',
-        borderRadius: 10,
+        borderRadius: 15,
         borderWidth: 2,
         borderColor: 'gray',
         flexDirection: 'row',
@@ -203,13 +266,17 @@ const styles = StyleSheet.create({
         //    marginLeft: 7,
     },
     column: {
+        flex: 1,
         flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
         // margin: 50,
     },
     title: {
         fontSize: 18,
         fontWeight: '400',
-        color: 'black'
+        color: 'black',
+        marginLeft: 10,
     },
     descBox: {
         margin: 10,
@@ -227,7 +294,8 @@ const styles = StyleSheet.create({
     separatorLine: {
         width: '90%',
         height: 1, // Độ cao của đường line
-        marginTop: 5, marginBottom: 5,
+        marginTop: 5,
+        marginBottom: 5,
         backgroundColor: 'gray', // Màu của đường line
     },
     descHeader: {
@@ -238,7 +306,7 @@ const styles = StyleSheet.create({
     //Recommendations:
     imageGrid: {
         flexDirection: 'row',
-     //   height: 150,
+        //   height: 150,
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         margin: 10,
@@ -252,7 +320,7 @@ const styles = StyleSheet.create({
     gridItemImage: {
         width: '100%',
         height: '100%',
-        borderRadius:8,
+        borderRadius: 8,
     },
     // Button section
     buttonContainer: {
@@ -283,14 +351,33 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
 
-    box1:{
-        margin:10,
-        borderRadius:5,
-        backgroundColor: 'lightblue',
+    box1: {
+
+        margin: 10,
+        borderRadius: 15,
+        backgroundColor: '#FFFFFF',
     },
-    box2:{
+    box2: {
 
     }
+    ,// Recommend 
+    itemWrapper: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        alignSelf: 'stretch',
+    },
+    image: {
+        width: 70,
+        height: 100,
+        borderRadius: 3,
+    },
+    text: {
+        marginTop: 5,
+        textAlign: 'left',
+        overflow: 'hidden',
+
+    },
 });
 
 export default NovelDetail;

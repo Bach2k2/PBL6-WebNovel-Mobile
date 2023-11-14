@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    Image, Text, View, Button, StyleSheet, Animated
+    View, StyleSheet, Animated
 } from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
 function Skeleton({ height, width, style }: any) {

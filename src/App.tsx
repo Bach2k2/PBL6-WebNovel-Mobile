@@ -19,6 +19,7 @@ import ChapterList from './views/novelDetail/ChapterList';
 import EditProfile from './views/account/EditProfile';
 import SettingAccount from './views/account/SettingAccount';
 import SkeletonComponent from './components/Loading/SkeletonComponent';
+import CreateNovel from './views/writenovel/CreateNovel';
 const Stack = createNativeStackNavigator();
 function App() {
   return (
@@ -31,6 +32,8 @@ function App() {
           <Stack.Screen name="NovelDetail" component={NovelDetail} />
           <Stack.Screen name="ChapterList" component={ChapterList} />
           <Stack.Screen name="ChapterDetail" component={ChapterDetail} />
+
+          <Stack.Screen name="CreateNovel" component={CreateNovel} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="CoinExchange" component={CoinExchange} />
@@ -41,9 +44,8 @@ function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
+
   );
 }
-
-
 
 export default App;

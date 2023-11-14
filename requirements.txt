@@ -13,3 +13,9 @@ https://stackoverflow.com/questions/72674863/facing-reactnativeblobutil-request-
 Text extract:
 react-native-fetch-blob 
 pdf-parse
+
+Bottom sheet:  // deleted
+reanimated-bottom-sheet
+react-native-reanimated , react-native-gesture-handler to support
+
+Picker :@react-native-picker/picker

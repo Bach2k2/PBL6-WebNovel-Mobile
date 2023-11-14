@@ -1,6 +1,19 @@
-export interface Bookmarked{
-    id: number,
-    name: string,
-    // description: string
-    // image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNM19gXSwYnT8Y7_2CWZCZFnIQw1PjAGJMcF40wevB&s'
+export interface Bookmarked {
+    novelId: string,
+    chapterId: string
+    name: string
+    title: string,
+    author: string
+    year: number,
+    views: number,
+    rating: number,
+    imagesURL: string,
+    genreName: [
+    ],
+    genreIds: [
+    ],
+    description: string,
+    status: boolean,
+    approvalStatus: boolean,
+    numChapter: number
 }

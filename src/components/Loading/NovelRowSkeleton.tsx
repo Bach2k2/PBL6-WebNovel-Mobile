@@ -6,10 +6,10 @@ import { Novel } from '../../models/Novel';
 import Skeleton from './Skeleton';
 // Phần để recommend truyện
 var { width } = Dimensions.get("window");
-const NovelGridSkeleton = () => {
-    useEffect(()=>{
+const NovelRowSkeleton = () => {
+    useEffect(() => {
         console.log(width)
-        width= Math.floor(width)
+        width = Math.floor(width)
     })
     return (
         <View style={styles.gridContainer}>
@@ -20,18 +20,16 @@ const NovelGridSkeleton = () => {
                 <Skeleton height={30} width={width} style={{ borderRadius: 5, marginBottom: 5 }} />
             </View>
             <View style={styles.container}>
-                {Array.from({ length: 2 }, (_, rowIndex) => (
-                    <View style={styles.row} key={rowIndex}>
-
-                        {Array.from({ length: 4 }, (_, colIndex) => (
-                            <View style={styles.column} key={colIndex}>
-                                <Skeleton height={100} width={70} style={{ borderRadius: 5, marginBottom: 5 }} />
-                                <Skeleton height={20} width={70} style={{ borderRadius: 5, marginBottom: 5 }} />
-                            </View>
-                        ))}
-                    </View>
-                ))}
+                <View style={styles.row}>
+                    {Array.from({ length: 5 }, (_, colIndex) => (
+                        <View style={styles.column} key={colIndex}>
+                            <Skeleton height={100} width={70} style={{ borderRadius: 5, marginBottom: 5 }} />
+                            <Skeleton height={20} width={70} style={{ borderRadius: 5, marginBottom: 5 }} />
+                        </View>
+                    ))}
+                </View>
             </View>
+
         </View>
     );
 }
@@ -53,7 +51,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 5,
+        margin: 10,
     },
     column: {
         flex: 1,
@@ -76,4 +74,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default NovelGridSkeleton;
+export default NovelRowSkeleton;

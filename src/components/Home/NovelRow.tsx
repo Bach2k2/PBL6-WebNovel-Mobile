@@ -1,51 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
-export default function NovelRow() {
-    // const images = [ /* Array of image sources */ ];
-    const images = [
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'A stack attributes' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 2' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 3' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 4' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 5' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 6' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 7' },
-        { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 8' },
-    ];
+import { Novel } from '../../models/Novel';
+import { useNavigation } from '@react-navigation/native';
+import NovelRowSkeleton from '../Loading/NovelRowSkeleton';
+export default function NovelRow({ novelData }: { novelData: Novel[] }) {
+    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
+    const [novels, setNovels] = useState<Novel[]>([]);// Initial with null array
+    useEffect(() => {
+        // Simulate data loading delay (replace with your actual data fetching logic)
+        const fetchData = async () => {
+            // await new Promise(resolve => setTimeout(resolve, 1000));
+            setNovels(novelData);
+            console.log('Fetching data');
+            if (novelData.length > 0) {
+                console.log("Fetch novel in novel grid haha successful");
+                setLoading(false);
+            } else {
+                console.log("No data here");
+                setLoading(true);
+            }
+
+        };
+        fetchData();
+    }, [novelData]);
+
+    if (loading) {
+        return (
+            <NovelRowSkeleton />
+        );
+
+    }
     return (
-        <>
-            <View style={{
-                backgroundColor: 'lightblue',
-                padding: 12,
-            }}>
+        <View style={styles.container}>
+            <View style={styles.headerTitle}>
                 <Text style={{ color: "black", fontSize: 24, }}>Top Trending</Text>
             </View>
-            {/* <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
-        {images.map((image, index) => (
-          <Image key={index} source={image} style={styles.image} />
-        ))}
-      </ScrollView> */}
+
             <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
-                {images.map((item, index) => (
+                {novelData.map((item, index) => (
                     <View key={index}>
-                        {item.image ? <Image source={{ uri: item.image }} style={styles.prefer_image} />
-                            : <Skeleton style={styles.prefer_image} />}
+                        {item.imagesURL ? (<Image source={{ uri: item.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />) :
+                            (<Image source={require('../../assets/img/waiting_img.jpg')} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />)}
                         <View style={styles.textContainer}>
-                            {item.text ?
-                                <Text numberOfLines={2} style={styles.text_imgrow}>{item.text}</Text> :
-                                <Skeleton style={styles.text_imgrow} />
-                            }
+                            <Text numberOfLines={2} style={styles.text_imgrow}>{item.name}</Text>
                         </View>
                     </View>
                 ))}
             </ScrollView>
-        </>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     // Reading Preferences
+    container: {
+        flex: 1,
+        borderRadius: 7,
+        backgroundColor: '#fff',
+        width:'95%',
+    },
+    headerTitle:{
+        marginLeft:10,
+        marginTop:10
+
+    },
     imageRow: {
         flexDirection: 'row',
         marginLeft: 10,

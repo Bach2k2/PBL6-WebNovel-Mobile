@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
+
 
 import useFetch from '../../hook/useFetch';
 import { getNovelData } from '../../hook/NovelApi';
@@ -11,6 +10,7 @@ import { Novel } from '../../models/Novel';
 import NovelRow from '../../components/Home/NovelRow';
 import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
+import Skeleton from '../../components/Loading/Skeleton';
 function HotNovels() {
   const navigation = useNavigation();
   // const [novels, setNovels] = useState<Novel[]>([]);
@@ -47,96 +47,28 @@ function HotNovels() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header />
-      <ScrollView>
-        <ScrollView onScroll={handleScroll}>
-          {/* <RmdNovel></RmdNovel> */}
-          <NovelGrid novelData={novels} />
-
+      {novels ? (
+        <ScrollView>
+          <ScrollView onScroll={handleScroll}>
+            {/* <RmdNovel></RmdNovel> */}
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+              <NovelGrid novelData={novels} />
+            </View>
+          </ScrollView>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+            <NovelRow novelData={novels} />
+            {/* <ImageRow novelData={novels} /> */}
+          </View>
+          <NovelsList navigation={navigation}></NovelsList>
         </ScrollView>
-        <NovelRow />
-        <ImageRow></ImageRow>
-
-        <NovelsList navigation={navigation}></NovelsList>
-      </ScrollView>
+      ) :
+        (<ActivityIndicator></ActivityIndicator>)}
     </SafeAreaView>
   );
 }
 
-// const Header = () => {
-//   return (
-//     <View>
-//       <View style={styles.header}>
-//         <Image source={require('../../assets/img/TTQBA.png')} style={styles.logo}></Image>
-//         <View style={styles.searchContainer}>
-//           <Icon name="search" size={24} color="black" />
-//           <TextInput
-//             style={styles.searchInput}
-//             placeholder="Tác giả/ Tác phẩm"
-//             placeholderTextColor="gray"
-//           />
-//         </View>
-//         <TouchableOpacity style={styles.settingButton}>
-//           <Icon name="settings" size={24} color="black"></Icon>
-//         </TouchableOpacity>
-//       </View>
-//       <View style={{ marginLeft: 20 }}>
-//         <Text>Novels</Text>
-//       </View>
-//     </View>
-//   );
-// }
 
-
-// const RmdNovel = () => {
-//   const data = [
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'A stack attributes' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 2' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 3' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 4' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 5' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 6' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 7' },
-//     { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 8' },
-//   ];
-
-//   const renderRow = (row: number) => (
-//     <View style={styles.row} key={row}>
-//       {data.slice(row * 4, (row + 1) * 4).map((item, index) => (
-//         <View style={styles.column} key={index}>
-//           <Image source={{ uri: item.image }} style={styles.image} />
-//           <Text style={styles.text}>{item.text}</Text>
-//         </View>
-//       ))}
-//     </View>
-//   );
-
-//   return (
-//     <>
-//       <View style={{
-//         backgroundColor: 'lightblue',
-//         padding: 12,
-//       }}>
-//         <Text style={{ color: "black", fontSize: 24, }}>Weekly Feature</Text>
-//       </View>
-//       <View style={styles.rcm_container}>
-//         {Array.from({ length: Math.ceil(data.length / 4) }, (_, i) => renderRow(i))}
-//       </View>
-//     </>
-//   );
-// }
-
-function ImageRow() {
-  // const images = [ /* Array of image sources */ ];
-  const images = [
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'A stack attributes' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 2' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 3' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 4' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 5' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 6' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 7' },
-    { image: 'https://picsum.photos/seed/picsum/200/300', text: 'Novel 8' },
-  ];
+function ImageRow({ novelData }: { novelData: Novel[] }) {
   return (
     <>
       <View style={{
@@ -145,17 +77,14 @@ function ImageRow() {
       }}>
         <Text style={{ color: "black", fontSize: 24, }}>From your Reading Preference</Text>
       </View>
-      {/* <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
-      {images.map((image, index) => (
-        <Image key={index} source={image} style={styles.image} />
-      ))}
-    </ScrollView> */}
+
       <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
-        {images.map((item, index) => (
+        {novelData.map((item, index) => (
           <View key={index}>
-            <Image source={{ uri: item.image }} style={styles.prefer_image} />
+            {item.imagesURL ? (<Image source={{ uri: item.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />) :
+              (<Image source={require('../../assets/img/waiting_img.jpg')} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />)}
             <View style={styles.textContainer}>
-              <Text numberOfLines={2} style={styles.text_imgrow}>{item.text}</Text>
+              <Text numberOfLines={2} style={styles.text_imgrow}>{item.name}</Text>
             </View>
           </View>
         ))}
@@ -174,6 +103,7 @@ function NovelsList({ navigation }: any) {
       await getNovelData().then((data) => {
         console.log('I fire two')
         setNovels(data);
+        setLoading(false);
       }).catch((err) => {
         console.error(err);
       })
@@ -181,12 +111,15 @@ function NovelsList({ navigation }: any) {
     fetchData();
   }, []);
 
-
+  if(loading){
+    return(
+      <Skeleton height={30} width={500} style={{ borderRadius: 5, marginBottom: 5 }} />
+    );
+  }
   return (
-    <ScrollView>
+    <View style={styles.container}>
       <View style={{
-        backgroundColor: 'lightblue',
-        padding: 12,
+        margin: 10,
       }}>
         <Text style={{ color: "black", fontSize: 24, }}>You may also like:</Text>
       </View>
@@ -196,7 +129,7 @@ function NovelsList({ navigation }: any) {
             console.log('Press to novel details' + novel.id);
             navigation.navigate('NovelDetail', { novelId: novel.id });
           }}>
-            <Image source={{ uri: novel.imagesURL }} alt='https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447' style={styles.novelImage} />
+            <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
             <View style={styles.novelContent}>
               <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
               <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
@@ -206,14 +139,20 @@ function NovelsList({ navigation }: any) {
 
             <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" onPress={() => { console.log('add novel into lib') }} />
           </TouchableOpacity>
-
         </View>
       ))}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container:{
+      margin:10,
+      backgroundColor:'white',
+      borderRadius:7,
+      width:'95%',
+           
+  },
   header: {
     // position: 'sticky', 
     flexDirection: 'row',
@@ -263,8 +202,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 70,
-    height: 100,
+    width: 100,
+    height: 120,
     borderRadius: 10,
   },
   text: {
@@ -299,7 +238,7 @@ const styles = StyleSheet.create({
   },
   novelImage: {
     width: 100,
-    height: 100,
+    height: 120,
     marginRight: 10,
   },
   novelContent: {

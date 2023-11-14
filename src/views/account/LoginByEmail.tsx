@@ -8,6 +8,7 @@ import { AxiosContext } from '../../context/AxiosContext';
 import * as Keychain from 'react-native-keychain';
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import AccountApi from '../../hook/AccountApi';
+import Toast from 'react-native-toast-message';
 // import jwt from 'jsonwebtoken';
 
 const HeigthWindow = Dimensions.get('window').height;
@@ -88,6 +89,11 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
             const accountApi = AccountApi(authContext);
             const userData = await accountApi(userId, accessToken);
             await authContext.setUserData(userData); // thành công, đã check
+            Toast.show({
+                type: 'success',
+                text1: 'Login Notification!',
+                text2: 'Login successfully👋'
+            });
             navigation.navigate('Account', userData);
 
         } catch (error: any) {
@@ -126,7 +132,7 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
                                 onChangeText={(password) => setPassword(password)}
                                 secureTextEntry={!showPasswordStatus} ref={passwordRef} />
                             <View style={styles.passwordShowContainer} >
-                                <TouchableOpacity onPress={() => { SetShowPasswordStatus(!showPasswordStatus) }}>
+                                <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }} onPress={() => { SetShowPasswordStatus(!showPasswordStatus) }}>
                                     <Image style={styles.passwordShow} source={showPasswordStatus ? require('../../assets/logo/show.png') : require('../../assets/logo/hide.png')} />
                                 </TouchableOpacity>
                             </View>
@@ -222,7 +228,8 @@ const styles = StyleSheet.create({
     passwordShowContainer: {
         height: '100%',
         justifyContent: 'center',
-        alignSelf: 'flex-end',
+        alignItems: 'flex-end',
+        flex: 1,
     },
     passwordShow: {
         width: 30,

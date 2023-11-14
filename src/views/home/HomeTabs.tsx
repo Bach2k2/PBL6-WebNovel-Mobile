@@ -6,6 +6,7 @@ import NovelStore from '../genres/NovelStore';
 import Account from '../account/Account'
 import HotNovels from './Home';
 import { useRoute } from '@react-navigation/native';
+import WriteStorage from '../writenovel/WriteStorage';
 
 const Tab = createBottomTabNavigator();
 function HomeTabs() {
@@ -42,7 +43,7 @@ function HomeTabs() {
         />
         <Tab.Screen
           name="WriteDashboard"
-          component={WriteDashboard}
+          component={WriteStorage}
           options={{
             tabBarLabel: 'Viết',
             tabBarIcon: ({ color, size }) => (

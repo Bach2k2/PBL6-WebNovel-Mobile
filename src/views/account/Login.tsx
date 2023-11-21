@@ -21,6 +21,7 @@ const widthWindow = Dimensions.get('window').width;
 
 const Login = ({ navigation }: { navigation: any }) => {
 
+    // Making the blur headers.
     // useLayoutEffect(() => {
     //     navigation.setOptions({
     //         header: () => <CustomBlurredHeader />,

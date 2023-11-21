@@ -19,5 +19,28 @@ const getPreferenceData = async (user: User, accessToken: any) => {
     }
 };
 
+export const postPreferenceData = async (userId: any, novelId: any, accessToken: any) => {
+    console.log("userId", userId);
+    console.log("novelId: ", novelId);
+    console.log("access toekn: ", accessToken);
+    const axiosConfig = {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+        },
+    };
+    const postData = {
+        novelId: novelId,
+        accountId: userId,
+    };
+    try {
+        const response = await axiosInstance.post('preferences/', postData, axiosConfig);
+        console.log(JSON.stringify(response))
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to post post preferences data");
+    }
+};
+
 export default getPreferenceData;
 

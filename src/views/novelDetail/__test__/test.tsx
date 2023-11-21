@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Dimensions, ScrollView } from "react-native";
 import Pdf from 'react-native-pdf';
-import { Chapter } from "../../models/Chapter";
-import { getChaptersByChapterId } from "../../hook/ChapterApi";
+import { Chapter } from "../../../models/Chapter";
+import { getChaptersByChapterId } from "../../../hook/ChapterApi";
 function ChapterDetail({ route }: any) {
     const [chapter, setChapter] = useState<Chapter>();
     const [numOfPage, setNumOfPage] = useState(1);

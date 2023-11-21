@@ -1,4 +1,11 @@
 {
   "name": "webnovelmobile",
-  "displayName": "webnovelmobile"
+  "displayName": "webnovelmobile",
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "9103b5d3-c940-4647-a8b6-4e239db8f207"
+      }
+    }
+  }
 }

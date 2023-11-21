@@ -68,7 +68,9 @@ const PreferenceNovels = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        margin: 10,
+        //margin: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     warningText: {
         fontSize: 20,

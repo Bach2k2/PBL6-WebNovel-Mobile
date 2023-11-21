@@ -9,9 +9,13 @@ import Modal from 'react-native-modal';
 import getGenreData from '../../hook/GenreApi';
 import { createNovel } from '../../hook/NovelApi';
 import { AuthContext } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { AppNavigatorProps, RootStackParamList } from '../../models/NavigationModel';
 // import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
 
-const CreateNovel = () => {
+// type NovelDetailProps = AppNavigatorProps<'CreateNovel'>;
+
+const CreateNovel = ({ route, navigation }: any) => {
   const [image, setImage] = useState('');
   const [preview, setPreview] = useState(null);
   const [description, setDescription] = useState('');
@@ -31,6 +35,7 @@ const CreateNovel = () => {
 
   const authState = useContext(AuthContext);
   const { getUserData } = useContext(AuthContext);
+  // const navigation = useNavigation<AppNavigatorProps<'CreateNovel'>>();
 
   const { colors } = useTheme();
 
@@ -43,7 +48,7 @@ const CreateNovel = () => {
     ImagePicker.openCamera({
       compressImageMaxWidth: 300,
       compressImageMaxHeight: 300,
-      cropping: true,
+      cropping: false,
       compressImageQuality: 0.7
     }).then(image => {
       console.log(image);
@@ -57,7 +62,7 @@ const CreateNovel = () => {
     ImagePicker.openPicker({
       width: 300,
       height: 300,
-      cropping: true,
+      cropping: false,
       compressImageQuality: 0.7
     }).then(image => {
       console.log(image);
@@ -101,6 +106,10 @@ const CreateNovel = () => {
     }
     fetchGenreData();
   }, []);
+
+  useEffect(() => {
+
+  });
 
 
 
@@ -157,36 +166,33 @@ const CreateNovel = () => {
 
   const handleCreate = () => {
     const user = getUserData();
-    console.log(user.id);
-    setPostNovel({ ...postNovel, AccountId: user.id });
-    console.log(postNovel.Name);
-    console.log(postNovel.Title)
-    console.log(postNovel.Description)
-    console.log(postNovel.AccountId)
-    console.log(postNovel.GenresId)
-    console.log(postNovel.File)
-    const formData = new FormData();
-    // formData.append('Name', postNovel.Name);
-    // formData.append('Title', postNovel.Title);
-    // formData.append('Description', postNovel.Description);
-    // formData.append('AccountId', postNovel.AccountId);
-    // formData.append('GenreID', postNovel.GenresId);
-    // formData.append('image', {
-    //     uri: imageURI,
-    //     type: "image/jpeg",
-    //     name: "photo.jpg"
-    //  }) 
-    if (postNovel.Name && postNovel.Description && postNovel.AccountId && postNovel.GenresId && postNovel.File) {
-      createNovel(postNovel, authState.getAccessToken())
-        .then((data) => {
-          console.log("check novel, it's okay");
-          console.log(data);
-        })
-        .catch(error => {
-          console.error(error);
-          // Handle error
-        });
+    // console.log(user.id);
+    if (user) {
+      setPostNovel({ ...postNovel, AccountId: user?.id });
+      console.log(postNovel.Name);
+      console.log(postNovel.Title)
+      console.log(postNovel.Description)
+      console.log(postNovel.AccountId)
+      console.log(postNovel.GenresId)
+      console.log(postNovel.File)
+      // const formData = new FormData();
+
+      if (postNovel.Name && postNovel.Description && postNovel.AccountId && postNovel.GenresId && postNovel.File) {
+        createNovel(postNovel, authState.getAccessToken())
+          .then((data) => {
+            console.log("check novel, it's okay");
+            console.log(data);
+            navigation.navigate('WriteDashboard');
+          })
+          .catch(error => {
+            console.error(error);
+            // Handle error
+          });
+      }
+    }else{
+      console.log("Can't find user");
     }
+
   };
 
 
@@ -195,7 +201,7 @@ const CreateNovel = () => {
     <View style={styles.container}>
       <TouchableOpacity onPress={() => toggleBottomSheet()} style={styles.imageContainer}>
         {image ? (
-           <Image source={{ uri: image }} style={styles.image} />
+          <Image source={{ uri: image }} style={styles.image} />
         ) : (
           <Image source={require('../../assets/img/waiting_img.jpg')} style={styles.image} />
         )}
@@ -257,7 +263,7 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
-    borderRadius: 50,
+    borderRadius: 10,
     marginBottom: 16,
   },
   inputContainer: {

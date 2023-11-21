@@ -8,10 +8,12 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
 import { Chapter } from '../../models/Chapter';
 import { getChaptersByNovelId } from '../../hook/ChapterApi';
-const NovelDetail = ({ route }: any) => {
-    const navigation = useNavigation();
+import NovelDetailSkeleton from '../../components/Loading/NovelDetailSkeleton';
+
+const NovelDetail = ({ navigation, route }: any) => {
+    // const navigation = useNavigation();
     const [novel, setNovel] = useState<Novel>();
-    const [chapter, setChapters] = useState<Chapter>();
+    const [chapter, setChapters] = useState<Chapter[]>([]);
     const { novelId } = route.params;
     const [isDownload, setDownloadStatus] = useState(false);
     const [rcmNovel, setRcmNovels] = useState<Novel[]>([]);
@@ -19,56 +21,58 @@ const NovelDetail = ({ route }: any) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // console.log(novelId);
+
         const fetchNovelDetailData = async () => {
             await getNovelById(novelId).then((data) => {
-                console.log('data', data);
                 setNovel(data);
+                // setLoading(false);
             }).catch((error) => {
+                console.log('Lay thong tin chi tiet cua novel that bai')
                 console.log(error);
             })
         }
-        fetchNovelDetailData();
-    }, []);
-
-    useEffect(() => {
-        // console.log(novelId);
+        // ----------------------------------------------------------------
         const fetchChapterByNovelId = async () => {
             await getChaptersByNovelId(novelId).then((data) => {
-                console.log('data', data);
                 setChapters(data);
             }).catch((error) => {
+                console.log('Lay thong tin chi tiet cua chapter that bai')
                 console.log(error);
             })
         }
-        fetchChapterByNovelId();
-    }, []);
-
-    useEffect(() => {
-        // Simulate data loading delay (replace with your actual data fetching logic)
+        // ----------------------------------------------------------------
         const fetchRcmData = async () => {
             await getNovelData().then((data) => {
-                console.log('I fire two')
                 setRcmNovels(data);
-                setLoading(false);
+                // setLoading(false);
             }).catch((err) => {
                 console.error(err);
+                console.log('Lay danh sach recommend that bai')
             })
         }
-        fetchRcmData();
-    }, []);
-
-    useEffect(() => {
+        // ----------------------------------------------------------------
         const fetchRelatedData = async () => {
+            console.log("nv gemre", novel?.genreIds[0])
             getNovelByGenre(novel?.genreIds[0]).then((data) => {
-                console.log(data);
                 setRelatedNovels(data);
             }).catch((err) => {
                 console.log(err);
+                console.log('Lay danh sach truyen lien quan that bai')
             })
         };
-        fetchRelatedData();
+
+        fetchNovelDetailData();
+        fetchChapterByNovelId();
+        fetchRcmData();
+        if (novel?.genreIds[0]) { // them dieu kien
+            fetchRelatedData();
+        }
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000);
+
     }, []);
+
 
 
     function handleDownloadBtnPress(): void {
@@ -78,6 +82,7 @@ const NovelDetail = ({ route }: any) => {
 
     function handleReadingBtnPress(): void {
         console.log('reading');
+        navigation.navigate('ChapterDetail', { chapterId: chapter[0].id });
     }
     function handleAddingBtnPress(): void {
         console.log('function not implemented');
@@ -87,17 +92,6 @@ const NovelDetail = ({ route }: any) => {
         navigation.navigate('ChapterList', { NovelId: novel?.id });
     }
 
-    const sampleData = [
-        { id: 1, imageUrl: 'https://i.pinimg.com/474x/12/02/a9/1202a9d0bff60bc5675e3dea1f4d09c8.jpg' },
-        { id: 2, imageUrl: 'https://i.pinimg.com/474x/a1/14/b0/a114b002719e272b96dba9ad6255935e.jpg' },
-        { id: 3, imageUrl: 'https://i.pinimg.com/474x/a6/31/cd/a631cd4993dd1ebf00eeabbba0b4f768.jpg' },
-        { id: 4, imageUrl: 'https://i.pinimg.com/474x/99/9e/c3/999ec3f203b28b61ac5ce19b48d6e8f5.jpg' },
-        { id: 5, imageUrl: 'https://i.pinimg.com/474x/37/73/dc/3773dc7aebd77aa7c0155752dad1a41d.jpg' },
-        { id: 6, imageUrl: 'https://i.pinimg.com/474x/37/73/dc/3773dc7aebd77aa7c0155752dad1a41d.jpg' },
-        { id: 7, imageUrl: 'https://i.pinimg.com/474x/37/73/dc/3773dc7aebd77aa7c0155752dad1a41d.jpg' },
-        { id: 8, imageUrl: 'https://i.pinimg.com/474x/37/73/dc/3773dc7aebd77aa7c0155752dad1a41d.jpg' },
-    ];
-
     // Recommend System
     const renderRCMRow = (row: number) => {
         return (
@@ -105,7 +99,8 @@ const NovelDetail = ({ route }: any) => {
                 {rcmNovel.slice(row * 4, (row + 1) * 4).map((item, index) => (
                     <View style={styles.column} key={index}>
                         <TouchableOpacity style={styles.itemWrapper} onPress={() => {
-                            navigation.navigate('NovelDetail', { novelId: item.id });
+                            console.log('Navigating to NovelDetail with novelId:', item.id);
+                            navigation.push('NovelDetail', { novelId: item.id, title: item.name });
                         }}>
                             <View style={styles.itemWrapper}>
                                 <Image source={{ uri: item.imagesURL }} style={styles.image} />
@@ -118,13 +113,15 @@ const NovelDetail = ({ route }: any) => {
         );
     };
 
+    // Related story
     const renderRelatedRow = (row: number) => {
         return (
             <View style={styles.row} key={row}>
                 {relatedNovel.slice(row * 4, (row + 1) * 4).map((item, index) => (
                     <View style={styles.column} key={index}>
                         <TouchableOpacity style={styles.itemWrapper} onPress={() => {
-                            navigation.navigate('NovelDetail', { novelId: item.id });
+                            console.log('Navigating to NovelDetail with novelId:', item.id);
+                            navigation.push('NovelDetail', { novelId: item.id,  title: item.name });
                         }}>
                             <View style={styles.itemWrapper}>
                                 <Image source={{ uri: item.imagesURL }} style={styles.image} />
@@ -137,7 +134,9 @@ const NovelDetail = ({ route }: any) => {
         );
     };
 
-
+    if (loading) {
+        return <NovelDetailSkeleton />
+    }
 
     return (
         <View style={styles.container} >
@@ -150,7 +149,7 @@ const NovelDetail = ({ route }: any) => {
                     <View style={styles.inforColumn}>
                         <Text numberOfLines={4} style={styles.nameInfor}>{novel?.name}</Text>
                         <Text style={styles.authorInfor}>by {novel?.author}</Text>
-                        <Text style={styles.authorInfor}>{novel?.genreName.join()}</Text>
+                        <Text style={styles.genreInfor}>{novel?.genreName.join()}</Text>
                     </View>
                 </View>
                 <View style={styles.viewrow}>
@@ -177,8 +176,9 @@ const NovelDetail = ({ route }: any) => {
                     </View>
 
                     <View style={styles.row}>
-                        <TouchableOpacity onPress={handleNavigateToChapterList}>
-                            <Text>Đã cập nhật {novel?.numChapter} chương</Text>
+                        <TouchableOpacity style={{marginBottom:10, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}} onPress={handleNavigateToChapterList}>
+                            <Text style={{fontSize:18}} >Đã cập nhật {novel?.numChapter} chương</Text>
+                            <Icon style={{alignSelf:'flex-end'}} name='chevron-right' size={20} color={'black'}/>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -200,7 +200,7 @@ const NovelDetail = ({ route }: any) => {
             </ScrollView>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.buttonDownload} onPress={() => handleDownloadBtnPress()}>
-                    {isDownload ? <Icon name="download" size={20} /> : <Icon name="check" size={20} />}
+                    {isDownload ? <Icon name="check" size={20} /> : <Icon name="download" size={20} />}
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
                     <Text>Đọc ngay</Text>
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
     inforColumn: {
-        width: '70%',
+        width: '60%',
         marginLeft: 5,
         flexDirection: 'column',
         justifyContent: 'center',
@@ -253,17 +253,20 @@ const styles = StyleSheet.create({
         //   color: 'gray',
         // fontWeight:'bold'
     },
+    genreInfor: {
+        fontSize: 15,
+        //   color: 'gray',
+        // fontWeight:'bold'
+    },
     viewrow: {
         margin: 10,
         backgroundColor: '#FFFFFF',
-        borderRadius: 15,
-        borderWidth: 2,
+        borderRadius: 10,
+       // borderWidth: 2,
         borderColor: 'gray',
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-
-        //    marginLeft: 7,
     },
     column: {
         flex: 1,
@@ -280,7 +283,7 @@ const styles = StyleSheet.create({
     },
     descBox: {
         margin: 10,
-        borderWidth: 2,
+        // borderWidth: 2,
         backgroundColor: '#FFFFFF',
         justifyContent: 'space-around',
         alignItems: 'center',

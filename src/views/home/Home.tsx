@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import { useNavigation } from '@react-navigation/native';
@@ -11,6 +11,8 @@ import NovelRow from '../../components/Home/NovelRow';
 import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
 import Skeleton from '../../components/Loading/Skeleton';
+import { AuthContext } from '../../context/AuthContext';
+import { postPreferenceData } from '../../hook/PreferenceApi';
 function HotNovels() {
   const navigation = useNavigation();
   // const [novels, setNovels] = useState<Novel[]>([]);
@@ -20,17 +22,15 @@ function HotNovels() {
     const fetchData = async () => {
       await getNovelData().then((data) => { // thêm await sẽ tạo 
         setNovels(data);
-        console.log('I fire one')
-        // console.log('novels' + novels);
         setLoading(false); // Đã tải xong dữ liệu
       }).catch((err) => {
-        // setNovels(novelsData)
         setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
         console.error(err);
       })
     }
     fetchData();
   }, []);
+
   // const { data: novels, isLoading, error } = useFetch("novel")
 
   const [headerSticky, setHeaderSticky] = useState(false);
@@ -98,6 +98,24 @@ function NovelsList({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [novels, setNovels] = useState(Array<Novel>());
   const [error, setError] = useState(null);
+  const { getUserData } = useContext(AuthContext);
+  const authState = useContext(AuthContext);
+  const user = getUserData();
+
+  const handleAddToLib = async (novelId: any) => {
+    console.log('add novel into lib',novelId)
+    if (user) {
+      await postPreferenceData(user.id, novelId, authState.getAccessToken()).then((response) => {
+        console.log(response)
+
+      }).catch((err) => {
+        console.log(err)
+      })
+    } else {
+      console.log('chua dang nhap');
+    }
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       await getNovelData().then((data) => {
@@ -111,8 +129,8 @@ function NovelsList({ navigation }: any) {
     fetchData();
   }, []);
 
-  if(loading){
-    return(
+  if (loading) {
+    return (
       <Skeleton height={30} width={500} style={{ borderRadius: 5, marginBottom: 5 }} />
     );
   }
@@ -127,7 +145,7 @@ function NovelsList({ navigation }: any) {
         <View key={index}>
           <TouchableOpacity style={styles.novelContainer} onPress={() => {
             console.log('Press to novel details' + novel.id);
-            navigation.navigate('NovelDetail', { novelId: novel.id });
+            navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.name });
           }}>
             <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
             <View style={styles.novelContent}>
@@ -137,7 +155,7 @@ function NovelsList({ navigation }: any) {
               <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.join()} . <Icon name='description' size={16} color="gray" />{novel.views}</Text>
             </View>
 
-            <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" onPress={() => { console.log('add novel into lib') }} />
+            <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" onPress={()=> handleAddToLib(novel.id)} />
           </TouchableOpacity>
         </View>
       ))}
@@ -146,12 +164,12 @@ function NovelsList({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container:{
-      margin:10,
-      backgroundColor:'white',
-      borderRadius:7,
-      width:'95%',
-           
+  container: {
+    margin: 10,
+    backgroundColor: 'white',
+    borderRadius: 7,
+    width: '95%',
+
   },
   header: {
     // position: 'sticky', 

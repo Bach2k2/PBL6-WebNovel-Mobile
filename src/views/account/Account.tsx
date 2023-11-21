@@ -16,8 +16,11 @@ type ParamList = {
     Login: undefined
     Register: undefined;
 };
+
+
 function Account() {
     const navigation = useNavigation();
+
     return (
         <AccountNavigator.Navigator initialRouteName='MainScreen'>
             <AccountNavigator.Screen name="MainScreen" component={AccountMainPage}
@@ -44,6 +47,17 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
         // console.log(user);
 
     }, [user, getUserData]); // Cập nhật khi có sự thay đổi cua
+
+    function handleNavigate(path: string) {
+        console.log(path);
+        switch (path) {
+            case 'EmailBox':
+                {
+                    navigation.navigate('EmailBox');
+                }
+        }
+    }
+
     return (
         <View>
             <ScrollView>
@@ -88,84 +102,90 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                     }
 
 
-                    <View style={styles.infor_container}>
-                        <View style={styles.coinRow}>
-                            <View style={styles.infor_column}>
-                                <Text>Số dư coins</Text>
-                                <Text style={styles.infor_text}>-</Text>
+                    <View style={styles.allIn4container}>
+                        <View style={styles.infor_container}>
+                            <View style={styles.coinRow}>
+                                <View style={styles.infor_column}>
+                                    <Text>Số dư coins</Text>
+                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                </View>
+                                <View style={styles.infor_column}>
+
+                                    <TouchableOpacity onPress={() => {
+                                        {
+                                            user ?
+                                                navigation.navigate('CoinExchange')
+                                                : navigation.navigate('CoinExchange')
+                                        }
+                                    }}>
+                                        <LinearGradient colors={['#EADEDB', '#BC70A4', '#BFD641']} start={{ x: 0.0, y: 0.0 }}
+                                            end={{ x: 1.0, y: 1.0 }}
+                                            locations={[0.0, 0.5, 0.75]} style={styles.CoinExBtn}>
+                                            <Text style={{ color: 'black', fontSize: 17 }}>Nạp tiền</Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+
+                                </View>
                             </View>
-                            <View style={styles.infor_column}>
+                            <View style={styles.infor_row}>
+                                <View style={styles.infor_column}>
+                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                    <Text>Phiếu đọc sách</Text>
+                                </View>
+                                <View style={styles.infor_column}>
+                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                    <Text>Điểm của tôi</Text>
+                                </View>
+                                <View style={styles.infor_column}>
+                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                    <Text>Phiếu</Text>
+                                </View>
+                            </View>
 
-                                <TouchableOpacity onPress={() => {
-                                    {
-                                        user ?
-                                            navigation.navigate('CoinExchange')
-                                            : navigation.navigate('CoinExchange')
-                                    }
-                                }}>
-                                    <LinearGradient colors={['#EADEDB', '#BC70A4', '#BFD641']} start={{ x: 0.0, y: 0.0 }}
-                                        end={{ x: 1.0, y: 1.0 }}
-                                        locations={[0.0, 0.5, 0.75]} style={styles.CoinExBtn}>
-                                        <Text style={{ color: 'black', fontSize: 17 }}>Nạp tiền</Text>
-                                    </LinearGradient>
-                                </TouchableOpacity>
+                        </View>
 
+                        <View style={styles.userContainer}>
+                            <TouchableOpacity onPress={()=>handleNavigate('EmailBox')}>
+                                <View style={styles.row4User}>
+                                    <Icon style={styles.iconItem} name='email' size={30} />
+                                    <Text style={styles.textItem} >Hộp thư đến</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='dock' size={30} />
+                                <Text style={styles.textItem} >Thiết bị của tôi</Text>
+                            </View>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='discount' size={30} />
+                                <Text style={styles.textItem} >Ưu đãi</Text>
+                            </View>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='shopping-cart' size={30} />
+                                <Text style={styles.textItem} >Lịch sử tiêu dùng</Text>
                             </View>
                         </View>
-                        <View style={styles.infor_row}>
-                            <View style={styles.infor_column}>
-                                <Text style={styles.infor_text}>-</Text>
-                                <Text>Xu của tôi</Text>
+                        {/* Row 2 */}
+                        <View style={styles.userContainer}>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='try' size={30} />
+                                <Text style={styles.textItem} >Quy đổi</Text>
                             </View>
-                            <View style={styles.infor_column}>
-                                <Text style={styles.infor_text}>-</Text>
-                                <Text>Điểm của tôi</Text>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='question-answer' size={30} />
+                                <Text style={styles.textItem} >Diễn đàn</Text>
                             </View>
-                            <View style={styles.infor_column}>
-                                <Text style={styles.infor_text}>-</Text>
-                                <Text>Phiếu</Text>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='question-mark' size={30} />
+                                <Text style={styles.textItem} >Câu hỏi thường gặp</Text>
+                            </View>
+                            <View style={styles.row4User}>
+                                <Icon style={styles.iconItem} name='quickreply' size={30} />
+                                <Text style={styles.textItem} >Dịch vụ khách hàng trực tuyến</Text>
                             </View>
                         </View>
 
                     </View>
 
-                    <View style={styles.infor_container}>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Hộp thư đến</Text>
-                        </View>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Thiết bị của tôi</Text>
-                        </View>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Ưu đãi</Text>
-                        </View>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Lịch sử tiêu dùng</Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.infor_container}>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Quy đổi</Text>
-                        </View>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Diễn đàn</Text>
-                        </View>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Câu hỏi thường gặp</Text>
-                        </View>
-                        <View style={styles.infor_row}>
-                            <Icon name='email' size={30} />
-                            <Text>Dịch vụ khách hàng trực tuyến</Text>
-                        </View>
-                    </View>
                 </View>
             </ScrollView >
         </View >
@@ -181,6 +201,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         width: '100%',
+
     },
     icon_container: {
         padding: 10,
@@ -207,13 +228,20 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
 
+    //All infor container:
+    allIn4container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
     infor_container: {
         backgroundColor: 'white',
         borderWidth: 1,
         borderRadius: 25,
         flexDirection: 'column',
         justifyContents: 'center',
-        width: '100%',
+        width: '95%',
         margin: 5,
         alignItems: 'stretch'// độ height phụ thuộc vào content
     },
@@ -239,19 +267,48 @@ const styles = StyleSheet.create({
     infor_row: {
         margin: 10,
         flexDirection: 'row',
-        justifyContents: 'space-between',
-        alignItem: 'stretch',
+        justifyContents: 'center',
+        alignItem: 'center',
         // height: 70,
     },
     infor_column: {
         flex: 1,
-        justifyContents: 'space-between',
+        justifyContents: 'center',
         alignItems: 'center',
-        height: 60,
+        height: 100,
     },
     infor_text: {
         fontSize: 18,
         fontWeight: 'bold',
+    }
+    ,
+    userContainer: {
+        flex: 1,
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderRadius: 25,
+        flexDirection: 'column',
+        // justifyContents: 'center',
+        // alignItems:center,
+        width: '95%',
+        margin: 5,
+
+    },
+    row4User: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        width: '100%',
+        height: 50,
+        margin: 10,
+    },
+    iconItem: {
+
+    },
+    textItem: {
+        marginLeft: 10,
+        color: '#080808',
+        fontSize: 15
     }
 });
 

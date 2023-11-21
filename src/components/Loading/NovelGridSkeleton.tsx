@@ -5,11 +5,10 @@ import {
 import { Novel } from '../../models/Novel';
 import Skeleton from './Skeleton';
 // Phần để recommend truyện
-var { width } = Dimensions.get("window");
+const widthWindow  = Math.floor(Dimensions.get("window").width);
 const NovelGridSkeleton = () => {
     useEffect(()=>{
-        console.log(width)
-        width= Math.floor(width)
+        console.log(widthWindow);
     })
     return (
         <View style={styles.gridContainer}>
@@ -17,7 +16,7 @@ const NovelGridSkeleton = () => {
                 marginLeft: 10,
                 marginTop: 10,
             }}>
-                <Skeleton height={30} width={width} style={{ borderRadius: 5, marginBottom: 5 }} />
+                <Skeleton height={30} width={widthWindow} style={{ borderRadius: 5, marginBottom: 5 }} />
             </View>
             <View style={styles.container}>
                 {Array.from({ length: 2 }, (_, rowIndex) => (

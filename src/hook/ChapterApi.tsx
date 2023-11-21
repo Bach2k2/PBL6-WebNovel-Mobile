@@ -4,7 +4,6 @@ export const getChaptersByNovelId = async (novelId: any) => {
    // console.log('param: ', novelId);
     try {
         const response = await axiosInstance.get(`/chapter/NovelId=${novelId}`);
-       // console.log(response);
         return response.data;
     } catch (error) {
         console.error(error);
@@ -12,7 +11,7 @@ export const getChaptersByNovelId = async (novelId: any) => {
     }
 }
 
-export const getChaptersByChapterId = async (chapterId: any) => {
+export const getChapterByChapterId = async (chapterId: any) => {
     //console.log('param: ', chapterId);
     try {
         const response = await axiosInstance.get(`/chapter/${chapterId}`);

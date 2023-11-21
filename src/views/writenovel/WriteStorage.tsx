@@ -8,15 +8,16 @@ import { Novel } from '../../models/Novel';
 import { getNovelByAccount } from '../../hook/NovelApi';
 import { useNavigation } from '@react-navigation/native';
 import WriteDashboard from './WriteDashboard';
-function WriteStorage() {
+function WriteStorage({ navigation }: any) {
 
   const [userNovel, setNovelByUser] = useState<Novel[]>([]);
   const [loading, setLoading] = useState(true);
   const { getUserData } = useContext(AuthContext);
   const { authState } = useContext(AuthContext);
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
+  const user = getUserData();
   useEffect(() => {
-    const user = getUserData();
+
     const fetchNovelByAccount = async () => {
       await getNovelByAccount(user.id).then((data) => {
 
@@ -26,9 +27,10 @@ function WriteStorage() {
       })
     }
     if (user) {
+      console.log("run fetch novel by account");
       fetchNovelByAccount();
     }
-  }, []);
+  }, [user]);
   const handleCreateBtnPress = () => {
     navigation.navigate("CreateNovel");
   }
@@ -38,15 +40,15 @@ function WriteStorage() {
   }
   return (
     <>
-    <View>
-      <Text style={{fontSize:22,}}>Danh sách truyện của tôi</Text>
-    </View>
+      <View>
+        <Text style={styles.title}>Danh sách truyện của tôi</Text>
+      </View>
       <ScrollView>
         <View style={styles.container}>
           {userNovel.map((novel, index) => (
-            <TouchableOpacity style={styles.container} key={index} onPress={() => {
+            <TouchableOpacity style={styles.novelBorder} key={index} onPress={() => {
               console.log('Press to novel detail');
-              // navigation.navigate('NovelDetail', { novelId: novel.novelId });
+              navigation.navigate('UserNovelDetail', { novelId: novel.id , title: novel.name});
             }}>
               <View style={styles.novelContainer}>
                 <Image source={{ uri: novel.imagesURL }} alt='image' style={styles.novelImage} />
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // justifyContent: 'center',
-    // alignItems: 'center',
+    alignItems: 'center',
     flexDirection: 'column',
   },
   title: {
@@ -89,6 +91,7 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'left',
     margin: 5,
+    marginLeft:10,
     alignSelf: 'flex-start'
   },
   row: {
@@ -96,17 +99,27 @@ const styles = StyleSheet.create({
     width: '100%',
     margin: 10,
   },
-  novelContainer: {
-    flex:1,
-    borderRadius: 5,
+  novelBorder: {
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: '#EBEBEB',
+    backgroundColor:'#FFFFFF',
+    width: '98%',
+    borderRadius:10,
+    marginBottom:5,
+
+  },
+  novelContainer: {
+    flex: 1,
+    borderRadius: 5,
+    // borderWidth: 1,
+    // borderColor: 'black',
     backgroundColor: 'white',
     flexDirection: 'row',
     margin: 10,
     width: '95%',
   },
   novelContent: {
+    marginLeft:10,
     flexDirection: 'column',
     width: '70%',
   },
@@ -124,14 +137,15 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   smallBtn: {
-    flex:1,
+    flex: 1,
     backgroundColor: 'purple',
     justifyContent: 'center',
     alignItems: 'center',
-    margin:5,
-    width:50,
-    textAlign:'center',
-    borderRadius:5,
+    margin: 5,
+    width: 50,
+    textAlign: 'center',
+    borderRadius: 5,
+    color: '#FFFFFF',
   },
   // Button section
   buttonContainer: {

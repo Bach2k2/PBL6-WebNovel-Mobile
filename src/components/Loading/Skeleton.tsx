@@ -1,34 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    View, StyleSheet, Animated
+    View, StyleSheet, Animated, Easing
 } from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
-function Skeleton({ height, width, style }: any) {
+const Skeleton = ({ height, width, style }: any) => {
     const translateX = useRef(new Animated.Value(-width)).current;
     useEffect(() => {
-        Animated.loop(
+        const animation = Animated.loop(
             Animated.timing(translateX, {
                 toValue: width,
                 useNativeDriver: true,
-                duration: 2000,
+                duration: 1600,
+                easing: Easing.linear,
             })
-        ).start();
-    }, [width]);
+        );
+        animation.start();
+        return () => animation.stop();
+    }, [width, translateX]);
     return (
         <View style={StyleSheet.flatten(
             [
                 {
-                    width: width, height: height,
+                    width: width,
+                    height: height,
                     backgroundColor: "rgba(0,0,0,0.12)",
                     overflow: "hidden"
                 },
                 style
             ]
         )}>
-            <Animated.View style={{ width: '100%', height: '100%' }}>
+            <Animated.View style={{
+                width: '100%', height: '100%',
+                transform: [{
+                    translateX: translateX
+                }],
+            }}>
                 <LinearGradient style={{ width: '100%', height: '100%' }}
-                    colors={['transparent', "rgba(0,0,0,0.05)", 'transparent']}
-                    start={{ x: 1, y: 1 }} />
+                    colors={['transparent', 'rgba(255, 255, 255, 0.6)', 'transparent']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }} />
+
             </Animated.View>
         </View>
     );

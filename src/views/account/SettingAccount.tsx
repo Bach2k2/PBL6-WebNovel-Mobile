@@ -6,18 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 const SettingAccount = () => {
     const navigation = useNavigation()
-    const customUser = {
-        email: "namtruong0900@gmail.com",
-        id: "dckfGkjWXEG7jy4u0zc_rg",
-        isAdmin: true,
-        nickName: "SkywoodNick",
-        phone: "0353670461",
-        refreshToken: "3ZzbRuZW8wj7GTdF7ASHY39Rq22+qTWPhhMV4pA2HGI=",
-        refreshTokenExpiryTime: "2023-11-15T08:11:45.884609",
-        roleIds: ["ADMIN", "DEV"],
-        status: 0,
-        username: "Skywood",
-    }
+
     const [user, setUserData] = useState<User | null>(null);
     const { getUserData } = useContext(AuthContext);
     const authContext = useContext(AuthContext);
@@ -34,11 +23,11 @@ const SettingAccount = () => {
     return (
         <View style={styles.container}>
             {
-                user ? (<Button title='Dang xuat' onPress={() => {
+                user ? (<Button title='Đăng xuất' onPress={() => {
                     // const logout =asyn
                     authContext.logout();
                     navigation.navigate('Account')
-                }}></Button>):(<Button title='Dang nhap' onPress={() => {
+                }}></Button>):(<Button title='Đăng nhập' onPress={() => {
                     // const logout =asyn
                     // authContext.logout();
                     navigation.navigate('Login')

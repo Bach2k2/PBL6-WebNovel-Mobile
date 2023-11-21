@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Dimensions, ScrollView, ActivityIndicator } from "react-native";
 import Pdf from 'react-native-pdf';
 import { Chapter } from "../../models/Chapter";
-import { getChaptersByChapterId } from "../../hook/ChapterApi";
+import { getChapterByChapterId } from "../../hook/ChapterApi";
 const ChapterDetail = ({ route }: any) => {
     const [chapter, setChapter] = useState<Chapter>();
     const [currentPage, setCurrentPage] = useState(1);
@@ -14,8 +14,8 @@ const ChapterDetail = ({ route }: any) => {
     useEffect(() => {
         const fetchChapterById = async () => {
             try {
-                const data = await getChaptersByChapterId(chapterId);
-                console.log("chapter Response:", data);
+                const data = await getChapterByChapterId(chapterId);
+                // console.log("chapter Response:", data);
                 setChapter(data);
 
                 if (data.fileContent === undefined) {

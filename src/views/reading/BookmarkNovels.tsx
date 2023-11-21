@@ -5,14 +5,14 @@ import { Bookmarked } from "../../models/Bookmarked";
 import { AuthContext } from "../../context/AuthContext";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from "@react-navigation/native";
-const BookmarkNovels = () => {
+const BookmarkNovels = ({navigation}:any) => {
 
     // const authContext = useContext(AuthContext);
     const { authState, getUserData } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [isGrid, setIsGrid] = useState(true);
     const [bookmarkedData, setBookmarkedData] = useState<Bookmarked[]>([]);
-    const navigation = useNavigation();
+  //  const navigation = useNavigation();
 
     useEffect(() => {
         console.log("auth: ", authState.accessToken);
@@ -37,6 +37,15 @@ const BookmarkNovels = () => {
         return (
             <View style={styles.container} >
                 <Text style={styles.warningText} numberOfLines={2} >Bạn hãy đăng nhập để có thể xem danh sach truyện đã thêm vào thư viện</Text>
+            </View>
+        );
+    }
+
+    if (bookmarkedData.length == 0) {
+        return (
+            <View style={styles.nodataContainer} >
+                <Image source={require('../../assets/img/nodatapresent.png')} style={{height:100,width:100}}/>
+                <Text style={styles.warningText}>Không có dữ liệu</Text>
             </View>
         );
     }
@@ -69,7 +78,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        margin: 10,
+        // margin: 10,
         width: '100%',
     },
     mycontainer: {
@@ -78,9 +87,17 @@ const styles = StyleSheet.create({
         width: '100%',
 
     },
+    nodataContainer: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent:'center',
+        alignItems: 'center',
+    },
     warningText: {
         fontSize: 20,
-        textAlign: "center"
+        textAlign: "center",
+        color:'black',
+
     },
     row: {
         flexDirection: 'row',

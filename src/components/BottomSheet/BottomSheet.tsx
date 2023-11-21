@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
         color: 'blue',
         fontSize: 18,
-    },textContainer:{
-        alignSelf:'flex-start'
+    }, textContainer: {
+        alignSelf: 'flex-start'
     }
     , titleText: {
         fontSize: 22,
@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
     },
     googleBtn: {
         // width: '70%',
-        width: '80%',
-        height: '40%',
+        width: '80%', // Adjusted width
+        height: 50, // Adjusted height
         marginTop: 10,
         backgroundColor: 'white',
         borderRadius: 10,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     },
     facebookBtn: {
         width: '80%',
-        height: '40%',
+        height: 50, // Adjusted height
         backgroundColor: "#3b5998",
         borderRadius: 10,
         borderWidth: 1,
@@ -134,10 +134,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     roundButtonsContainer: {
+        flex:1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '70%',
-        marginTop: 20,
+        marginTop: 60,
     },
     roundButton: {
         width: 50,

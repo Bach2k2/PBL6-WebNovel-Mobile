@@ -6,24 +6,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getNovelByGenre } from '../../hook/NovelApi';
 import { useNavigation } from '@react-navigation/native';
 
-function NovelByGenre({ route }: { route: any }) {
+function NovelByGenre({ navigation, route }: any) {
   const { genre } = route.params;
   const [novelByGenre, setNovellByGenre] = useState<Array<Novel>>([]);
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
-  const novelData = [
-    { title: 'Novel 1', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: 'Blood Sniper', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 1', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 2', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 3', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 4', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 5', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 6', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 7', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 8', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 9', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-    { title: 'Novel 10', coverImageUrl: 'https://book-pic.webnovel.com/bookcover/22600918205369205?imageMogr2/thumbnail/150&imageId=1684504174447', author: '_Er', genre: ['Eastern', 'Fantasy'], content: 'Content of Novel 2', view: 135, tag: '#ACTION #ADVENTURE' },
-
-  ]
   useEffect(() => {
     const fetchData = async () => {
       getNovelByGenre(genre.id).then((data) => {
@@ -37,19 +24,23 @@ function NovelByGenre({ route }: { route: any }) {
   }, []);
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text>Chọn lọc</Text>
-        <Text>Hot nhất</Text>
-      </View>
+      {/* <View style={styles.header}>
+        <View>
+          <Text>Chọn lọc</Text>
+        </View>
+        <View>
+          <Text>Hot nhất</Text>
+        </View>
+      </View> */}
       <View style={styles.content}>
         <ScrollView>
           {
             novelByGenre.map((novel, index) => (
-              <TouchableOpacity onPress={() => {
+              <TouchableOpacity key={index} onPress={() => {
                 console.log('Press to novel detail');
                 navigation.navigate('NovelDetail', { novelId: novel.id });
               }}>
-                <View style={styles.novelContainer} key={index}>
+                <View style={styles.novelContainer} >
                   <Image source={{ uri: novel.imagesURL }} alt='image' style={styles.novelImage} />
                   <View style={styles.novelContent}>
                     <Text numberOfLines={1} style={styles.novelTitle}>{novel.name}</Text>
@@ -78,6 +69,7 @@ const styles = StyleSheet.create({
   header: {
     // flex: 1,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignContent: 'center',
     alignItems: 'center'
   },

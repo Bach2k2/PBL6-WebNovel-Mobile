@@ -40,13 +40,17 @@ export default function NovelRow({ novelData }: { novelData: Novel[] }) {
 
             <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
                 {novelData.map((item, index) => (
-                    <View key={index}>
-                        {item.imagesURL ? (<Image source={{ uri: item.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />) :
-                            (<Image source={require('../../assets/img/waiting_img.jpg')} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />)}
-                        <View style={styles.textContainer}>
-                            <Text numberOfLines={2} style={styles.text_imgrow}>{item.name}</Text>
+                    <TouchableOpacity key={index} onPress={() => {
+                        navigation.navigate('NovelDetail', { novelId: item.id,title: item.name });
+                    }}>
+                        <View key={index}>
+                            {item.imagesURL ? (<Image source={{ uri: item.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />) :
+                                (<Image source={require('../../assets/img/waiting_img.jpg')} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />)}
+                            <View style={styles.textContainer}>
+                                <Text numberOfLines={2} style={styles.text_imgrow}>{item.name}</Text>
+                            </View>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </View>
@@ -59,11 +63,11 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 7,
         backgroundColor: '#fff',
-        width:'95%',
+        width: '95%',
     },
-    headerTitle:{
-        marginLeft:10,
-        marginTop:10
+    headerTitle: {
+        marginLeft: 10,
+        marginTop: 10
 
     },
     imageRow: {

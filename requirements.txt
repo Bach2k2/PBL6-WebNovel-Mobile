@@ -19,3 +19,5 @@ reanimated-bottom-sheet
 react-native-reanimated , react-native-gesture-handler to support
 
 Picker :@react-native-picker/picker
+
+@react-native-community/blur

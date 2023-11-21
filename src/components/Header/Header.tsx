@@ -1,11 +1,18 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 const Header = () => {
+    const navigation = useNavigation();
     return (
         <View>
             <View style={styles.header}>
-                <Image source={require('../../assets/img/TTQBA.png')} style={styles.logo}></Image>
+                <TouchableOpacity onPress={
+                    ()=>{ navigation.navigate('Welcome')}
+                }>
+                    <Image source={require('../../assets/img/TTQBA.png')} style={styles.logo} />
+                </TouchableOpacity>
+
                 <View style={styles.searchContainer}>
                     <Icon name="search" size={24} color="black" />
                     <TextInput
@@ -59,5 +66,5 @@ const styles = StyleSheet.create({
         width: '15%',
         alignItems: 'center',
     }
-});  
+});
 export default Header

@@ -5,8 +5,8 @@ import Skeleton from 'react-loading-skeleton';
 import NovelGridSkeleton from '../Loading/NovelGridSkeleton';
 import { useNavigation } from '@react-navigation/native';
 // Phần để recommend truyện
-const NovelGrid = ({ novelData }: { novelData: Novel[] }) => {
-    const navigation = useNavigation();
+const NovelGrid = ({ novelData }: any) => {
+      const navigation = useNavigation();
     const [novels, setNovels] = useState<Novel[]>([]);// Initial with null array
     const [loading, setLoading] = useState(true);
     const [visibleNovelWeekly, setVisibleNovelWeekly] = useState(8);
@@ -48,7 +48,7 @@ const NovelGrid = ({ novelData }: { novelData: Novel[] }) => {
 
     // Hàm dùng đê random truyện
     const loadMoreNovels = () => {
-        const availableNovels = novelData.filter(novel => !displayedNovels.includes(novel));
+        const availableNovels = novelData.filter((novel:any) => !displayedNovels.includes(novel));
         const randomNovels = shuffleArray(availableNovels);
         setDisplayedNovels(randomNovels.slice(0, 8));
     };
@@ -59,7 +59,7 @@ const NovelGrid = ({ novelData }: { novelData: Novel[] }) => {
                 {displayedNovels.slice(row * 4, (row + 1) * 4).map((item, index) => (
                     <View style={styles.column} key={index}>
                         <TouchableOpacity style={styles.itemWrapper} onPress={() => {
-                            navigation.navigate('NovelDetail', { novelId: item.id });
+                            navigation.navigate('NovelDetail', { novelId: item.id, title: item.name });
                         }}>
                             <View style={styles.itemWrapper}>
                                 <Image source={{ uri: item.imagesURL }} style={styles.image} />
@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 10,
         backgroundColor: '#fff',
-        margin:5,
-        width:'100%',
+        margin: 5,
+        width: '95%',
     },
     // render for row
     rcm_container: {

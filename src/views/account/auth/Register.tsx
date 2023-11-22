@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Dimensions, View, Keyboard } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import RegisterApi from '../../hook/RegisterApi';
+import RegisterApi from '../../../hook/RegisterApi';
 const HeigthWindow = Dimensions.get('window').height;
 const WidthWindow = Dimensions.get('window').width;
 import Toast from 'react-native-toast-message';
@@ -56,15 +56,31 @@ const Register = ({ navigation }: { navigation: any }) => {
             setIsTouchableEnabled(false);
         }
     }, [email, password]);
-    useEffect(() => {
 
-    })
+    //setHeader
+    useEffect(() => {
+        navigation.setOptions({
+            header: () => <CustomBlurredHeader />
+        });
+    },[navigation])
+
+    const CustomBlurredHeader = () => {
+        return (
+            <View
+                style={styles.customHeader}
+            >
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Icon name="arrow-left" size={25} color="white" />
+                </TouchableOpacity>
+            </View>
+        );
+    };
     return (
-        <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../assets/background/background1.jpg')}>
+        <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../../assets/background/background1.jpg')}>
             <SafeAreaView style={styles.container}>
                 {/* Logo */}
                 <View style={styles.logoContainer}>
-                    <Image source={require('../../assets/img/welcome.png')} style={styles.logo} />
+                    <Image source={require('../../../assets/img/welcome.png')} style={styles.logo} />
                 </View>
 
                 <View style={[styles.content, { height: contentHeight }]}>
@@ -76,7 +92,6 @@ const Register = ({ navigation }: { navigation: any }) => {
                             <TextInput style={styles.textInput} placeholder='Nhập email ở đây'
                                 onChangeText={(email) => setEmail(email)} />
                         </View>
-
                     </View>
 
                     <View style={styles.inputContainer}>
@@ -89,7 +104,7 @@ const Register = ({ navigation }: { navigation: any }) => {
                                 secureTextEntry={!showPasswordStatus} />
                             <View style={styles.passwordShowContainer} >
                                 <TouchableOpacity onPress={() => { SetShowPasswordStatus(!showPasswordStatus) }}>
-                                    <Image style={styles.passwordShow} source={showPasswordStatus ? require('../../assets/logo/show.png') : require('../../assets/logo/hide.png')} />
+                                    <Image style={styles.passwordShow} source={showPasswordStatus ? require('../../../assets/logo/show.png') : require('../../../assets/logo/hide.png')} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -119,12 +134,14 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         width: '100%',
-        height: '20%', marginTop: 1,
+        height: '20%', marginTop: 10,
         justifyContent: 'flex-start',
         alignItems: 'center',
 
     },
     logo: {
+        //position: 'relative',
+        marginTop: 20,
         width: '80%',
         height: '100%',
     },
@@ -134,6 +151,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     content: {
+        flex:1,
         width: '100%',
         height: '100%',
         marginTop: 10,
@@ -209,6 +227,23 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         marginRight: 10,
         flex: 1,
+    },
+
+    //header:
+    customHeader: {
+        position: 'absolute',
+        top: 0,
+        flexDirection: 'row',
+        zIndex: 100,
+    },
+    headerText: {
+        fontSize: 18,
+        color: 'white',
+    },
+    backButton: {
+        margin: 20,
+        marginRight: 16,
+        zIndex: 100,
     },
 
 });

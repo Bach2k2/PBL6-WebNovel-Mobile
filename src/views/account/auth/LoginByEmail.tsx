@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Dimensions, View, Keyboard } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import LoginApi from '../../hook/LoginApi';
-import { AuthContext } from '../../context/AuthContext';
-import { AxiosContext } from '../../context/AxiosContext';
+import LoginApi from '../../../hook/LoginApi';
+import { AuthContext } from '../../../context/AuthContext';
+import { AxiosContext } from '../../../context/AxiosContext';
 import * as Keychain from 'react-native-keychain';
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import AccountApi from '../../hook/AccountApi';
+import AccountApi from '../../../hook/AccountApi';
 import Toast from 'react-native-toast-message';
 // import jwt from 'jsonwebtoken';
 
@@ -18,6 +18,7 @@ const WidthWindow = Dimensions.get('window').width;
 const LoginByEmail = ({ navigation }: { navigation: any }) => {
     const authContext = useContext(AuthContext);
     const { publicAxios } = useContext(AxiosContext);
+    const [emailMessage, setEmailMessage] = useState('');
     const [message, setMessage] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,6 +27,28 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
     const [isTouchableEnabled, setIsTouchableEnabled] = useState(false);
     const [showPasswordStatus, SetShowPasswordStatus] = useState(false);
     const [contentHeight, setContentHeight] = useState(HeigthWindow);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+
+    useEffect(() => {
+        navigation.setOptions({
+            header: () => <CustomBlurredHeader />
+        });
+    }, [navigation])
+
+    const CustomBlurredHeader = () => {
+        return (
+            <View
+                style={styles.customHeader}
+            >
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Icon name="arrow-left" size={25} color="white" />
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
     const updateContentHeight = () => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
             setContentHeight(HeigthWindow / 2); // You can adjust the height as needed
@@ -45,6 +68,8 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
 
     useEffect(() => {
         if (email && password) {
+            setEmailMessage('');
+            setMessage('');
             setIsTouchableEnabled(true);
         } else {
             setIsTouchableEnabled(false);
@@ -52,7 +77,14 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
     }, [email, password]);
 
     const handleLogin = async () => {
+        if (!emailRegex.test(email)) {
+            setEmailMessage("Email không hợp lệ");
+            setMessage('');
+            setIsTouchableEnabled(false);
+            return;
+        }
         try {
+
             const response = await LoginApi(
                 email, password
             );
@@ -104,11 +136,11 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
     };
 
     return (
-        <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../assets/background/background1.jpg')}>
+        <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../../assets/background/background1.jpg')}>
             <SafeAreaView style={styles.container}>
                 {/* Logo */}
                 <View style={styles.logoContainer}>
-                    <Image source={require('../../assets/img/welcome.png')} style={styles.logo} />
+                    <Image source={require('../../../assets/img/welcome.png')} style={styles.logo} />
 
                 </View>
 
@@ -120,8 +152,17 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
                             <Icon style={styles.iconInput} name='email' size={30} />
                             <TextInput style={styles.textInput} placeholder='Nhập email ở đây' onChangeText={(email) => setEmail(email)} />
                         </View>
-
                     </View>
+                    {
+                        emailMessage ? (
+                            <View style={styles.warningContainer}>
+                                <Icon name='alert' size={20} color={'red'} />
+                                <Text style={styles.warningText}>{emailMessage}</Text>
+                            </View>
+                        ) :
+                            (<View></View>)
+                    }
+
 
                     <View style={styles.inputContainer}>
                         <Text style={styles.label}>Password</Text>
@@ -133,24 +174,33 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
                                 secureTextEntry={!showPasswordStatus} ref={passwordRef} />
                             <View style={styles.passwordShowContainer} >
                                 <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }} onPress={() => { SetShowPasswordStatus(!showPasswordStatus) }}>
-                                    <Image style={styles.passwordShow} source={showPasswordStatus ? require('../../assets/logo/show.png') : require('../../assets/logo/hide.png')} />
+                                    <Image style={styles.passwordShow} source={showPasswordStatus ? require('../../../assets/logo/show.png') : require('../../../assets/logo/hide.png')} />
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
-                    <View style={styles.warningContainer}>
-                        <Text style={styles.warningText}>{message}</Text>
-                    </View>
+                    {
+                        message ? (
+                            <View style={styles.warningContainer}>
+                                <Icon name='alert' size={20} color={'red'} />
+                                <Text style={styles.warningText}>{message}</Text>
+                            </View>
+                        ) :
+                            (<View></View>)
+                    }
+
 
                     <View style={styles.btnContainer}>
-                        <TouchableOpacity onPress={handleLogin} style={styles.btnNext} disabled={!isTouchableEnabled}>
-                            <Text>Đăng nhập</Text>
+                        <TouchableOpacity onPress={handleLogin} style={[
+                            styles.btnLogin,
+                            isTouchableEnabled ? null : styles.btnLoginDisabled,
+                        ]} disabled={!isTouchableEnabled}>
+                            <Text style={[styles.loginText, isTouchableEnabled ? { color: '#FFFFFF' } : null]}>Đăng nhập</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.btnContainer}>
                         <TouchableOpacity onPress={() => { }} style={styles.btnForgotPassword}>
-                            <Text>Quên mật khẩu?</Text>
-
+                            <Text style={styles.forgotPassText}>QUÊN MẬT KHẨU?</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -168,18 +218,21 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         width: '100%',
-        height: '20%', marginTop: 1,
+        height: '20%',
+        marginTop: 10,
         justifyContent: 'flex-start',
         alignItems: 'center',
 
     },
     logo: {
+        //position: 'absolute',
+        marginTop: 20,
         width: '80%',
         height: '100%',
     },
     header: {
         fontSize: 20, color: 'black',
-        marginTop: 10, marginLeft: 10,
+        marginTop: 15, marginLeft: 15,
         fontWeight: 'bold'
     },
     content: {
@@ -215,7 +268,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: 5, marginLeft: 5,
         alignItems: 'center',
-        backgroundColor: '#EEEEEE',
+        backgroundColor: '#EBEBEB',
         alignSelf: 'flex-start',
     },
     iconInput: {
@@ -241,34 +294,67 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
+        width: '90%',
     },
     warningText: {
         marginLeft: 5,
-        color: 'gray',
-        fontSize: 12,
+        marginTop: 5,
+        color: 'red',
+        fontSize: 13,
     }, btnContainer: {
         width: '90%',
         height: 50,
-        margin: 15
-    }, btnNext: {
+        margin: 15,
+        marginTop: 20,
+        marginBottom: 5,
+
+    }, btnLogin: {
         width: '100%',
         height: '100%',
         borderWidth: 1, borderColor: 'black',
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        margin: 0,
-        padding: 0,
+        backgroundColor: '#4285f4',
+        color: 'white'
+    },
+    btnLoginDisabled: {
+        backgroundColor: '#b5b5b5',
+        color: '#FFFFFF'
+    },
+    loginText: {
+        color: 'gray',
+        fontSize: 17,
+        fontWeight: '700'
+    },
+    forgotPassText: {
+        fontSize: 18,
+        fontWeight: '600'
     }
     , btnForgotPassword: {
-        marginTop: 0,
+        marginBottom: 20,
         width: '100%',
-        height: '100%',
+        height: '50%',
         color: 'gray',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    //header:
+    customHeader: {
+        position: 'absolute',
+        top: 0,
+        flexDirection: 'row',
+        zIndex: 100,
+    },
+    headerText: {
         fontSize: 18,
-    }
+        color: 'white',
+    },
+    backButton: {
+        margin: 20,
+        marginRight: 16,
+        zIndex: 100,
+    },
 
 });
 export default LoginByEmail;

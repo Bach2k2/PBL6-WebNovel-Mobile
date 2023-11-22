@@ -3,8 +3,8 @@ import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'rea
 import { LinearGradient } from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Login from './Login'
-import Register from './Register';
+import Login from './auth/Login'
+import Register from './auth/Register';
 import { useNavigation } from '@react-navigation/native';
 import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';

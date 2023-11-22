@@ -1,5 +1,5 @@
-import React, { useLayoutEffect } from 'react';
-import { Dimensions, View } from 'react-native';
+import React, { useEffect, useLayoutEffect } from 'react';
+import { Button, Dimensions, View } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -22,27 +22,26 @@ const widthWindow = Dimensions.get('window').width;
 const Login = ({ navigation }: { navigation: any }) => {
 
     // Making the blur headers.
-    // useLayoutEffect(() => {
-    //     navigation.setOptions({
-    //         header: () => <CustomBlurredHeader />,
-    //     });
-    // }, [navigation]);
+    useEffect(() => {
+        navigation.setOptions({
+            header: () => <CustomBlurredHeader />,
+        });
+    }, [navigation]);
 
-    // const CustomBlurredHeader = () => {
-    //     return (
-    //         <BlurView
-    //             style={[styles.header, { zIndex: 100 }]}
-    //             blurType="light"
-    //             blurAmount={10}
-    //             reducedTransparencyFallbackColor="white"
-    //         >
-    //             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-    //                 <Icon name="arrow-left" size={25} color="white" />
-    //             </TouchableOpacity>
-    //             <Text style={styles.headerText}>Login</Text>
-    //         </BlurView>
-    //     );
-    // };
+    const CustomBlurredHeader = () => {
+        return (
+            <View
+                style={styles.header}
+            // blurType="light"
+            // blurAmount={0}
+            // reducedTransparencyFallbackColor="white"
+            >
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Icon name="arrow-left" size={25} color="white" />
+                </TouchableOpacity>
+            </View>
+        );
+    };
     const handleLoginByEmail = () => {
         navigation.navigate('LoginByEmail');
         console.log('handleLoginByEmail');
@@ -82,28 +81,31 @@ const Login = ({ navigation }: { navigation: any }) => {
 
 
     return (
-        <ImageBackground style={{ height: '100%', width: '100%' }} source={require('../../assets/background/background1.jpg')}>
-            <SafeAreaView style={styles.container}>
+        <ImageBackground style={styles.container} source={require('../../assets/background/background1.jpg')}>
+            <SafeAreaView style={styles.safeAreaView}>
                 {/* Logo */}
-                <View style={{ width: '100%', height: '20%', marginTop: 0.1 * heigthWindow, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={styles.logoContainer}>
                     <Image source={require('../../assets/img/logo-login.png')} style={styles.logo} />
                 </View>
 
-                <View style={{ width: '100%', height: '20%', marginTop: 0.1 * heigthWindow, justifyContent: 'flex-start', alignItems: 'center' }}>
+                {/* Google and Facebook buttons */}
+                <View style={styles.socialButtonsContainer}>
                     <TouchableOpacity onPress={() => { googleLogin() }} style={styles.googleBtn}>
-                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <View style={styles.socialButtonContent}>
                             <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
                             <Text style={styles.googleText}>Login with Google</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => { }} style={styles.facebookBtn}>
-                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <View style={styles.socialButtonContent}>
                             <Icon name='facebook' size={30} color="white" style={styles.facebookIcon} />
                             <Text style={styles.facebookText}>Login with Facebook</Text>
                         </View>
 
                     </TouchableOpacity>
                 </View>
+
+                {/*Round buttons*/}
                 <View style={styles.roundButtonsContainer}>
                     {/* Add your 4 round buttons here */}
                     <TouchableOpacity style={styles.zaloRoundBtn}>
@@ -133,16 +135,37 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
+        justifyContent: 'center',   
+    },
+    safeAreaView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '100%',
         width: '100%',
+        marginBottom:25,
     },
-
+    logoContainer: {
+        flex:0.5,
+        width: '100%',
+        height: '20%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignContent:'center',
+    },
     logo: {
+        alignSelf:'center',
         width: 240,
         height: 240,
     },
+    socialButtonsContainer: {
+        width: '100%',
+        height: '20%',
+        marginTop: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     googleBtn: {
-        // width: '70%',
         width: '80%',
         height: '40%',
         marginTop: 10,
@@ -150,13 +173,19 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: 'white',
-        justifyContent: 'center',
+       // justifyContent: 'center',
         color: 'black'
     },
+    socialButtonContent: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
     googleBtnImage: {
-        marginLeft: 10,
-        width: 30,
-        height: 30,
+        marginLeft: 20,
+        width: 35,
+        height: 35,
     },
     googleText: {
         marginLeft: 40,
@@ -174,7 +203,9 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     facebookIcon: {
-        marginLeft: 10,
+        marginLeft: 20,
+        width: 35,
+        height: 35,
     },
     facebookText: {
         marginLeft: 40,
@@ -237,9 +268,9 @@ const styles = StyleSheet.create({
 
     // header:
     header: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        flexDirection: 'row',
         zIndex: 100,
     },
     headerText: {
@@ -247,7 +278,9 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     backButton: {
+        margin: 20,
         marginRight: 16,
+        zIndex: 100,
     },
 });
 export default Login;

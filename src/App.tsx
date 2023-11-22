@@ -5,10 +5,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import HomeTabs from './views/home/HomeTabs';
-import Login from './views/account/Login';
-import Register from './views/account/Register';
+import Login from './views/account/auth/Login';
+import Register from './views/account/auth/Register';
 import CoinExchange from './views/account/CoinExchange';
-import LoginByEmail from './views/account/LoginByEmail';
+import LoginByEmail from './views/account/auth/LoginByEmail';
 
 import { AuthContext, AuthProvider } from './context/AuthContext';
 import Profile from './views/account/Profile';

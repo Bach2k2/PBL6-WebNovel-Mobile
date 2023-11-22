@@ -81,18 +81,18 @@ const Login = ({ navigation }: { navigation: any }) => {
 
 
     return (
-        <ImageBackground style={styles.container} source={require('../../assets/background/background1.jpg')}>
+        <ImageBackground style={styles.container} source={require('../../../assets/background/background1.jpg')}>
             <SafeAreaView style={styles.safeAreaView}>
                 {/* Logo */}
                 <View style={styles.logoContainer}>
-                    <Image source={require('../../assets/img/logo-login.png')} style={styles.logo} />
+                    <Image source={require('../../../assets/img/logo-login.png')} style={styles.logo} />
                 </View>
 
                 {/* Google and Facebook buttons */}
                 <View style={styles.socialButtonsContainer}>
                     <TouchableOpacity onPress={() => { googleLogin() }} style={styles.googleBtn}>
                         <View style={styles.socialButtonContent}>
-                            <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
+                            <Image style={styles.googleBtnImage} source={require('../../../assets/logo/google.png')} />
                             <Text style={styles.googleText}>Login with Google</Text>
                         </View>
                     </TouchableOpacity>
@@ -109,10 +109,10 @@ const Login = ({ navigation }: { navigation: any }) => {
                 <View style={styles.roundButtonsContainer}>
                     {/* Add your 4 round buttons here */}
                     <TouchableOpacity style={styles.zaloRoundBtn}>
-                        <Image style={styles.roundButtonImage} source={require('../../assets/logo/zalo.png')} />
+                        <Image style={styles.roundButtonImage} source={require('../../../assets/logo/zalo.png')} />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.lineRoundBtn}>
-                        <Image style={styles.roundButtonImage} source={require('../../assets/logo/line.png')} />
+                        <Image style={styles.roundButtonImage} source={require('../../../assets/logo/line.png')} />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.twitterRoundBtn}>
                         <Icon name='twitter' size={30} color="white" />
@@ -154,9 +154,9 @@ const styles = StyleSheet.create({
         alignContent:'center',
     },
     logo: {
-        alignSelf:'center',
-        width: 240,
-        height: 240,
+       // alignSelf:'center',
+        width: 250,
+        height: 250,
     },
     socialButtonsContainer: {
         width: '100%',

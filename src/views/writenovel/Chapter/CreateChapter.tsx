@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions } from "react-native";
+import { Alert, Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, } from "react-native";
+import { PermissionsAndroid } from 'react-native';
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
-
+import { printToFileAsync } from 'expo-print';
 import { Keyboard, KeyboardEvent } from 'react-native';
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../../context/AuthContext";
@@ -23,9 +24,57 @@ const CreateChapter = ({ route, navigation }: any) => {
     // const [fileChapter, setFileChapter] = useState<string | null>(null);
     var fileChapter = null;
     const { authState } = useContext(AuthContext)
+    // const isPermitted = async () => {
+    //     if (Platform.OS === 'android') {
+    //         try {
+    //             const rationale: PermissionsAndroid.Rationale = {
+    //                 title: 'External Storage Write Permission',
+    //                 message: 'App needs access to Storage data',
+    //                 buttonPositive: 'OK', // Add this property
+    //             };
+
+    //             const granted = await PermissionsAndroid.request(
+    //                 PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    //                 rationale,
+    //             );
+
+    //             return granted === PermissionsAndroid.RESULTS.GRANTED;
+    //         } catch (err) {
+    //             alert('Write permission err', err);
+    //             return false;
+    //         }
+    //     } else {
+    //         return true;
+    //     }
+    // };
+
+
+    const isPermitted = async () => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                    {
+                        title: 'External Storage Write Permission',
+                        message: 'App needs access to Storage data',
+                        buttonNeutral: 'Ask Me Later',
+                        buttonNegative: 'Cancel',
+                        buttonPositive: 'OK',
+                    },
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err: any) {
+                Alert.alert('Write permission err', err);
+                return false;
+            }
+        } else {
+            return true;
+        }
+    };
 
     const handleCreateChapter = async () => {
         // const { htmlContent } = content;
+        // if (await isPermitted()) {
         console.log('Title', title, 'content', content)
 
         // if (title === '' || content === '') {
@@ -38,17 +87,21 @@ const CreateChapter = ({ route, navigation }: any) => {
 
         let options = {
             //   html: `<html><body>${content}</body></html>`,
-            html: '<html><body><h1>HelloHowaboutyouhahahah?</h1></body></html>',
-            fileName: 'test',
-            directory: 'Document',
-            base64: true,
+            html: '<h1>HelloBaba</h1>',
+            fileName: 'lol',
+            directory: 'Documents',
+            // base64: true,
         };
 
         try {
-            const file = await RNHTMLtoPDF.convert(options);
+            // const file = await RNHTMLtoPDF.convert(options);
+            const file = await printToFileAsync({
+                html: '<html><body><h1>HelloHowaboutyouhahahah?</h1></body></html>',
+                base64: true,
+            });
             console.log(file);
-                    
-            if(file.filePath){
+
+            if (file.uri) {
                 // const fileBlob = await fetch(file.filePath).then(response => response.blob());//type network error
                 const data = {
                     name: title,
@@ -60,12 +113,14 @@ const CreateChapter = ({ route, navigation }: any) => {
 
                 console.log(response);
             }
-            
-        
-           setPdfFilePath(file.filePath || null);        
+
+
+            setPdfFilePath(file.uri || null);
+
         } catch (error) {
             console.error('Error creating PDF:', error);
         }
+
     };
 
     const handleSetHeader = async (header: string) => {
@@ -148,12 +203,12 @@ const CreateChapter = ({ route, navigation }: any) => {
                         }}
                         initialContentHTML={content}
                     />
-                    {pdfFilePath && (<Pdf
+                    {/* {pdfFilePath && (<Pdf
                         trustAllCerts={false}
-                        source={{ uri: pdfFilePath, cache: true }}
+                        source={{ uri: pdfFilePath, cache: false }}
                         style={styles.pdf} />)
 
-                    }
+                    } */}
 
                 </KeyboardAvoidingView>
             </ScrollView>

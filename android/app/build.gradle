@@ -81,6 +81,7 @@ android {
         vectorDrawables.useSupportLibrary = true //add for react native image
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true //add for html-pdf
     }
     signingConfigs {
         debug {

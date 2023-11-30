@@ -10,6 +10,7 @@ import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
 import com.reactnativecommunity.blurview.BlurViewPackage;
+// import com.christopherdro.htmltopdf.RNHTMLtoPDFPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -28,6 +29,8 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
           // packages.add(new RNGoogleSigninPackage()); // <-- this needs to be in the list
           packages.add(new BlurViewPackage());
+          // packages.add(new MainReactPackage());
+          // packages.add(new RNHTMLtoPDFPackage());
           return packages;
         }
 

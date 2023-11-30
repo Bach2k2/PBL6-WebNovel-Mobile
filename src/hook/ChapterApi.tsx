@@ -38,21 +38,33 @@ export const postChapter = async (data: any) => {
         formData.append('NovelId', data.novelId);
         // formData.append('File', data.filePath);
         formData.append('File', {
-            uri: data.file.filePath,
-            name: 'test.pdf',
+            uri: data.file.uri,
+            name: 'lol.pdf',
             type: 'application/pdf',
         });
-        // formData.append('File',data.file);
+        formData.append('File', data.file);
         const response = await axios.post('https://webnovelapi.azurewebsites.net/api/chapter', formData, {
             headers: {
                 'Authorization': `Bearer ${data.accessToken}`,
                 'Content-Type': "multipart/form-data",
                 // 'Accept': '*',
             },
-           // withCredentials: false, // Add this line
+            // withCredentials: false, // Add this line
         });
-        return response.data;
-    } catch (error:any) {
+        // let result = await fetch(
+        //     'https://webnovelapi.azurewebsites.net/api/chapter',
+        //     {
+        //       method: 'post',
+        //       body: formData,
+        //       headers: {
+        //         'content-type': 'multipart/form-data',
+        //         'Authorization': `Bearer ${data.accessToken}`,
+
+        //       },
+        //     }
+        //   );
+        // return result;
+    } catch (error: any) {
         console.error("Error in postChapter:", error);
         // Log more details about the error
         if (error.response) {

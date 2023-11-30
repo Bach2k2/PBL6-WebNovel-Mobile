@@ -12,6 +12,12 @@ const Register = ({ navigation }: { navigation: any }) => {
     const [contentHeight, setContentHeight] = useState(HeigthWindow);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [validEmail, setValidEmail] = useState(false);
+    const [validPassword, setValidPassword] = useState(false);
+    const [emailMessage, setEmailMessage] = useState('');
+    const [message, setMessage] = useState('');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     const updateContentHeight = () => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
             setContentHeight(HeigthWindow / 2); // You can adjust the height as needed
@@ -32,8 +38,20 @@ const Register = ({ navigation }: { navigation: any }) => {
 
     const handleRegister = async () => {
         // console.log(email,password);
+        if (!emailRegex.test(email)) {
+            setEmailMessage("Email không hợp lệ");
+            setMessage('');
+            setIsTouchableEnabled(false);
+            return;
+        }
+
         await RegisterApi(email, password).then((response) => {
-            console.log(response);
+            console.log(response.code);
+            const code = response.code
+            if (code == 202) {
+                setEmailMessage('Email này đã được sử dụng');
+                return;
+            }
             Toast.show({
                 type: 'success',
                 text1: 'Register Notification!',
@@ -50,9 +68,21 @@ const Register = ({ navigation }: { navigation: any }) => {
         })
     }
     useEffect(() => {
-        if (email && password) {
-            setIsTouchableEnabled(true);
+        // if fill password first
+        if (password.length >= 6) {
+            setValidPassword(true);
         } else {
+            setValidPassword(false);
+        }
+
+        if (email && password.length >= 6) {
+            setValidEmail(true);
+            setValidPassword(true);
+            setIsTouchableEnabled(true);
+
+        } else {
+            setValidEmail(false);
+            setValidPassword(false);
             setIsTouchableEnabled(false);
         }
     }, [email, password]);
@@ -62,7 +92,7 @@ const Register = ({ navigation }: { navigation: any }) => {
         navigation.setOptions({
             header: () => <CustomBlurredHeader />
         });
-    },[navigation])
+    }, [navigation])
 
     const CustomBlurredHeader = () => {
         return (
@@ -90,9 +120,21 @@ const Register = ({ navigation }: { navigation: any }) => {
                         <View style={styles.textboxContainer}>
                             <Icon style={styles.iconInput} name='email' size={30} />
                             <TextInput style={styles.textInput} placeholder='Nhập email ở đây'
-                                onChangeText={(email) => setEmail(email)} />
+                                onChangeText={(email) => {
+                                    setEmailMessage('')
+                                    setEmail(email)
+                                }} />
                         </View>
                     </View>
+                    {
+                        emailMessage ? (
+                            <View style={styles.warningContainer}>
+                                <Icon name='alert' size={20} color={'red'} />
+                                <Text style={styles.warningText}>{emailMessage}</Text>
+                            </View>
+                        ) :
+                            (<View></View>)
+                    }
 
                     <View style={styles.inputContainer}>
                         <Text style={styles.label}>Password</Text>
@@ -110,13 +152,17 @@ const Register = ({ navigation }: { navigation: any }) => {
                         </View>
                     </View>
                     <View style={styles.warningContainer}>
-                        <Icon name='alert' size={20} />
+                        {!validPassword ? (<Icon name='alert' size={20} />) : (<Icon name='check' size={20} />)}
                         <Text style={styles.warningText}>Phải dài 6-18 ký tự</Text>
                     </View>
 
                     <View style={styles.btnContainer}>
-                        <TouchableOpacity onPress={handleRegister} style={styles.btnNext} disabled={!isTouchableEnabled}>
-                            <Text>Đăng ký</Text>
+                        <TouchableOpacity onPress={handleRegister} style={[
+                            styles.btnRegister,
+                            isTouchableEnabled ? null : styles.btnLoginDisabled,
+                        ]} disabled={!isTouchableEnabled}>
+                            <Text style={[
+                                styles.registerText, isTouchableEnabled ? { color: 'white' } : null]}>Đăng ký</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -151,7 +197,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     content: {
-        flex:1,
+        flex: 1,
         width: '100%',
         height: '100%',
         marginTop: 10,
@@ -214,13 +260,23 @@ const styles = StyleSheet.create({
         width: '90%',
         height: 50,
         margin: 15
-    }, btnNext: {
+    }, btnRegister: {
         width: '100%',
         height: '100%',
         borderWidth: 1, borderColor: 'black',
         borderRadius: 10,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: '#4285f4',
+    },
+    registerText: {
+        color: 'gray',
+        fontSize: 17,
+        fontWeight: '700'
+    },
+    btnLoginDisabled: {
+        backgroundColor: '#b5b5b5',
+        color: '#FFFFFF'
     }, passwordShowContainer: {
         height: '100%',
         justifyContent: 'center',
@@ -228,6 +284,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
         flex: 1,
     },
+
 
     //header:
     customHeader: {

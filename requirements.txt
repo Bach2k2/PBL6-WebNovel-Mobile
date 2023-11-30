@@ -21,3 +21,19 @@ react-native-reanimated , react-native-gesture-handler to support
 Picker :@react-native-picker/picker
 
 @react-native-community/blur
+
+for upload chapter
+react-native-html-to-pdf
+react-native-pell-rich-editor
+
+selectbox for multiselect
+//npm install react-native-picker-checkbox --save --> Not used
+// react-native-multiple-select
+
+ npm install react-native-dropdown-select-list
+
+ //add the box of editor:
+ react-native-pell-rich-editor
+ // html to pdf:
+ npm i react-native-html-to-pdf
+

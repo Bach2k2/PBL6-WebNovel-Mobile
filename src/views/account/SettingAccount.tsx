@@ -4,8 +4,9 @@ import { User } from '../../models/User';
 import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-const SettingAccount = () => {
-    const navigation = useNavigation()
+// import { signOut } from '../../auth/handleAuth';
+const SettingAccount = ({ navigation }: any) => {
+    // const navigation = useNavigation()
 
     const [user, setUserData] = useState<User | null>(null);
     const { getUserData } = useContext(AuthContext);
@@ -24,10 +25,12 @@ const SettingAccount = () => {
         <View style={styles.container}>
             {
                 user ? (<Button title='Đăng xuất' onPress={() => {
-                    // const logout =asyn
+
                     authContext.logout();
+                    // signOut({authContext});
+
                     navigation.navigate('Account')
-                }}></Button>):(<Button title='Đăng nhập' onPress={() => {
+                }}></Button>) : (<Button title='Đăng nhập' onPress={() => {
                     // const logout =asyn
                     // authContext.logout();
                     navigation.navigate('Login')

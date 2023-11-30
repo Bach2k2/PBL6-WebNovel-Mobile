@@ -82,14 +82,14 @@ const NovelDetail = ({ navigation, route }: any) => {
 
     function handleReadingBtnPress(): void {
         console.log('reading');
-        navigation.navigate('ChapterDetail', { chapterId: chapter[0].id });
+        navigation.navigate('ChapterDetail', { chapterId: chapter[0].id , novel: novel});
     }
     function handleAddingBtnPress(): void {
         console.log('function not implemented');
     }
     function handleNavigateToChapterList() {
         console.log("Navigate to chapter list")
-        navigation.navigate('ChapterList', { NovelId: novel?.id });
+        navigation.navigate('ChapterList', { novel: novel });
     }
 
     // Recommend System

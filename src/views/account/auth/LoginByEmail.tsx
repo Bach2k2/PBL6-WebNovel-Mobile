@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Dimensions, View, Keyboard } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import LoginApi from '../../../hook/LoginApi';
+import { LoginApi } from '../../../hook/LoginApi';
 import { AuthContext } from '../../../context/AuthContext';
 import { AxiosContext } from '../../../context/AxiosContext';
 import * as Keychain from 'react-native-keychain';

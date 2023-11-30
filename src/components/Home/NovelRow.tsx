@@ -13,15 +13,11 @@ export default function NovelRow({ novelData }: { novelData: Novel[] }) {
         const fetchData = async () => {
             // await new Promise(resolve => setTimeout(resolve, 1000));
             setNovels(novelData);
-            console.log('Fetching data');
             if (novelData.length > 0) {
-                console.log("Fetch novel in novel grid haha successful");
                 setLoading(false);
             } else {
-                console.log("No data here");
                 setLoading(true);
             }
-
         };
         fetchData();
     }, [novelData]);
@@ -41,7 +37,7 @@ export default function NovelRow({ novelData }: { novelData: Novel[] }) {
             <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
                 {novelData.map((item, index) => (
                     <TouchableOpacity key={index} onPress={() => {
-                        navigation.navigate('NovelDetail', { novelId: item.id,title: item.name });
+                        navigation.navigate('NovelDetail', { novelId: item.id, title: item.name });
                     }}>
                         <View key={index}>
                             {item.imagesURL ? (<Image source={{ uri: item.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />) :

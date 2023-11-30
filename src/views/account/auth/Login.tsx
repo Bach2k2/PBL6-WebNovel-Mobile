@@ -1,26 +1,36 @@
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Button, Dimensions, View } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { BlurView } from '@react-native-community/blur';
-GoogleSignin.configure(
-    {
-        //scopes: ['email'], // what API you want to access on behalf of the user, default is email and profile
-        // webClientId: '953071676402-ok21i770o5754ovmce51e9sgch5la9di.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
-        webClientId: '1022621922641-e7tpkjpkbaiu2fl2j7lsv67umjvv6mug.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
-        offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
-        // hostedDomain: '', // specifies a hosted domain restriction
-        //forceCodeForRefreshToken: true, // [Android] related to `serverAuthCode`, read the docs link below *.
-        //accountName: 'letrongbach02@gmail.com', // [Android] specifies an account name on the device that should be used
-    }
-);
+import { LoginWithGoogleApi } from '../../../hook/LoginApi';
+import { handleAuth } from '../../../auth/handleAuth';
+import Toast from 'react-native-toast-message';
+import { useContext } from 'react'
+import { AuthContext } from '../../../context/AuthContext';
+import handleLoginByGG from '../../../auth/handleLoginByGG';
+import { LoadingAnimation } from '../../../components/Loading/LoadingAnimation';
+
+// GoogleSignin.configure(
+//     {
+//         //scopes: ['email'], // what API you want to access on behalf of the user, default is email and profile
+//         //webClientId: '953071676402-ok21i770o5754ovmce51e9sgch5la9di.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+//         webClientId: '1022621922641-e7tpkjpkbaiu2fl2j7lsv67umjvv6mug.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+//         offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+//         // hostedDomain: '', // specifies a hosted domain restriction
+//         //forceCodeForRefreshToken: true, // [Android] related to `serverAuthCode`, read the docs link below *.
+//         //accountName: 'letrongbach02@gmail.com', // [Android] specifies an account name on the device that should be used
+//     }
+// );
 
 const heigthWindow = Dimensions.get('window').height;
 const widthWindow = Dimensions.get('window').width;
 
 const Login = ({ navigation }: { navigation: any }) => {
 
+    const [loading, setLoading] = useState(false);
+    const authContext = useContext(AuthContext);
     // Making the blur headers.
     useEffect(() => {
         navigation.setOptions({
@@ -44,41 +54,54 @@ const Login = ({ navigation }: { navigation: any }) => {
     };
     const handleLoginByEmail = () => {
         navigation.navigate('LoginByEmail');
-        console.log('handleLoginByEmail');
     }
-    // const setupSocial =async ()=> {
-    //     GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
-    //     GoogleSignin.configure({
-    //         webClientId: '922650223041-5ngaleu67dg66prv8njel5e7atmdmtae.apps.googleusercontent.com',
-    //         // iosClientId: Config.IOS_CLIENT_ID,
-    //         offlineAccess: true,
-    //     })
-    // }
-    const googleLogin = async () => {
-        console.log('googleLogin');
-        try {
-            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            const userInfo = await GoogleSignin.signIn();
-            console.log("google signin ", { userInfo });
 
-        } catch (error: any) {
-            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                console.log("signin cancelled");
-                // user cancelled the login flow
-            } else if (error.code === statusCodes.IN_PROGRESS) {
-                console.log("signin in progress");
-                // operation (e.g. sign in) is in progress already
-            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                // play services not available or outdated
-                console.log("signin google play services not enabled or outdated");
-            } else {
-                // some other error happened
-                console.log("signin error", error);
-            }
+    const loginByGG = async () => {
+        try {
+            const userData = handleLoginByGG(authContext)
+            setTimeout(() => {
+                setLoading(true);
+                navigation.navigate('Account');
+            }, 5000);
+            //setLoading(false);
+        } catch (error) {
+            // Toast.show("ERROR");
         }
 
     }
 
+
+    // const googleLogin = async () => {
+    //     try {
+    //         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    //         const userInfo = await GoogleSignin.signIn();
+    //         const response = await LoginWithGoogleApi(userInfo);
+    //         const userData = await handleAuth({ authContext, response });
+    //         Toast.show({
+    //             type: 'success',
+    //             text1: 'Login Notification!',
+    //             text2: 'Login successfully👋'
+    //         });
+    //         // await GoogleSignin.signOut();
+    //         navigation.navigate('Account', userData);
+
+    //     } catch (error: any) {
+    //         if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+    //             console.log("signin cancelled");
+    //             // user cancelled the login flow
+    //         } else if (error.code === statusCodes.IN_PROGRESS) {
+    //             console.log("signin in progress");
+    //             // operation (e.g. sign in) is in progress already
+    //         } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+    //             // play services not available or outdated
+    //             console.log("signin google play services not enabled or outdated");
+    //         } else {
+    //             // some other error happened
+    //             console.log("signin error", error);
+    //         }
+    //     }
+
+    // }
 
     return (
         <ImageBackground style={styles.container} source={require('../../../assets/background/background1.jpg')}>
@@ -90,7 +113,7 @@ const Login = ({ navigation }: { navigation: any }) => {
 
                 {/* Google and Facebook buttons */}
                 <View style={styles.socialButtonsContainer}>
-                    <TouchableOpacity onPress={() => { googleLogin() }} style={styles.googleBtn}>
+                    <TouchableOpacity onPress={() => { loginByGG() }} style={styles.googleBtn}>
                         <View style={styles.socialButtonContent}>
                             <Image style={styles.googleBtnImage} source={require('../../../assets/logo/google.png')} />
                             <Text style={styles.googleText}>Login with Google</Text>
@@ -126,7 +149,13 @@ const Login = ({ navigation }: { navigation: any }) => {
                 }}>
                     <Text style={styles.createAccountText}>Create an account</Text>
                 </TouchableOpacity>
+                {loading && (
+                    <View style={styles.loadingContainer}>
+                        <LoadingAnimation />
+                    </View>
+                )}
             </SafeAreaView >
+
         </ImageBackground>
     );
 }
@@ -135,7 +164,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',   
+        justifyContent: 'center',
     },
     safeAreaView: {
         flex: 1,
@@ -143,18 +172,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: '100%',
         width: '100%',
-        marginBottom:25,
+        marginBottom: 25,
     },
     logoContainer: {
-        flex:0.5,
+        flex: 0.5,
         width: '100%',
         height: '20%',
         justifyContent: 'center',
         alignItems: 'center',
-        alignContent:'center',
+        alignContent: 'center',
     },
     logo: {
-       // alignSelf:'center',
+        // alignSelf:'center',
         width: 250,
         height: 250,
     },
@@ -173,7 +202,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: 'white',
-       // justifyContent: 'center',
+        // justifyContent: 'center',
         color: 'black'
     },
     socialButtonContent: {
@@ -281,6 +310,19 @@ const styles = StyleSheet.create({
         margin: 20,
         marginRight: 16,
         zIndex: 100,
+    },
+
+    //Loading
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1, // Đảm bảo nó ở trên cùng
     },
 });
 export default Login;

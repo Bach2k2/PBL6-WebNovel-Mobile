@@ -19,15 +19,11 @@ const NovelGrid = ({ novelData }: any) => {
             // await new Promise(resolve => setTimeout(resolve, 1000));
             setNovels(novelData);
             setDisplayedNovels(novelData.slice(0, visibleNovelWeekly));
-            console.log('Fetching data');
             if (novelData.length > 0) {
-                console.log("Fetch novel in novel grid haha successful");
                 setLoading(false);
             } else {
-                console.log("No data here");
                 setLoading(true);
             }
-
         };
         fetchData();
     }, [novelData]);

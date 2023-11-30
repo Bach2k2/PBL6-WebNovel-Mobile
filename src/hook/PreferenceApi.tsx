@@ -1,10 +1,12 @@
 import axios from "axios";
 import { axiosInstance } from './AxiosInstance.js'
+import {View, StyleSheet, ToastAndroid, Button, StatusBar} from 'react-native';
 import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 import { User } from "../models/User.js";
+// import Toast from "react-native-toast-message";
 const getPreferenceData = async (user: User, accessToken: any) => {
-    console.log("user", user.id);
+
     const axiosConfig = {
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -20,9 +22,7 @@ const getPreferenceData = async (user: User, accessToken: any) => {
 };
 
 export const postPreferenceData = async (userId: any, novelId: any, accessToken: any) => {
-    console.log("userId", userId);
-    console.log("novelId: ", novelId);
-    console.log("access toekn: ", accessToken);
+ 
     const axiosConfig = {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -34,11 +34,10 @@ export const postPreferenceData = async (userId: any, novelId: any, accessToken:
     };
     try {
         const response = await axiosInstance.post('preferences/', postData, axiosConfig);
-        console.log(JSON.stringify(response))
         return response.data;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to post post preferences data");
+        ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
     }
 };
 

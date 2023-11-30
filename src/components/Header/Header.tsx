@@ -5,30 +5,28 @@ import Icon from 'react-native-vector-icons/MaterialIcons'
 const Header = () => {
     const navigation = useNavigation();
     return (
-        <View>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={
-                    ()=>{ navigation.navigate('Welcome')}
-                }>
-                    <Image source={require('../../assets/img/TTQBA.png')} style={styles.logo} />
-                </TouchableOpacity>
 
-                <View style={styles.searchContainer}>
+        <View style={styles.header}>
+            <TouchableOpacity onPress={
+                () => { navigation.navigate('Welcome') }
+            }>
+                <Image source={require('../../assets/img/TTQBA.png')} style={styles.logo} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.searchContainer} onPress={
+                () => { navigation.navigate('Search') }
+            }>
+                <View style={styles.searchInnerContainer}>
                     <Icon name="search" size={24} color="black" />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Tác giả/ Tác phẩm"
-                        placeholderTextColor="gray"
-                    />
+                    <Text style={styles.searchInput}>Search for novels</Text>
                 </View>
-                <TouchableOpacity style={styles.settingButton}>
-                    <Icon name="settings" size={24} color="black"></Icon>
-                </TouchableOpacity>
-            </View>
-            {/* <View style={{ marginLeft: 20 }}>
-                <Text>Novels</Text>
-            </View> */}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.settingButton}>
+                <Icon name="settings" size={24} color="black"></Icon>
+            </TouchableOpacity>
         </View>
+
     );
 }
 
@@ -50,20 +48,30 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     searchContainer: {
+        flex: 1,
         flexDirection: 'row',
+        // justifyContent:'center',
         alignItems: 'center',
-        width: '70%',
+        alignContent: 'center',
         borderWidth: 1,
         borderColor: 'gray',
         borderRadius: 50,
-        padding: 5
+        padding: 15,
+        marginLeft: 10,
+    },
+    searchInnerContainer:{
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     searchInput: {
         flex: 1,
-        marginLeft: 5
+        marginLeft: 5,
+        textAlignVertical: 'center',
     },
     settingButton: {
-        width: '15%',
+        width: 40,
+        // flex:1,
+        right: 0,
         alignItems: 'center',
     }
 });

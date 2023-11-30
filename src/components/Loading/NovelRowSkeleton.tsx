@@ -5,12 +5,9 @@ import {
 import { Novel } from '../../models/Novel';
 import Skeleton from './Skeleton';
 // Phần để recommend truyện
-var { width } = Dimensions.get("window");
+const width = Math.floor(Dimensions.get("window").width);
 const NovelRowSkeleton = () => {
-    useEffect(() => {
-        console.log(width)
-        width = Math.floor(width)
-    })
+
     return (
         <View style={styles.gridContainer}>
             <View style={{
@@ -43,7 +40,7 @@ const styles = StyleSheet.create({
 
     },
     container: {
-        flex: 1,
+        // flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 10,

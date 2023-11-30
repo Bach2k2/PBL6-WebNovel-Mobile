@@ -1,5 +1,5 @@
 export interface Novel {
-    id: number,
+    id: string,
     name: string,
     title: string,
     author: string,
@@ -13,7 +13,8 @@ export interface Novel {
     approvalStatus: boolean,
     tags: Array<string>,
     genres: Array<string>
-    genreIds: Array<number>
+    genreIds: Array<string>
     genreName: Array<string>
-    numChapter: number
+    numChapter: number,
+    isExistLib:boolean
 }

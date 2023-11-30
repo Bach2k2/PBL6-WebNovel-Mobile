@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { axiosInstance } from './AxiosInstance';
 
-const LoginApi = async (email:any, password:any) => {
+export const LoginApi = async (email:any, password:any) => {
     try {
         const response = await axios.post('https://webnovelapi.azurewebsites.net/api/auth/login', {
             username: email,
@@ -31,5 +31,32 @@ const LoginApi = async (email:any, password:any) => {
         throw new Error('Failed to Login');
     }
 };
+export const LoginWithGoogleApi = async (userInfo: any) => {
+    try {
+        const user = userInfo.user
+        console.log('here', user);
+        console.log(userInfo.idToken);
 
-export default LoginApi;
+        const formData = new FormData();
+        formData.append('Name', user.name);
+        formData.append('Email', user.email);
+        formData.append('Picture', user.photo);
+        formData.append('EmailVeriFied', true);
+        const response = await axios.post('https://webnovelapi.azurewebsites.net/google',
+            formData
+            , {
+                headers: {
+                    'Accept': '*',
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${userInfo.idToken}`
+                }
+            });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        // Chuyển sang trang 500
+        throw new Error('Failed to Login');
+    }
+};
+
+// export default LoginApi;

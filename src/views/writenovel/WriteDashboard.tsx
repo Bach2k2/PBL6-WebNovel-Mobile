@@ -3,9 +3,10 @@ import { View, Text, StyleSheet, Button, TouchableOpacity } from 'react-native'
 // import Animated from 'react-native-reanimated';
 // import BottomSheet from 'reanimated-bottom-sheet';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import BottomSheet from '../../components/BottomSheet/BottomSheet';
+
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
 function WriteDashboard() {
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const { authState } = useContext(AuthContext);
@@ -17,54 +18,54 @@ function WriteDashboard() {
 
   const handleNavigate = () => {
     if (authState.authenticated) {
-        console.log("You are authenticated");
-        navigation.navigate('CreateNovel');
+      console.log("You are authenticated");
+      navigation.navigate('CreateNovel');
 
-    }else{
+    } else {
       toggleBottomSheet();
     }
   }
 
-  if(authState)
-  return (
-    <>
-      <View style={styles.container}>
-        <Text numberOfLines={1} style={styles.title}>Bắt đầu viết</Text>
-        <View style={styles.boxNovelContainer}>
-          <TouchableOpacity onPress={handleNavigate}>
-            <View style={styles.box}>
-              <View style={styles.iconContainer}>
-                <Icon name={'book'} size={30} />
+  if (authState)
+    return (
+      <>
+        <View style={styles.container}>
+          <Text numberOfLines={1} style={styles.title}>Become a writer</Text>
+          <View style={styles.boxNovelContainer}>
+            <TouchableOpacity onPress={handleNavigate}>
+              <View style={styles.box}>
+                <View style={styles.iconContainer}>
+                  <Icon name={'book'} size={30} />
+                </View>
+                <View >
+                  <Text style={styles.headerText}>Make a new book</Text>
+                </View>
+                <View>
+                  <Text style={styles.bodyText}>I'm ready with my book information(title, cover, genre,description,etc.)</Text>
+                </View>
               </View>
-              <View >
-                <Text style={styles.headerText}>Làm một cuốn sách mới</Text>
-              </View>
-              <View>
-                <Text style={styles.bodyText}>Tôi đã sẵn sàng với thông tin sách của mình(tên sách, bìa, thể loại, tóm tắt, v.v)</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-        </View>
-        <View style={styles.boxChapterContainer}>
-          <TouchableOpacity onPress={handleNavigate}>
-            <View style={styles.box}>
-              <View style={styles.iconContainer}>
-                <Icon name={'newspaper-variant-outline'} size={30} />
+          </View>
+          <View style={styles.boxChapterContainer}>
+            <TouchableOpacity onPress={handleNavigate}>
+              <View style={styles.box}>
+                <View style={styles.iconContainer}>
+                  <Icon name={'newspaper-variant-outline'} size={30} />
+                </View>
+                <View >
+                  <Text style={styles.headerText}>Go write chapters first </Text>
+                </View>
+                <View>
+                  <Text style={styles.bodyText}>Book information can be edited later</Text>
+                </View>
               </View>
-              <View >
-                <Text style={styles.headerText}>Đi viết chương mới</Text>
-              </View>
-              <View>
-                <Text style={styles.bodyText}>Thông tin sách có thể chỉnh sửa sau</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
+            </TouchableOpacity>
+          </View>
 
-        <BottomSheet isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
-      </View>
-      {/* <Button
+          <SignInBottomSheet isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
+        </View>
+        {/* <Button
           title="Open Bottom Sheet"
           onPress={() => sheetRef.current.snapTo(0)}
         />
@@ -74,9 +75,9 @@ function WriteDashboard() {
         borderRadius={10}
         renderContent={renderContent}
       /> */}
-    </>
+      </>
 
-  );
+    );
 }
 
 export default WriteDashboard;

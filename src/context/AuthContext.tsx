@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode"
 import { JwtPayload } from "jwt-decode"
 // const AuthContext = createContext('AuthContext');
 import { User } from '../models/User';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 const AuthContext = createContext({
   authState: {
     accessToken: null,
@@ -39,6 +40,8 @@ const AuthProvider = ({ children }: any) => {
       authenticated: false,
       userData: null,
     });
+    if (await GoogleSignin.isSignedIn() === true)
+      await GoogleSignin.signOut();
   };
 
   const getAccessToken = () => {
@@ -53,7 +56,7 @@ const AuthProvider = ({ children }: any) => {
     }));
   };
 
-  const getUserData = ():any => {
+  const getUserData = (): any => {
     return authState.userData;
   };
 

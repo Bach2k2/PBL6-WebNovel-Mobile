@@ -4,26 +4,36 @@ import { Chapter } from "../../models/Chapter";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { getChaptersByNovelId } from "../../hook/ChapterApi";
 import { useNavigation } from "@react-navigation/native";
-const ChapterList = ({ route }: any) => {
+import { ActivityIndicator } from "react-native-paper";
+const ChapterList = ({ navigation, route }: any) => {
+    const [loading, setLoading] = useState(true);
     const [chapterList, setChapterList] = useState<Chapter[]>([]);
-    const { NovelId } = route.params;
-    const navigation = useNavigation();
+    const { novel } = route.params;
+    // const navigation = useNavigation();
+    useEffect(()=>{
+        setTimeout(()=>{
+            setLoading(false);
+        },2000)
+    })
     useEffect(() => {
-        console.log(NovelId)
         const fetchChapter = async () => {
-            const data = await getChaptersByNovelId(NovelId);
+            const data = await getChaptersByNovelId(novel.id);
             setChapterList(data);
-
         }
         fetchChapter();
-    }, [NovelId]);
-    
+    }, [novel]);
+
+    if(loading){
+        return(
+            <ActivityIndicator/>
+        )
+    }
     return (
         <View style={styles.container}>
             <ScrollView>
                 {chapterList.map((chapter, index) => (
-                    <TouchableOpacity key={index} onPress={()=>{
-                        navigation.navigate('ChapterDetail', {chapterId: chapter.id});
+                    <TouchableOpacity key={index} onPress={() => {
+                        navigation.navigate('ChapterDetail', { chapterId: chapter.id, novel: novel,title: chapter.name });
                     }}>
                         <View style={styles.row}>
                             <Text style={styles.chapIndex}>{chapter.chapIndex}</Text>
@@ -43,20 +53,25 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
+        backgroundColor:'#FFFFFF'
     },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
+        padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: 'lightgray',
     },
     chapIndex: {
         marginRight: 20,
+        fontSize:15,
+        color:'#333'
     },
     chapterName: {
         flex: 1,
         marginLeft: 20,
+        fontSize:15,
+        color:'#333',    
     },
     lockIcon: {
         alignSelf: 'flex-end',

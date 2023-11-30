@@ -10,7 +10,6 @@ export const getNovelData = async () => {
     }
 };
 export const getNovelById = async (novelId: any) => {
-    console.log('param: ', novelId);
     try {
         const response = await axiosInstance.get(`/novel/${novelId}`);
         return response.data;
@@ -21,7 +20,6 @@ export const getNovelById = async (novelId: any) => {
 }
 
 export const getNovelByGenre = async (genreId: any) => {
-    console.log('param: ', genreId);
     try {
         const response = await axiosInstance.get(`/novel/GenreId=${genreId}`);
         return response.data;
@@ -32,7 +30,6 @@ export const getNovelByGenre = async (genreId: any) => {
 }
 
 export const getNovelByAccount = async (accountId: any) => {
-    console.log('param: ', accountId);
     try {
         const response = await axiosInstance.get(`/novel/AccountId=${accountId}`);
         return response.data;
@@ -44,7 +41,6 @@ export const getNovelByAccount = async (accountId: any) => {
 
 export const createNovel = async (novel: any, accessToken: any) => {
     const formData = new FormData();
-    console.log('param: ', accessToken);
     formData.append('Name', novel.Name);
     formData.append('Title', novel.Title);
     formData.append('AccountId', novel.AccountId);
@@ -58,7 +54,7 @@ export const createNovel = async (novel: any, accessToken: any) => {
     const axiosConfig = {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': " multipart/form-data",
+            'Content-Type': "multipart/form-data",
             'Accept': '*',
         },
     };
@@ -72,5 +68,15 @@ export const createNovel = async (novel: any, accessToken: any) => {
     }
 }
 // export default { getNovelData, getNovelById };
+
+export const searchNovelByKey = async (key:any) => {
+    try {
+        const response = await axiosInstance.get(`/novel?Key=${key}`);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch novel data");
+    }
+};
 
 

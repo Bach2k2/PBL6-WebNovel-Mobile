@@ -1,12 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button, TouchableOpacity, Image, ScrollView } from 'react-native'
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import BottomSheet from '../../components/BottomSheet/BottomSheet';
+import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
 import { AuthContext } from '../../context/AuthContext';
 import { Novel } from '../../models/Novel';
 import { getNovelByAccount } from '../../hook/NovelApi';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import WriteDashboard from './WriteDashboard';
 function WriteStorage({ navigation }: any) {
 
@@ -23,14 +23,34 @@ function WriteStorage({ navigation }: any) {
 
         setNovelByUser(data);
         setLoading(false);
-        console.log("userLength", userNovel)
+        console.log("userLength", userNovel.length)
       })
     }
     if (user) {
-      console.log("run fetch novel by account");
+      console.log("run fetch novel by account", user.id);
       fetchNovelByAccount();
     }
-  }, [user]);
+  }, [, user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchNovelByAccount = async () => {
+        await getNovelByAccount(user.id).then((data) => {
+
+          setNovelByUser(data);
+          setLoading(false);
+          console.log("userLength", userNovel.length)
+        })
+      }
+      if (user) {
+        fetchNovelByAccount();
+      }
+
+      return () => {
+        // Cleanup or clear any subscriptions if needed
+      };
+    }, [, user])
+  );
   const handleCreateBtnPress = () => {
     navigation.navigate("CreateNovel");
   }
@@ -41,22 +61,30 @@ function WriteStorage({ navigation }: any) {
   return (
     <>
       <View>
-        <Text style={styles.title}>Danh sách truyện của tôi</Text>
+        <Text style={styles.title}>My list of novels</Text>
       </View>
       <ScrollView>
         <View style={styles.container}>
           {userNovel.map((novel, index) => (
             <TouchableOpacity style={styles.novelBorder} key={index} onPress={() => {
               console.log('Press to novel detail');
-              navigation.navigate('UserNovelDetail', { novelId: novel.id , title: novel.name});
+              navigation.navigate('UserNovelDetail', { novel: novel, title: novel.name });
             }}>
               <View style={styles.novelContainer}>
                 <Image source={{ uri: novel.imagesURL }} alt='image' style={styles.novelImage} />
                 <View style={styles.novelContent}>
-                  {novel.status ? (<Text numberOfLines={1}>Còn tiếp - {novel.numChapter}</Text>) : (<Text numberOfLines={1}>Kết thúc - {novel.numChapter}</Text>)}
+                  {novel.numChapter === 0 ? (
+                    <Text numberOfLines={1}>New - {novel.numChapter}</Text>
+                  ) : (
+                    novel.status ? (
+                      <Text numberOfLines={1}>Serializing - {novel.numChapter}</Text>
+                    ) : (
+                      <Text numberOfLines={1}>Complete - {novel.numChapter}</Text>
+                    )
+                  )}
                   <Text numberOfLines={1} style={styles.novelTitle}>{novel.name}</Text>
                   <View>
-                    <Text style={styles.smallBtn}>Viết</Text>
+                    <Text style={styles.smallBtn}>Write</Text>
                   </View>
                 </View>
               </View>
@@ -67,9 +95,8 @@ function WriteStorage({ navigation }: any) {
         </View>
       </ScrollView>
       <View style={styles.buttonContainer}>
-
         <TouchableOpacity style={styles.createButton} onPress={() => handleCreateBtnPress()}>
-          <Text>Tạo truyện mới</Text>
+          <Text>Create new novel</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -91,7 +118,7 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'left',
     margin: 5,
-    marginLeft:10,
+    marginLeft: 10,
     alignSelf: 'flex-start'
   },
   row: {
@@ -102,10 +129,10 @@ const styles = StyleSheet.create({
   novelBorder: {
     borderWidth: 1,
     borderColor: '#EBEBEB',
-    backgroundColor:'#FFFFFF',
+    backgroundColor: '#FFFFFF',
     width: '98%',
-    borderRadius:10,
-    marginBottom:5,
+    borderRadius: 10,
+    marginBottom: 5,
 
   },
   novelContainer: {
@@ -119,7 +146,7 @@ const styles = StyleSheet.create({
     width: '95%',
   },
   novelContent: {
-    marginLeft:10,
+    marginLeft: 10,
     flexDirection: 'column',
     width: '70%',
   },

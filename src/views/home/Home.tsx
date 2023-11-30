@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons'
+import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator, Dimensions, ToastAndroid } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation } from '@react-navigation/native';
 
 
@@ -12,8 +12,15 @@ import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
 import Skeleton from '../../components/Loading/Skeleton';
 import { AuthContext } from '../../context/AuthContext';
-import { postPreferenceData } from '../../hook/PreferenceApi';
+import getPreferenceData, { postPreferenceData } from '../../hook/PreferenceApi';
+import NovelGridSkeleton from '../../components/Loading/NovelGridSkeleton';
+import NovelRowSkeleton from '../../components/Loading/NovelRowSkeleton';
+import { Preference } from '../../models/Preference';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 function HotNovels() {
+  const width = Dimensions.get("window").width;
   const navigation = useNavigation();
   // const [novels, setNovels] = useState<Novel[]>([]);
   const [novels, setNovels] = useState(Array<Novel>());
@@ -25,13 +32,11 @@ function HotNovels() {
         setLoading(false); // Đã tải xong dữ liệu
       }).catch((err) => {
         setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
-        console.error(err);
+        // console.error("Có lỗi kết nối xảy ra, vui lòng kiểm tra đường truyền");
       })
     }
     fetchData();
   }, []);
-
-  // const { data: novels, isLoading, error } = useFetch("novel")
 
   const [headerSticky, setHeaderSticky] = useState(false);
 
@@ -44,52 +49,50 @@ function HotNovels() {
     }
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', padding: 10, backgroundColor: '#FFFFFF', height: 50 }}>
+          <Skeleton width={70} height={20} style={{ marginLeft: 10 }} />
+          <Skeleton width={70} height={20} style={{ marginLeft: 10 }} />
+          <Skeleton width={70} height={20} style={{ marginLeft: 10 }} />
+          <Skeleton width={70} height={20} style={{ marginLeft: 10 }} />
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+          <NovelGridSkeleton />
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10, height: 50, backgroundColor: '#fff' }}>
+          <NovelRowSkeleton />
+          <Skeleton width={width * 0.95} height={100} style={{ borderRadius: 10, marginBottom: 10 }} />
+        </View>
+      </SafeAreaView>
+    );
+  }
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Header />
-      {novels ? (
-        <ScrollView>
-          <ScrollView onScroll={handleScroll}>
-            {/* <RmdNovel></RmdNovel> */}
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
-              <NovelGrid novelData={novels} />
+    <SafeAreaView style={{ flex: 1 }} >
+      {
+        novels ? (
+          <><Header />
+            <ScrollView>
+              <ScrollView onScroll={handleScroll}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                  <NovelGrid novelData={novels} />
+                </View>
+              </ScrollView>
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                <NovelRow novelData={novels} />
+              </View>
+              <NovelsList navigation={navigation}></NovelsList>
+            </ScrollView>
+          </>
+        ) :
+          (
+            <View>
+              <ActivityIndicator></ActivityIndicator>
             </View>
-          </ScrollView>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
-            <NovelRow novelData={novels} />
-            {/* <ImageRow novelData={novels} /> */}
-          </View>
-          <NovelsList navigation={navigation}></NovelsList>
-        </ScrollView>
-      ) :
-        (<ActivityIndicator></ActivityIndicator>)}
-    </SafeAreaView>
-  );
-}
-
-
-function ImageRow({ novelData }: { novelData: Novel[] }) {
-  return (
-    <>
-      <View style={{
-        backgroundColor: 'lightblue',
-        padding: 12,
-      }}>
-        <Text style={{ color: "black", fontSize: 24, }}>From your Reading Preference</Text>
-      </View>
-
-      <ScrollView horizontal={true} contentContainerStyle={styles.imageRow}>
-        {novelData.map((item, index) => (
-          <View key={index}>
-            {item.imagesURL ? (<Image source={{ uri: item.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />) :
-              (<Image source={require('../../assets/img/waiting_img.jpg')} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.prefer_image} />)}
-            <View style={styles.textContainer}>
-              <Text numberOfLines={2} style={styles.text_imgrow}>{item.name}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </>
+          )
+      }
+    </SafeAreaView >
   );
 }
 
@@ -101,34 +104,109 @@ function NovelsList({ navigation }: any) {
   const { getUserData } = useContext(AuthContext);
   const authState = useContext(AuthContext);
   const user = getUserData();
+  const [preferList, setPreferList] = useState<Preference[]>([]);
 
-  const handleAddToLib = async (novelId: any) => {
-    console.log('add novel into lib',novelId)
+  const handleAddToLib = async (novel: Novel) => {
+    console.log('add novel into lib', novel.id);
+
     if (user) {
-      await postPreferenceData(user.id, novelId, authState.getAccessToken()).then((response) => {
+      if (
+        preferList &&
+        preferList.some(item => item.novelId === novel.id && item.accountId === user.id)
+      ) {
+        novel.isExistLib = true;
+        console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
+      } else {
+        novel.isExistLib = false;
+        console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
+      }
+      await postPreferenceData(user.id, novel.id, authState.getAccessToken()).then((response) => {
         console.log(response)
 
       }).catch((err) => {
-        console.log(err)
+        ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
       })
     } else {
-      console.log('chua dang nhap');
+      const newPreferList = {
+        novelId: novel.id,
+        accountId: '',
+        name: novel.name,
+        title: novel.title,
+        author: novel.author,
+        year: novel.year,
+        views: novel.views,
+        rating: novel.rating,
+        imagesURL: novel.imagesURL,
+        genreName: novel.genreName,
+        genreIds: novel.genreIds,
+        description: novel.description,
+        status: novel.status,
+        approvalStatus: novel.approvalStatus,
+        numChapter: novel.numChapter
+      };
+      if (
+        preferList &&
+        preferList.some(item => item.novelId === novel.id)
+      ) {
+        novel.isExistLib = true;
+        console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
+      } else {
+        novel.isExistLib = false;
+        console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
+      }
+
+      // Lưu danh sách mới vào AsyncStorage
+      try {
+        setPreferList([...preferList, newPreferList]);
+        await AsyncStorage.setItem('preferList', JSON.stringify(preferList));
+        // console.log('Danh sách đã lưu vào AsyncStorage:', newPreferList);
+        // setPreferList([...preferList, newPreferList]);
+      } catch (error) {
+        ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
+        // console.error('Lỗi khi lưu danh sách vào AsyncStorage:', error);
+      }
+      // console.log('chua dang nhap');
     }
   }
 
   useEffect(() => {
-    const fetchData = async () => {
+    const clearAsyncStorage = async () => {
+      try {
+        await AsyncStorage.clear();
+        console.log('AsyncStorage cleared successfully.');
+      } catch (error) {
+        console.error('Error clearing AsyncStorage:', error);
+      }
+    };
+
+    // Gọi hàm để xóa tất cả dữ liệu
+    clearAsyncStorage();
+  },[])
+
+  useEffect(() => {
+    const fetchNovelData = async () => {
       await getNovelData().then((data) => {
-        console.log('I fire two')
         setNovels(data);
         setLoading(false);
       }).catch((err) => {
         console.error(err);
       })
     }
-    fetchData();
+    fetchNovelData();
   }, []);
 
+  // get preference data
+  useEffect(() => {
+    if (user) {
+      const fetchPreferenceData = async () => {
+        await getPreferenceData(user, authState.getAccessToken()).then((data) => {
+          setPreferList(data)
+        }).catch((err) => { console.error('Something went wrong with preference list'); });
+      }
+      fetchPreferenceData();
+    }
+  }, [user]);
+  // render 
   if (loading) {
     return (
       <Skeleton height={30} width={500} style={{ borderRadius: 5, marginBottom: 5 }} />
@@ -144,7 +222,6 @@ function NovelsList({ navigation }: any) {
       {novels.map((novel, index) => (
         <View key={index}>
           <TouchableOpacity style={styles.novelContainer} onPress={() => {
-            console.log('Press to novel details' + novel.id);
             navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.name });
           }}>
             <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
@@ -152,10 +229,17 @@ function NovelsList({ navigation }: any) {
               <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
               <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
               <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
-              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.join()} . <Icon name='description' size={16} color="gray" />{novel.views}</Text>
+              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.join()} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
             </View>
+            <TouchableOpacity onPress={() => {
+              handleAddToLib(novel)
+              novel.isExistLib = !novel.isExistLib;
+            }}>
+              {novel.isExistLib ?
+                (<Icon name='check' size={24} color="black" />) :
+                (<Icon name='plus-box' size={24} color="black" />)}
 
-            <Icon.Button name='add-box' size={24} color="black" backgroundColor="transparent" onPress={()=> handleAddToLib(novel.id)} />
+            </TouchableOpacity>
           </TouchableOpacity>
         </View>
       ))}
@@ -169,7 +253,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 7,
     width: '95%',
-
   },
   header: {
     // position: 'sticky', 
@@ -278,5 +361,9 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
 
+
+  containerSkeleton: {
+
+  },
 });
 export default HotNovels;

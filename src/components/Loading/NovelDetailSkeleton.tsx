@@ -6,7 +6,6 @@ import {
 import { LinearGradient } from 'react-native-linear-gradient';
 
 const windowWidth = Math.floor(Dimensions.get('window').width);
-// const [windowHeight, setWindowHeight] = useState(0);
 
 const NovelDetailSkeleton = () => {
     return (

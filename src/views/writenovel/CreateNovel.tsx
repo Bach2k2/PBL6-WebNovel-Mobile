@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, Image, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, Image, TouchableOpacity, StyleSheet, Platform, ScrollView, SafeAreaView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Genre } from '../../models/Genre';
 
@@ -11,25 +11,34 @@ import { createNovel } from '../../hook/NovelApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorProps, RootStackParamList } from '../../models/NavigationModel';
+import { MultipleSelectList } from 'react-native-dropdown-select-list'
+// import PickerCheckBox from 'react-native-picker-checkbox';
 // import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
 
 // type NovelDetailProps = AppNavigatorProps<'CreateNovel'>;
-
+type genreType = {
+  'key': string,
+  'value': string
+}
 const CreateNovel = ({ route, navigation }: any) => {
   const [image, setImage] = useState('');
   const [preview, setPreview] = useState(null);
   const [description, setDescription] = useState('');
   const [author, setAuthor] = useState('');
-  const [genreList, setGenreList] = useState<Genre[]>([]);
-  const [genreSelect, setGenreSelect] = useState<Genre>();
+  const [genreList, setGenreList] = useState<genreType[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
   const [disableCreateBtn, setDisableCreateBtn] = useState(true);
+
+  const handleConfirm = (pItems: any) => {
+    console.log('pItems =>', pItems);
+  }
 
   const [postNovel, setPostNovel] = useState({
     Name: '',
     Title: '',
     Description: '',
     AccountId: '',
-    GenresId: 1,
+    GenresId: [1],
     File: null,
   });
 
@@ -38,6 +47,7 @@ const CreateNovel = ({ route, navigation }: any) => {
   // const navigation = useNavigation<AppNavigatorProps<'CreateNovel'>>();
 
   const { colors } = useTheme();
+  const user = getUserData();
 
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const toggleBottomSheet = () => {
@@ -71,7 +81,13 @@ const CreateNovel = ({ route, navigation }: any) => {
       toggleBottomSheet();
     });
   }
-
+  // const toggleGenreSelection = (genreId: any) => {
+  //   if (selectedGenres.includes(genreId)) {
+  //     setSelectedGenres(selectedGenres.filter((id) => id !== genreId));
+  //   } else {
+  //     setSelectedGenres([...selectedGenres, genreId]);
+  //   }
+  // };
   const renderInner = (
     <View style={styles.panel}>
       <View style={{ alignItems: 'center' }}>
@@ -98,20 +114,25 @@ const CreateNovel = ({ route, navigation }: any) => {
   useEffect(() => {
     const fetchGenreData = async () => {
       getGenreData().then((data) => {
-        setGenreList(data);
-        // console.log('here ' + genreList)
+        console.log(data)
+        var temp: { key: string; value: string }[] = data.map((d: Genre) => ({
+          key: d.id,
+          value: d.name,
+        }));
+
+        setGenreList(temp);
+        console.log('here ' + genreList)
       }).catch((err) => {
         throw err;
       });
     }
     fetchGenreData();
   }, []);
-
   useEffect(() => {
-
-  });
-
-
+    if (user) {
+      setPostNovel({ ...postNovel, AccountId: user?.id });
+    }
+  },[]);
 
   const onChangeName = (text: any) => {
     // setPostNovel({ ...postNovel, Name: text });
@@ -137,13 +158,6 @@ const CreateNovel = ({ route, navigation }: any) => {
     setPostNovel({ ...postNovel, File: selectedImage.path });
   };
 
-  const onChangeGenreValue = (value: any) => {
-    setGenreSelect(value);
-    setPostNovel({ ...postNovel, GenresId: value });
-    // setPostNovel({ ...postNovel, Author: text });
-  };
-
-
   const ImagePickerBS = ({ isVisible, onClose }: any) => {
 
     return (
@@ -165,10 +179,10 @@ const CreateNovel = ({ route, navigation }: any) => {
   };
 
   const handleCreate = () => {
-    const user = getUserData();
+
     // console.log(user.id);
     if (user) {
-      setPostNovel({ ...postNovel, AccountId: user?.id });
+      // setPostNovel({ ...postNovel, AccountId: user?.id });
       console.log(postNovel.Name);
       console.log(postNovel.Title)
       console.log(postNovel.Description)
@@ -189,7 +203,7 @@ const CreateNovel = ({ route, navigation }: any) => {
             // Handle error
           });
       }
-    }else{
+    } else {
       console.log("Can't find user");
     }
 
@@ -198,48 +212,48 @@ const CreateNovel = ({ route, navigation }: any) => {
 
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => toggleBottomSheet()} style={styles.imageContainer}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <Image source={require('../../assets/img/waiting_img.jpg')} style={styles.image} />
-        )}
-      </TouchableOpacity>
-      <View style={styles.inputContainer}>
-        <Text>Tên truyện</Text>
-        <TextInput style={styles.inputField} placeholder='Nhập tên truyện' onChangeText={onChangeName} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text>Mô tả</Text>
-        <TextInput style={styles.inputField} value={description} onChangeText={onChangeDescription} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text>Tác giả</Text>
-        <TextInput style={styles.inputField} value={author} onChangeText={onChangeAuthor} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Text>Thể loại</Text>
-        <View style={styles.inputField}>
-          <Picker
-            selectedValue={genreSelect}
-            onValueChange={onChangeGenreValue}
-          >
-            {/* <ScrollView style={styles.selectBox}> */}
-            {genreList.map((item, index) => (
-              <Picker.Item key={index} label={item.name} value={item.id} />
-            ))}
-            {/* </ScrollView> */}
-
-          </Picker>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <TouchableOpacity onPress={() => toggleBottomSheet()} style={styles.imageContainer}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <Image source={require('../../assets/img/waiting_img.jpg')} style={styles.image} />
+          )}
+        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <Text>Book title</Text>
+          <TextInput style={styles.inputField} placeholder='Enter book title' onChangeText={onChangeName} />
         </View>
+        <View style={styles.inputContainer}>
+          <Text>Genres</Text>
+          <MultipleSelectList
+            setSelected={(val: any) => setSelectedGenres(val)}
+            data={genreList}
+            //data={genreList.map((genre) => ({ label: genre.value, value: genre.key }))}
+            save="value"
+            onSelect={() => console.log('selected')}
+            label="Genres"
+          />
 
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleCreate} >
-        <Text style={styles.buttonText}>Đăng truyện</Text>
-      </TouchableOpacity>
-      <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
-    </View>
+        </View>
+        <View style={styles.inputContainer}>
+          <Text>Short Description</Text>
+          <TextInput
+            style={[styles.inputField, { height: 100, textAlignVertical: 'top' }]}
+            value={description}
+            onChangeText={onChangeDescription}
+            multiline={true}
+            numberOfLines={4}
+            placeholder='Tell us more about your novels...'
+          />
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleCreate} >
+          <Text style={styles.buttonText}>Publish</Text>
+        </TouchableOpacity>
+        <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
+      </ScrollView>
+    </SafeAreaView>
   );
 
 };

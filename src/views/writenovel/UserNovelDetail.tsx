@@ -1,101 +1,126 @@
-import { SafeAreaView, StyleSheet, Text, View, useWindowDimensions } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { SceneMap, TabView } from 'react-native-tab-view'
+import React, { useEffect, useState } from 'react';
+import {
+    Animated,
+    View,
+    TouchableOpacity,
+    StyleSheet,
+    StatusBar,
+    Button,
+} from 'react-native';
+import { TabView } from 'react-native-tab-view';
+import UserChaptersDetail from './UserChaptersDetail';
+import NovelInforSettings from './NovelInforSettings';
+import { Novel } from '../../models/Novel';
 
-import NovelSettings from './NovelSettings';
-//import UserChaptersDetail from './UserChaptersDetail';
-import { Chapter } from '../../models/Chapter';
-import { getChaptersByNovelId } from '../../hook/ChapterApi';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { CustomTabBar } from '../../components/TabView/CustomTabBar';
-
-const TabNav = createMaterialTopTabNavigator();
-
-const UserNovelDetail = ({ navigation, route }: any) => {
-
-    const { novelId } = route.params;
-    const [chapters, setChapters] = useState<Chapter[]>([])
-
-
-    useEffect(() => {
-        // console.log(novelId);
-        const fetchChaptersByNovelId = async () => {
-            const data = await getChaptersByNovelId(novelId)
-            setChapters(data);
-            console.log(chapters)
-        }
-        fetchChaptersByNovelId();
-    }, [novelId])
-
-    const UserChaptersDetail = () => {
-        return (
-            <View style={styles.container}>
-                {
-                    chapters.map((chapter, index) => (
-                        <View style={styles.chapterContainer}>
-                            <Text>{chapter.name}</Text>
-                        </View>
-                    ))
-                }
-            </View >
-        );
-
-    }
-
-    return (
-        <TabNav.Navigator
-            sceneContainerStyle={styles.sceneContainerStyle}
-            style={styles.tabNavStyle}
-            tabBar={CustomTabBar}
-        >
-            <TabNav.Screen
-                component={UserChaptersDetail}
-                name={'UserChapterLists'}
-                options={{ title: 'Danh sách chương' }}
-            />
-            <TabNav.Screen
-                component={NovelSettings}
-                name={'NovelSettings'}
-                options={{ title: 'Cài đặt truyện' }}
-            />
-        </TabNav.Navigator>
-    );
+interface UserNovelDetailProps {
+    novel: Novel;
 }
 
-export default UserNovelDetail
+interface Route {
+    key: string;
+    title: string;
+}
+
+const UserNovelDetail = ({ route, navigation }: any) => {
+
+
+    const [index, setIndex] = useState(0);
+    const { novel } = route.params
+
+    useEffect(() => {
+        navigation.setOptions({
+            title: novel.name,
+            headerRight: () => (
+                <Button
+                    onPress={() => {
+                        navigation.navigate('CreateChapter',{novel:novel})
+                    }}
+                    title="New Chapter"
+                />
+            ),
+        });
+    }, [navigation, novel]);
+    const [routes] = useState([
+        { key: 'first', title: 'Chapter Published' },
+        { key: 'second', title: 'Info Settings' },
+    ]);
+
+
+    const handleIndexChange = (newIndex: number) => setIndex(newIndex);
+
+    const renderTabBar = (props: any) => {
+        const inputRange = props.navigationState.routes.map(
+            (x: any, i: any) => i
+        );
+
+        return (
+            <View style={styles.tabBar}>
+                {props.navigationState.routes.map((route: Route, i: number) => {
+                    const opacity = props.position.interpolate({
+                        inputRange,
+                        outputRange: inputRange.map((inputIndex: number) =>
+                            inputIndex === i ? 1 : 0.5
+                        ),
+                    });
+                    const color = index === i ? 'black' : 'gray';
+
+                    return (
+                        <TouchableOpacity
+                            style={styles.tabItem}
+                            key={i}
+                            onPress={() => setIndex(i)}>
+                            <Animated.Text style={[{ opacity, color }, styles.tabText]}>
+                                {route.title}
+                            </Animated.Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        );
+    };
+
+    const renderScene = () => {
+        const currentRoute = routes[index];
+        switch (currentRoute.key) {
+            case 'first':
+                return <UserChaptersDetail novel={novel} />;
+            case 'second':
+                return <NovelInforSettings novel={novel} />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <TabView
+            navigationState={{ index, routes }}
+            renderScene={renderScene}
+            renderTabBar={renderTabBar}
+            onIndexChange={handleIndexChange}
+        />
+    );
+};
 
 const styles = StyleSheet.create({
-    tabNavStyle: {
-        minHeight: 500,
-    },
-    sceneContainerStyle: { backgroundColor: 'white' },
-
-    container: { flex: 1, alignSelf: 'center' },
-    chapterContainer:{
-
-    },
-
-    listTab: {
+    container: {
         flex: 1,
-        backgroundColor: '#fff',
-        flexDirection: 'row'
     },
-    btnTab: {
-
+    tabBar: {
         flexDirection: 'row',
-        borderWidth: 0.5,
-        borderColor: '#EBEBEB',
+        height: 50,
         justifyContent: 'center',
-        height: 70,
+        alignItems: 'center',
+        paddingBottom: 5,
+        // backgroundColor: 'red',
+        // marginBottom: 10,
     },
-    textTab: {
+    tabItem: {
+        paddingLeft: 16,
+    },
+    tabText: {
+        fontWeight: 'bold',
         fontSize: 16,
-        color: 'black'
     },
-    btnTabStatus: {
-        backgroundColor: '#E6838D',
-    },
-    textTabStatus: {
-        color: '#fff'
-    }
-})
+});
+
+export default UserNovelDetail;

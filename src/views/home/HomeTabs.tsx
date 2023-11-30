@@ -1,12 +1,12 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Reading from '../reading/Reading'
 import WriteDashboard from '../writenovel/WriteDashboard';
 import NovelStore from '../genres/NovelStore';
 import Account from '../account/Account'
 import HotNovels from './Home';
 import { useRoute } from '@react-navigation/native';
 import WriteStorage from '../writenovel/WriteStorage';
+import Reading from '../reading/Reading';
 
 const Tab = createBottomTabNavigator();
 function HomeTabs() {

@@ -1,8 +1,7 @@
-export interface Bookmarked {
+export interface LibraryNovel {
     novelId: string,
-    accountId:string,
-    chapterId: string,
-    chapterIndex: number,
+    accountId: string,
+    chapterId: string
     name: string
     title: string,
     author: string

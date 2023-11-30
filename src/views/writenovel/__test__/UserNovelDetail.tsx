@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, SafeAreaView, Dimensions, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import UserChaptersDetail from '../UserChaptersDetail'
-import NovelSettings from '../NovelSettings'
+import NovelInforSettings from '../NovelInforSettings'
 
 const listTab = [
     {
@@ -25,7 +25,7 @@ const renderScene = ({ route }: any) => {
             return <UserChaptersDetail />
             break;
         case 'novelInfor':
-            return <NovelSettings />
+            return <NovelInforSettings />
             break
     }
 }

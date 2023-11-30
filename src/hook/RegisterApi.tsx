@@ -1,16 +1,16 @@
 
 import axios from 'axios';
 import { axiosInstance } from './AxiosInstance';
+import { RandomString } from '../utils/RandomString';
 
 const RegisterApi = async (email: any, password: any) => {
     try {
-        console.log('hh',email,password);
         const response = await axios.post('https://webnovelapi.azurewebsites.net/api/accounts', {
             id:null,
-            username: 'Bach',
+            username: email,
             password: password,
             email: email,
-            nickName: 'Bach',
+            nickName: RandomString(10),
             confirmPassword: password,
             phone: '122222',
             walletAmmount: 0,

@@ -10,14 +10,6 @@ import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
 const AccountNavigator = createNativeStackNavigator();
 
-
-type ParamList = {
-    MainScreen: undefined;
-    Login: undefined
-    Register: undefined;
-};
-
-
 function Account() {
     const navigation = useNavigation();
 
@@ -145,7 +137,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                         </View>
 
                         <View style={styles.userContainer}>
-                            <TouchableOpacity onPress={()=>handleNavigate('EmailBox')}>
+                            <TouchableOpacity onPress={() => handleNavigate('EmailBox')}>
                                 <View style={styles.row4User}>
                                     <Icon style={styles.iconItem} name='email' size={30} />
                                     <Text style={styles.textItem} >Hộp thư đến</Text>

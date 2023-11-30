@@ -25,42 +25,54 @@ import Toast from 'react-native-toast-message'
 import MailBox from './views/account/MailBox';
 import UserNovelDetail from './views/writenovel/UserNovelDetail';
 import Welcome from './views/home/Welcome';
+import PreferenceEdit from './views/reading/PreferenceEdit';
+import BookmarkEdit from './views/reading/BookmarkEdit';
+import CreateChapter from './views/writenovel/Chapter/CreateChapter';
+import Search from './views/home/Search';
 const Stack = createNativeStackNavigator();
 function App() {
   return (
     <AuthProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName='Welcome'>
-          <Stack.Screen name='Welcome' component={Welcome} options={{headerShown:false}}/>
+          <Stack.Screen name='Welcome' component={Welcome} options={{ headerShown: false }} />
           <Stack.Screen name="Home" component={HomeTabs} options={{
             headerShown: false,
           }} />
-          <Stack.Screen name="NovelDetail" component={NovelDetail} options={({ route }: any) => ({ title: route.params.title })} />
-          <Stack.Screen name="ChapterList" component={ChapterList} />
-          <Stack.Screen name="ChapterDetail" component={ChapterDetail} />
-          <Stack.Screen name="CreateNovel" component={CreateNovel} />
-          <Stack.Screen name="UserNovelDetail" component={UserNovelDetail} options={
-            ({ route }: any) => ({
-              title: route.params.title,
-              headerRight: () => (
-                <Button
-                  onPress={() => {
-                    // Handle the button press (e.g., navigate to the screen for creating a chapter)
-                  }}
-                  title="Tạo chương"
-                />
-              ),
-            })
+          <Stack.Screen name="Search" component={Search} options={{
+            headerShown: true,
+          }} />
 
-          } />
+          <Stack.Screen name="NovelDetail" component={NovelDetail} options={({ route }: any) => ({ title: route.params.title })} />
+          <Stack.Screen name="ChapterList" component={ChapterList} options={({ route }: any) => ({ title: 'Nội dung', headerTitleAlign: 'center' })} />
+          <Stack.Screen name="ChapterDetail" component={ChapterDetail} options={({ route }: any) => ({ title: route.params.title })} />
+          <Stack.Screen name="CreateNovel" component={CreateNovel} options={({ route }: any) => ({ title: 'Add new novel', headerTitleAlign: 'center' })} />
+          <Stack.Screen name="UserNovelDetail" component={UserNovelDetail} />
+          {/* Chapter */}
+          <Stack.Screen name="CreateChapter" component={CreateChapter} />
+
+          {/* Account */}
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="CoinExchange" component={CoinExchange} />
+          <Stack.Screen name="CoinExchange" component={CoinExchange} options={({ route }: any) => ({ title: 'Top Up', headerTitleAlign: 'center' })} />
           <Stack.Screen name="LoginByEmail" component={LoginByEmail} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerTitle: 'Chỉnh sửa hồ sơ' }} />
           <Stack.Screen name="SettingAccount" component={SettingAccount} />
           <Stack.Screen name="EmailBox" component={MailBox} options={{ headerTitle: 'Hộp thư đến' }} />
+
+          <Stack.Screen name="PreferenceEdit" component={PreferenceEdit} options={
+            ({ route }: any) => ({
+              title: 'Edit library',
+              headerTitleAlign: 'center',
+            })
+          } />
+          <Stack.Screen name="BookmarkEdit" component={BookmarkEdit} options={
+            ({ route }: any) => ({
+              title: 'Edit history',
+              headerTitleAlign: 'center',
+            })
+          } />
         </Stack.Navigator>
         <Toast />
       </NavigationContainer>

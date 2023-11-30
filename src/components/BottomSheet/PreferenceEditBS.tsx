@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const BottomSheet = ({ isVisible, onClose }: any) => {
+const PreferenceEditBS= ({ isVisible, onClose }: any) => {
     const navigation = useNavigation();
-    const handleLoginByEmail = () => {
-        navigation.navigate('LoginByEmail');
-        console.log('handleLoginByEmail');
+    const handleEdit = () => {
+        navigation.navigate('PreferenceEdit');
     }
+    useEffect(() => {
+
+    })
     return (
         <Modal
             isVisible={isVisible}
@@ -18,53 +20,39 @@ const BottomSheet = ({ isVisible, onClose }: any) => {
             backdropOpacity={0.5}
         >
             <View style={styles.modalContent}>
-                <View style={styles.textContainer}>
-                    <Text style={styles.titleText}>Đăng nhập/ đăng ký để tiếp tục</Text>
-                    <Text style={styles.bodyText}>Đăng nhập để nhận các đặc quyền độc lặp: nhiệm vụ, phần thưởng và phần thưởng đăng ký hằng ngày</Text>
-                </View>
-
-                <View style={{ width: '100%', height: '20%', justifyContent: 'flex-start', alignItems: 'center' }}>
-                    <TouchableOpacity onPress={() => { }} style={styles.googleBtn}>
-                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
-                            <Text style={styles.googleText}>Login with Google</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { }} style={styles.facebookBtn}>
-                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <Icon name='facebook' size={30} color="white" style={styles.facebookIcon} />
-                            <Text style={styles.facebookText}>Login with Facebook</Text>
-                        </View>
-
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.roundButtonsContainer}>
-                    {/* Add your 4 round buttons here */}
-                    <TouchableOpacity style={styles.zaloRoundBtn}>
-                        <Image style={styles.roundButtonImage} source={require('../../assets/logo/zalo.png')} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.lineRoundBtn}>
-                        <Image style={styles.roundButtonImage} source={require('../../assets/logo/line.png')} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.twitterRoundBtn}>
-                        <Icon name='twitter' size={30} color="white" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.roundButton} onPress={handleLoginByEmail}>
-                        <Icon name='gmail' size={30} color="white" />
-                    </TouchableOpacity>
-                </View>
-                <TouchableOpacity style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} onPress={() => {
-                    navigation.navigate('Register');
-                }}>
-                    <Text style={styles.createAccountText}>Create an account</Text>
+                <TouchableOpacity onPress={handleEdit} style={styles.editContainer}>
+                    <Icon name='pencil' size={20} />
+                    <Text style={styles.bodyText}>Biên tập</Text>
                 </TouchableOpacity>
+
+                <View style={styles.rowContainer}>
+                    <TouchableOpacity onPress={() => {
+
+                    }} style={styles.selectItem}>
+                        <View style={styles.selectItemContent}>
+                            <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
+                            <Text style={styles.googleText}>Dạng lưới</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+
+                    }} style={styles.selectItem}>
+                        <View style={styles.selectItemContent}>
+                            <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
+                            <Text style={styles.googleText}>Dạng danh sách</Text>
+                        </View>
+
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity onPress={onClose}>
                     <Text style={styles.closeButton}>Close</Text>
                 </TouchableOpacity>
             </View>
         </Modal>
     );
-};
+}
+
+export default PreferenceEditBS
 
 const styles = StyleSheet.create({
     bottomModal: {
@@ -72,7 +60,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     modalContent: {
-        backgroundColor: 'white',
+        backgroundColor: '#EBEBEB',
         padding: 22,
         justifyContent: 'center',
         alignItems: 'center',
@@ -83,14 +71,41 @@ const styles = StyleSheet.create({
         marginTop: 10,
         color: 'blue',
         fontSize: 18,
-    }, textContainer: {
-        alignSelf: 'flex-start'
+    }, editContainer: {
+        width: '95%',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        marginBottom: 10,
+        paddingVertical: 10,
     }
     , titleText: {
         fontSize: 22,
         fontWeight: 'bold',
     }, bodyText: {
         fontSize: 18,
+    },
+    selectItem: {
+        borderRadius: 10,
+        backgroundColor: '#FFFFFF',
+        flex: 0.48,
+        height: 80,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        width: '100%',
+        marginVertical: 10,
+    },
+    selectItemContent: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     googleBtn: {
         // width: '70%',
@@ -134,7 +149,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     roundButtonsContainer: {
-        flex:1,
+        flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '70%',
@@ -186,5 +201,3 @@ const styles = StyleSheet.create({
         fontSize: 18,
     }
 });
-
-export default BottomSheet;

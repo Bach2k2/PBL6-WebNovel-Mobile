@@ -1,4 +1,4 @@
-export interface Preference{
+export interface Preference {
     "novelId": string,
     "accountId": string,
     "name": string,
@@ -8,10 +8,8 @@ export interface Preference{
     "views": number,
     "rating": number,
     "imagesURL": string,
-    "genreName": [  
-    ],
-    "genreIds": [
-    ],
+    "genreName": string[],
+    "genreIds": string[],
     "description": string,
     "status": boolean,
     "approvalStatus": boolean,

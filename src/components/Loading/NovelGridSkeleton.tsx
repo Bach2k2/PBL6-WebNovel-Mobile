@@ -7,9 +7,6 @@ import Skeleton from './Skeleton';
 // Phần để recommend truyện
 const widthWindow  = Math.floor(Dimensions.get("window").width);
 const NovelGridSkeleton = () => {
-    useEffect(()=>{
-        console.log(widthWindow);
-    })
     return (
         <View style={styles.gridContainer}>
             <View style={{

@@ -66,3 +66,7 @@ yarn-error.log
 /coverage
 
 credentials.json
+# Expo
+.expo
+dist/
+web-build/

@@ -3,7 +3,7 @@ import { Alert, Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, 
 import { PermissionsAndroid } from 'react-native';
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import { printToFileAsync } from 'expo-print';
+// import { printToFileAsync } from 'expo-print';
 import { Keyboard, KeyboardEvent } from 'react-native';
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../../context/AuthContext";

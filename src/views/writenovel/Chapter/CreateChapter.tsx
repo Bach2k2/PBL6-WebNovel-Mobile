@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions } from "react-native";
+import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, TouchableOpacity } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
@@ -8,12 +8,13 @@ import Toast from "react-native-toast-message";
 import { AuthContext } from "../../../context/AuthContext";
 import { postChapter } from "../../../hook/ChapterApi";
 import Pdf from "react-native-pdf";
+var RNFS = require('react-native-fs');
 const handleHead = ({ tintColor }: any) => <Text style={{ color: tintColor }}>H1</Text>;
 
 const CreateChapter = ({ route, navigation }: any) => {
     const { novel } = route.params
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+    const [chapterTitle, setChapterTitle] = useState("");
+    const [chapterContent, setChapterContent] = useState("");
     const headerText = useRef();
     const richText = useRef();
     const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -26,32 +27,33 @@ const CreateChapter = ({ route, navigation }: any) => {
 
     const handleCreateChapter = async () => {
         // const { htmlContent } = content;
-        console.log('Title', title, 'content', content)
+        console.log('Title', chapterTitle, 'content', chapterContent)
 
-        // if (title === '' || content === '') {
-        //     Toast.show({
-        //         type: 'error',
-        //         text1: 'Your title or content is missing',
-        //     });
-        //     return;
-        // }
+        if (chapterTitle === '' || chapterContent === '') {
+            Toast.show({
+                type: 'error',
+                text1: 'Your title or content is missing',
+            });
+            return;
+        }
 
         let options = {
-            //   html: `<html><body>${content}</body></html>`,
-            html: '<html><body><h1>HelloHowaboutyouhahahah?</h1></body></html>',
-            fileName: 'test',
-            directory: 'Document',
+            html: `<html><body>${chapterContent}</body></html>`,
+            // html: '<html><body><h1>Hello</h1><div><p>Hi</p></div></body></html>',
+            fileName: 'newChapter',
+            directory: 'Documents',
             base64: true,
         };
 
         try {
             const file = await RNHTMLtoPDF.convert(options);
             console.log(file);
-                    
-            if(file.filePath){
+            if (file.filePath) {
+                //  const pdfContent = await RNFS.readFile(file.filePath, 'base64');
+                // console.log(pdfContent);
                 // const fileBlob = await fetch(file.filePath).then(response => response.blob());//type network error
                 const data = {
-                    name: title,
+                    name: chapterTitle,
                     novelId: novel.id,
                     file: file,
                     accessToken: authState.accessToken,
@@ -60,20 +62,30 @@ const CreateChapter = ({ route, navigation }: any) => {
 
                 console.log(response);
             }
-            
-        
-           setPdfFilePath(file.filePath || null);        
+            // setPdfFilePath(file.filePath || null);
         } catch (error) {
             console.error('Error creating PDF:', error);
         }
     };
 
-    const handleSetHeader = async (header: string) => {
-        setTitle(header);
-    }
-    const handleSetContent = async (content: string) => {
-        setContent(content);
-    }
+    useEffect(() => {
+        console.log('Title updated:', chapterTitle);
+    }, [chapterTitle]);
+
+    useEffect(() => {
+        console.log('Content updated:', chapterContent);
+    }, [chapterContent]);
+    // useEffect(() => {
+    //     if (chapterTitle !== '' && chapterContent !== '') {
+    //         handleCreateChapter();
+    //     }
+    // }, [chapterTitle, chapterContent]);
+    // const handleSetHeader = async (header: string) => {
+    //     setChapterTitle(header);
+    // }
+    // const handleSetContent = async (content: string) => {
+    //     setChapterContent(content);
+    // }
 
     useEffect(() => {
         function onKeyboardDidShow(e: KeyboardEvent) {
@@ -88,7 +100,6 @@ const CreateChapter = ({ route, navigation }: any) => {
 
         const showSubscription = Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
         const hideSubscription = Keyboard.addListener('keyboardDidHide', onKeyboardDidHide);
-        console.log(keyboardHeight);
         return () => {
             showSubscription.remove();
             hideSubscription.remove();
@@ -100,12 +111,12 @@ const CreateChapter = ({ route, navigation }: any) => {
         navigation.setOptions({
             title: novel.name,
             headerRight: () => (
-                <Button
-                    onPress={() => {
-                        handleCreateChapter()
-                    }}
-                    title="Publish this chapter"
-                />
+                <TouchableOpacity onPress={() => {
+                    handleCreateChapter()
+                }} style={styles.button}>
+                    <Text style={styles.buttonText}>Publish</Text>
+                </TouchableOpacity>
+
             ),
         });
     }, [navigation, novel]);
@@ -125,35 +136,35 @@ const CreateChapter = ({ route, navigation }: any) => {
 
     return (
         <SafeAreaView style={{ backgroundColor: '#333' }}>
-            <ScrollView>
+            <ScrollView style={{ height: '100%' }}>
                 <KeyboardAvoidingView behavior={Platform.OS === "android" ? "padding" : "height"} style={styles.container}>
                     <TextInput
-                        placeholder="Nhập tiêu đề chương"
+                        placeholder="Type the title for chapter"
                         onChangeText={(header) => {
-                            console.log(header)
-                            setTitle(header);
-                            handleSetHeader(header)
+                            setChapterTitle(header);
+                            console.log('title', chapterTitle)
+                            // handleSetHeader(header)
                         }}
-                        value={title}
+                        value={chapterTitle}
                         ref={setHeaderTextRef}
                         style={styles.headerInput}
                     />
                     <RichEditor
-                        placeholder="Nhập văn bản chính ..."
+                        placeholder="Type your main story"
                         ref={setRichTextRef}
                         onChange={(descriptionText) => {
-                            console.log(descriptionText)
-                            setContent(descriptionText);
-                            handleSetContent(descriptionText);
+                            setChapterContent(descriptionText);
+                            console.log('content: ', chapterContent)
+                            // handleSetContent(descriptionText);
                         }}
-                        initialContentHTML={content}
+                        initialContentHTML={chapterContent}
                     />
-                    {pdfFilePath && (<Pdf
+                    {/* {pdfFilePath && (<Pdf
                         trustAllCerts={false}
-                        source={{ uri: pdfFilePath, cache: true }}
+                        source={{ uri: pdfFilePath }}
                         style={styles.pdf} />)
 
-                    }
+                    } */}
 
                 </KeyboardAvoidingView>
             </ScrollView>
@@ -162,7 +173,7 @@ const CreateChapter = ({ route, navigation }: any) => {
                 editor={richText}
                 actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.heading1, actions.keyboard, actions.undo, actions.redo]}
                 iconMap={{ [actions.heading1]: handleHead }}
-                style={[styles.toolbar]}
+                style={[styles.toolbar, !keyboardShow && { height: 50 }]}
             />
 
 
@@ -205,9 +216,20 @@ const styles = StyleSheet.create({
     },
     pdf: {
         // flex: 1,
+        backgroundColor: '#EBEBEB',
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
     },
+    button: {
+        borderRadius: 10,
+        backgroundColor: '#00a2ed',
+        padding: 10,
+    },
+    buttonText: {
+        fontSize: 15,
+        color: '#fff',
+        margin: 2
+    }
 });
 
 

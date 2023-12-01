@@ -29,6 +29,7 @@ import PreferenceEdit from './views/reading/PreferenceEdit';
 import BookmarkEdit from './views/reading/BookmarkEdit';
 import CreateChapter from './views/writenovel/Chapter/CreateChapter';
 import Search from './views/home/Search';
+import EditChapter from './views/writenovel/Chapter/EditChapter';
 const Stack = createNativeStackNavigator();
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           <Stack.Screen name="UserNovelDetail" component={UserNovelDetail} />
           {/* Chapter */}
           <Stack.Screen name="CreateChapter" component={CreateChapter} />
+          <Stack.Screen name="EditChapter" component={EditChapter} />
 
           {/* Account */}
           <Stack.Screen name="Login" component={Login} />

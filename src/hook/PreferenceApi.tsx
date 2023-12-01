@@ -17,7 +17,7 @@ const getPreferenceData = async (user: User, accessToken: any) => {
         return response.data;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to fetch bookmarked data");
+        throw new Error("Failed to fetch preferences data");
     }
 };
 

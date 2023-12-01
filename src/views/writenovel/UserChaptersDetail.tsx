@@ -1,11 +1,17 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Novel } from '../../models/Novel'
 import { getChaptersByNovelId } from '../../hook/ChapterApi';
 import { Chapter } from '../../models/Chapter';
+import { useNavigation } from '@react-navigation/native';
 
 const UserChaptersDetail = ({ novel }: { novel: Novel }) => {
   const [chapterList, setChapterList] = useState<Chapter[]>([]);
+  const navigation = useNavigation();
+  const handleClickChapter= (chapter:Chapter)=>{
+    console.log('handleClick');
+    navigation.navigate('EditChapter',{novel: novel,chapter: chapter});
+  }
   useEffect(() => {
     const fecthChapterByNovelId = async () => {
       try {
@@ -22,7 +28,11 @@ const UserChaptersDetail = ({ novel }: { novel: Novel }) => {
       <View style={styles.container}>
         {chapterList.map((chapter, index) => (
           <View style={styles.row} key={index}>
-            <Text>{chapter.name}</Text>
+            <TouchableOpacity onPress={()=>{handleClickChapter(chapter)}} style={{flexDirection:'row',alignItems:'center'}}>
+              <Text style={{ marginLeft: 10, fontSize: 16, }}>{index}</Text>
+              <Text style={styles.chapterName}>{chapter.name}</Text>
+            </TouchableOpacity>
+
           </View>
         ))}
       </View>
@@ -43,8 +53,19 @@ export default UserChaptersDetail
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
-  },row:{
-    
+    backgroundColor: '#EBEBEB',
+    justifyContent: 'flex-start',
+    // alignItems:'center'
+  }, row: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    width: '90%',
+    margin: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  }, chapterName: {
+    margin: 10,
+    fontSize: 16,
+    color: '#333',
   }
 })

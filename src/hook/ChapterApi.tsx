@@ -1,5 +1,6 @@
 import axios from "axios";
 import { axiosInstance } from './AxiosInstance.js'
+var RNFS = require('react-native-fs');
 export const getChaptersByNovelId = async (novelId: any) => {
 
     try {
@@ -36,12 +37,24 @@ export const postChapter = async (data: any) => {
         const formData = new FormData();
         formData.append('Name', data.name);
         formData.append('NovelId', data.novelId);
-        // formData.append('File', data.filePath);
+        // formData.append('File', {
+        //     uri: 'file://' + RNFS.DocumentDirectoryPath + '/newChapter.pdf',
+        //     name: 'newChapter.pdf',
+        //     type: 'application/pdf',
+        // });
+    
         formData.append('File', {
-            uri: data.file.filePath,
-            name: 'test.pdf',
+            uri: 'file://'+ data.file.filePath,
+            name: 'newChapter.pdf',
             type: 'application/pdf',
         });
+        // formData.append('File', {
+        //     // uri: data.file.filePath,
+        //     uri: RNFS.DocumentDirectoryPath+'/newChapter.pdf',
+        //     name: 'newChapter.pdf',
+        //     type: 'application/pdf',
+        //     data: data.file, // Append the PDF content
+        // });
         // formData.append('File',data.file);
         const response = await axios.post('https://webnovelapi.azurewebsites.net/api/chapter', formData, {
             headers: {
@@ -49,10 +62,10 @@ export const postChapter = async (data: any) => {
                 'Content-Type': "multipart/form-data",
                 // 'Accept': '*',
             },
-           // withCredentials: false, // Add this line
+            // withCredentials: false, // Add this line
         });
         return response.data;
-    } catch (error:any) {
+    } catch (error: any) {
         console.error("Error in postChapter:", error);
         // Log more details about the error
         if (error.response) {

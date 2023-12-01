@@ -1,9 +1,19 @@
 import axios from "axios";
 import { axiosInstance } from './AxiosInstance.js'
+import { Novel } from "../models/Novel.js";
 export const getNovelData = async () => {
     try {
         const response = await axiosInstance.get('/novel');
         return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch novel data");
+    }
+};
+export const getNovelDataExcept = async (novelId:string) => {
+    try {
+        const response = await axiosInstance.get('/novel');
+        return response.data.filter((novel:Novel)=>novel.id!==novelId);
     } catch (error) {
         console.error(error);
         throw new Error("Failed to fetch novel data");
@@ -23,6 +33,15 @@ export const getNovelByGenre = async (genreId: any) => {
     try {
         const response = await axiosInstance.get(`/novel/GenreId=${genreId}`);
         return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch novel data by genre");
+    }
+}
+export const getRelatedNovelByGenre = async (novelId:string,genreId: any) => {
+    try {
+        const response = await axiosInstance.get(`/novel/GenreId=${genreId}`);
+        return response.data.filter((novel:Novel)=>novel.id!==novelId);
     } catch (error) {
         console.error(error);
         throw new Error("Failed to fetch novel data by genre");

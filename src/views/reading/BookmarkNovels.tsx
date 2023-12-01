@@ -63,8 +63,9 @@ const BookmarkNovels = () => {
                             // console.log('hêllo', parsedData.length);
                         }
                     }
-                } catch (error) {
-                    console.error('Error fetching data:', error);
+                } catch (error:any) {
+                    console.error('Error fetching data:', error.message);
+                    console.error('Stack trace:', error.stack);
                 }
             };
             const getChapter = async () => {

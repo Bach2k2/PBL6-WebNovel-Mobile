@@ -25,15 +25,16 @@ const CreateChapter = ({ route, navigation }: any) => {
     var fileChapter = null;
     const { authState } = useContext(AuthContext)
 
+
+    useEffect(() => {
+        console.log('Title', chapterTitle, 'content', chapterContent);
+    }, [chapterTitle, chapterContent]);
     const handleCreateChapter = async () => {
         // const { htmlContent } = content;
         console.log('Title', chapterTitle, 'content', chapterContent)
 
-        if (chapterTitle === '' || chapterContent === '') {
-            Toast.show({
-                type: 'error',
-                text1: 'Your title or content is missing',
-            });
+        if (chapterTitle == "" || chapterContent == "") {
+            console.log("Thieu thong tin")
             return;
         }
 
@@ -59,33 +60,15 @@ const CreateChapter = ({ route, navigation }: any) => {
                     accessToken: authState.accessToken,
                 }
                 const response = await postChapter(data);
-
+                if (response.code == 200) {
+                    navigation.goBack();
+                }
                 console.log(response);
             }
-            // setPdfFilePath(file.filePath || null);
         } catch (error) {
             console.error('Error creating PDF:', error);
         }
     };
-
-    useEffect(() => {
-        console.log('Title updated:', chapterTitle);
-    }, [chapterTitle]);
-
-    useEffect(() => {
-        console.log('Content updated:', chapterContent);
-    }, [chapterContent]);
-    // useEffect(() => {
-    //     if (chapterTitle !== '' && chapterContent !== '') {
-    //         handleCreateChapter();
-    //     }
-    // }, [chapterTitle, chapterContent]);
-    // const handleSetHeader = async (header: string) => {
-    //     setChapterTitle(header);
-    // }
-    // const handleSetContent = async (content: string) => {
-    //     setChapterContent(content);
-    // }
 
     useEffect(() => {
         function onKeyboardDidShow(e: KeyboardEvent) {
@@ -116,10 +99,9 @@ const CreateChapter = ({ route, navigation }: any) => {
                 }} style={styles.button}>
                     <Text style={styles.buttonText}>Publish</Text>
                 </TouchableOpacity>
-
             ),
         });
-    }, [navigation, novel]);
+    });
 
 
     const setHeaderTextRef = (ref: any) => {
@@ -140,11 +122,9 @@ const CreateChapter = ({ route, navigation }: any) => {
                 <KeyboardAvoidingView behavior={Platform.OS === "android" ? "padding" : "height"} style={styles.container}>
                     <TextInput
                         placeholder="Type the title for chapter"
-                        onChangeText={(header) => {
-                            setChapterTitle(header);
-                            console.log('title', chapterTitle)
-                            // handleSetHeader(header)
-                        }}
+                        onChangeText={(header) =>
+                            setChapterTitle(header)
+                        }
                         value={chapterTitle}
                         ref={setHeaderTextRef}
                         style={styles.headerInput}
@@ -152,11 +132,9 @@ const CreateChapter = ({ route, navigation }: any) => {
                     <RichEditor
                         placeholder="Type your main story"
                         ref={setRichTextRef}
-                        onChange={(descriptionText) => {
-                            setChapterContent(descriptionText);
-                            console.log('content: ', chapterContent)
-                            // handleSetContent(descriptionText);
-                        }}
+                        onChange={(descriptionText) =>
+                            setChapterContent(descriptionText)
+                        }
                         initialContentHTML={chapterContent}
                     />
                     {/* {pdfFilePath && (<Pdf

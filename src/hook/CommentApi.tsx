@@ -9,3 +9,19 @@ export const getCommentFromNovelId = async (novelId: string) => {
         console.error(err);
     }
 }
+
+export const postCommentApi= async (data:any,accessToken:any) => {
+    try {
+        const axiosConfig = {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': "application/json",
+                'Accept': '*',
+            },
+        };
+        const response = await axiosInstance.post('/comments/',data,axiosConfig);
+        return response.data;
+    } catch (err) {
+        console.error(err);
+    }
+}

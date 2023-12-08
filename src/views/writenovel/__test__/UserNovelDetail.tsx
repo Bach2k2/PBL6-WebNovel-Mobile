@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, SafeAreaView, Dimensions, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useState } from 'react'
-import UserChaptersDetail from '../UserChaptersDetail'
+import UserChaptersDetail from '../Chapter/UserChaptersList'
 import NovelInforSettings from '../NovelInforSettings'
 
 const listTab = [

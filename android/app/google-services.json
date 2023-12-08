@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "964321595460",
+    "project_id": "pbl6-web",
+    "storage_bucket": "pbl6-web.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964321595460:android:9a2d8244ef8602542eac11",
+        "android_client_info": {
+          "package_name": "com.webnovelmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "964321595460-2gpin2j4nk4p8p9mfvu5nipjel23hg2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOGLk1OP827PWQ6yki_9NM5qdN2MZYg1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "964321595460-2gpin2j4nk4p8p9mfvu5nipjel23hg2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

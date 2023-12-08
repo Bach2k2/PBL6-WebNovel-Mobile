@@ -3,94 +3,102 @@ import React, { useContext, useState } from 'react';
 import { User } from '../../models/User';
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { ActivityIndicator } from 'react-native-paper';
 const Profile = ({ navigation }: any) => {
     const { getUserData } = useContext(AuthContext);
     const [like, setLike] = useState(false);
-    const user = {
-        email: "namtruong0900@gmail.com",
-        id: "dckfGkjWXEG7jy4u0zc_rg",
-        isAdmin: true,
-        nickName: "SkywoodNick",
-        phone: "0353670461",
-        refreshToken: "3ZzbRuZW8wj7GTdF7ASHY39Rq22+qTWPhhMV4pA2HGI=",
-        refreshTokenExpiryTime: "2023-11-15T08:11:45.884609",
-        roleIds: ["ADMIN", "DEV"],
-        status: 0,
-        username: "Skywood",
-    }
+    // const user = {
+    //     email: "namtruong0900@gmail.com",
+    //     id: "dckfGkjWXEG7jy4u0zc_rg",
+    //     isAdmin: true,
+    //     nickName: "SkywoodNick",
+    //     phone: "0353670461",
+    //     refreshToken: "3ZzbRuZW8wj7GTdF7ASHY39Rq22+qTWPhhMV4pA2HGI=",
+    //     refreshTokenExpiryTime: "2023-11-15T08:11:45.884609",
+    //     roleIds: ["ADMIN", "DEV"],
+    //     status: 0,
+    //     username: "Skywood",
+    // }
     const handleEditBtn = () => {
         navigation.navigate('EditProfile');
     }
 
-    const userData = getUserData();
-    return (
-        <View style={styles.container}>
-            <View style={styles.coverImgContainer}>
-                <ImageBackground style={styles.coverImg} source={{ uri: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/anh-bia-dep-10.jpg' }} />
-            </View>
-            <View style={styles.content}>
-                <View style={styles.row}>
-                    <View style={styles.avatar_container}>
-                        <Image style={styles.avatar} source={{ uri: 'https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3' }} />
-                        <Text style={styles.username}>{user.username}</Text>
-                        <Text style={styles.userid}>ID:{user.id}</Text>
-                    </View>
-                    <View style={styles.funcBtn}>
+    const user = getUserData();
+    if (user) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.coverImgContainer}>
+                    <ImageBackground style={styles.coverImg} source={{ uri: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/anh-bia-dep-10.jpg' }} />
+                </View>
+                <View style={styles.content}>
+                    <View style={styles.row}>
+                        <View style={styles.avatar_container}>
+                            <Image style={styles.avatar} source={{ uri: user.imagesURL }} />
+                            <Text numberOfLines={2} style={styles.username}>{user.username}</Text>
+                            <Text style={styles.userid}>ID:{user.id}</Text>
+                        </View>
+                        <View style={styles.funcBtn}>
 
-                        <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setLike(!like) }}>
-                            <View style={styles.likeBtn}>
-                                <Icon name='heart' style={styles.likeBtnIcon} />
+                            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setLike(!like) }}>
+                                <View style={styles.likeBtn}>
+                                    <Icon name='heart' style={styles.likeBtnIcon} />
+                                </View>
+                            </TouchableOpacity>
+
+
+                            <View style={styles.editBtn}>
+                                <TouchableOpacity onPress={() => { handleEditBtn() }}>
+                                    <Text style={styles.editBtnText}>Chỉnh sửa hồ sơ</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.row}>
+                        <TouchableOpacity onPress={() => { }}>
+                            <View style={{ marginTop: 5, flexDirection: 'row' }}>
+                                <Icon name='pencil' size={20} />
+                                <Text>Nói cho chúng tôi thêm về sở thích của bạn</Text>
                             </View>
                         </TouchableOpacity>
-
-
-                        <View style={styles.editBtn}>
-                            <TouchableOpacity onPress={() => { handleEditBtn()}}>
-                                <Text style={styles.editBtnText}>Chỉnh sửa hồ sơ</Text>
-                            </TouchableOpacity>
-                        </View>
                     </View>
-                </View>
-                <View style={styles.row}>
-                    <TouchableOpacity onPress={() => { }}>
+                    <View style={styles.lastRow}>
                         <View style={{ marginTop: 5, flexDirection: 'row' }}>
-                            <Icon name='pencil' size={20} />
-                            <Text>Nói cho chúng tôi thêm về sở thích của bạn</Text>
+                            <Icon name='calendar' size={20} />
+                            <Text>Đã tham gia vào 2023-11-07 </Text>
                         </View>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.lastRow}>
-                    <View style={{ marginTop: 5, flexDirection: 'row' }}>
-                        <Icon name='calendar' size={20} />
-                        <Text>Đã tham gia vào 2023-11-07 </Text>
-                    </View>
-                    <View style={{ marginTop: 5, flexDirection: 'row' }}>
-                        <Icon name='account-wrench' size={20} />
-                        <Text>Toàn cầu </Text>
+                        <View style={{ marginTop: 5, flexDirection: 'row' }}>
+                            <Icon name='account-wrench' size={20} />
+                            <Text>Toàn cầu </Text>
+                        </View>
                     </View>
                 </View>
+
+
+                {/* Add for cooler */}
+                <View style={styles.moreContent}>
+                    <View style={styles.inforBox}>
+                        <View style={styles.boxRow}>
+                            <View style={styles.column}>
+                                <Text>1h</Text>
+                                <Text>đang đọc</Text>
+                            </View>
+                            <View style={styles.column}>
+                                <Text>14</Text>
+                                <Text>Đọc sách</Text>
+                            </View>
+                        </View>
+
+                    </View>
+                </View>
+
             </View>
-
-
-            {/* Add for cooler */}
-            <View style={styles.moreContent}>
-                <View style={styles.inforBox}>
-                    <View style={styles.boxRow}>
-                        <View style={styles.column}>
-                            <Text>1h</Text>
-                            <Text>đang đọc</Text>
-                        </View>
-                        <View style={styles.column}>
-                            <Text>14</Text>
-                            <Text>Đọc sách</Text>
-                        </View>
-                    </View>
-
-                </View>
-            </View>
-
+        );
+    } else {
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size={"large"} color="#333" />
         </View>
-    );
+    }
+
 };
 
 export default Profile;

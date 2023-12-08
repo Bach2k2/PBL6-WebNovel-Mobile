@@ -65,6 +65,8 @@ const Login = ({ navigation }: { navigation: any }) => {
             }, 5000);
             //setLoading(false);
         } catch (error) {
+            if (await GoogleSignin.isSignedIn() === true)
+                await GoogleSignin.signOut();
             // Toast.show("ERROR");
         }
 

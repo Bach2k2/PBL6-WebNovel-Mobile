@@ -15,13 +15,6 @@ const Welcome = () => {
             navigation.navigate('Home');
         }, 4000);
     },);
-    // if (loading) {
-    //     return (
-    //         <SafeAreaView style={styles.container} >
-    //             <ActivityIndicator />
-    //         </SafeAreaView>
-    //     )
-    // }
     return (
         <SafeAreaView style={styles.container} >
             <ImageBackground style={styles.container} source={require('../../assets/background/bg_welcome.jpg')}>

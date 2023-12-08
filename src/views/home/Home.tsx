@@ -25,18 +25,30 @@ function HotNovels() {
   // const [novels, setNovels] = useState<Novel[]>([]);
   const [novels, setNovels] = useState(Array<Novel>());
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>()
+  const { getUserData } = useContext(AuthContext)
+
+  useEffect(() => {
+    setUser(getUserData());
+  }, [user])
+
   useEffect(() => {
     const fetchData = async () => {
-      await getNovelData().then((data) => { // thêm await sẽ tạo 
-        setNovels(data);
-        setLoading(false); // Đã tải xong dữ liệu
-      }).catch((err) => {
-        setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
-        // console.error("Có lỗi kết nối xảy ra, vui lòng kiểm tra đường truyền");
-      })
+      console.log("Call my api");
+      if (user) {
+
+      } else {
+        await getNovelData().then((data) => { // thêm await sẽ tạo 
+          setNovels(data);
+          setLoading(false); // Đã tải xong dữ liệu
+        }).catch((err) => {
+          setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
+          // console.error("Có lỗi kết nối xảy ra, vui lòng kiểm tra đường truyền");
+        })
+      }
     }
     fetchData();
-  }, []);
+  }, [,user]);
 
   const [headerSticky, setHeaderSticky] = useState(false);
 
@@ -169,19 +181,19 @@ function NovelsList({ navigation }: any) {
     }
   }
 
-  useEffect(() => {
-    const clearAsyncStorage = async () => {
-      try {
-        await AsyncStorage.clear();
-        console.log('AsyncStorage cleared successfully.');
-      } catch (error) {
-        console.error('Error clearing AsyncStorage:', error);
-      }
-    };
+  // useEffect(() => {
+  //   const clearAsyncStorage = async () => {
+  //     try {
+  //       await AsyncStorage.clear();
+  //       console.log('AsyncStorage cleared successfully.');
+  //     } catch (error) {
+  //       console.error('Error clearing AsyncStorage:', error);
+  //     }
+  //   };
 
-    // Gọi hàm để xóa tất cả dữ liệu
-    clearAsyncStorage();
-  },[])
+  //   // Gọi hàm để xóa tất cả dữ liệu
+  //   clearAsyncStorage();
+  // },[])
 
   useEffect(() => {
     const fetchNovelData = async () => {

@@ -5,8 +5,13 @@ export interface User {
     email?: string,
     roleName?: string[],
     nickName?: string,
-    status?: 0,
+    imagesURL: string,
+    birthday: Date,
+    walletAmmount: number,
+    // status?: 0,
     phone?: string,
     roleIds?: string[],
-    isAdmin?: boolean
+    isAdmin?: boolean,
+    isActive: boolean
+
 }

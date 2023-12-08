@@ -1,12 +1,13 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Novel } from '../../models/Novel'
-import { getChaptersByNovelId } from '../../hook/ChapterApi';
-import { Chapter } from '../../models/Chapter';
+import { Novel } from '../../../models/Novel'
+import { getChaptersByNovelId } from '../../../hook/ChapterApi';
+import { Chapter } from '../../../models/Chapter';
 import { useNavigation } from '@react-navigation/native';
 
 const UserChaptersDetail = ({ novel }: { novel: Novel }) => {
   const [chapterList, setChapterList] = useState<Chapter[]>([]);
+  const [loading,setLoading] = useState(true)
   const navigation = useNavigation();
   const handleClickChapter= (chapter:Chapter)=>{
     console.log('handleClick');
@@ -23,6 +24,8 @@ const UserChaptersDetail = ({ novel }: { novel: Novel }) => {
     }
     fecthChapterByNovelId()
   }, [novel])
+
+
   if (chapterList.length > 0) {
     return (
       <View style={styles.container}>
@@ -40,8 +43,8 @@ const UserChaptersDetail = ({ novel }: { novel: Novel }) => {
   }
   else {
     return (
-      <View style={styles.container}>
-        <Text>No chapter addeed</Text>
+      <View style={styles.empty_container}>
+        <Text style={{fontSize:20,color:'#333'}}>No chapter added</Text>
       </View>
     )
   }
@@ -56,7 +59,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEBEB',
     justifyContent: 'flex-start',
     // alignItems:'center'
-  }, row: {
+  },empty_container:{
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+   row: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     width: '90%',

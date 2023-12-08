@@ -3,7 +3,7 @@ import React, { useContext } from 'react'
 import { AuthContext } from '../context/AuthContext';
 import * as Keychain from 'react-native-keychain';
 import { jwtDecode } from 'jwt-decode';
-import AccountApi from '../hook/AccountApi';
+import GetAccountApi from '../hook/AccountApi';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export const handleAuth = async ({ authContext, response }: any) => {
@@ -38,7 +38,7 @@ export const handleAuth = async ({ authContext, response }: any) => {
     const userId = decoded.nameidentifier;
 
     console.log(userId);
-    const accountApi = AccountApi(authContext);
+    const accountApi = GetAccountApi(authContext);
     const userData = await accountApi(userId, accessToken);
     await authContext.setUserData(userData); // thành công, đã check
     return userData;

@@ -30,6 +30,7 @@ import BookmarkEdit from './views/reading/BookmarkEdit';
 import CreateChapter from './views/writenovel/Chapter/CreateChapter';
 import Search from './views/home/Search';
 import EditChapter from './views/writenovel/Chapter/EditChapter';
+import AddReview from './views/novelDetail/Rating/AddReview';
 const Stack = createNativeStackNavigator();
 function App() {
   return (
@@ -45,8 +46,12 @@ function App() {
           }} />
 
           <Stack.Screen name="NovelDetail" component={NovelDetail} options={({ route }: any) => ({ title: route.params.title })} />
-          <Stack.Screen name="ChapterList" component={ChapterList} options={({ route }: any) => ({ title: 'Nội dung', headerTitleAlign: 'center' })} />
+          <Stack.Screen name="ChapterList" component={ChapterList} options={({ route }: any) => ({ title: 'Content', headerTitleAlign: 'center' })} />
           <Stack.Screen name="ChapterDetail" component={ChapterDetail} options={({ route }: any) => ({ title: route.params.title })} />
+          {/* Rating  */}
+          <Stack.Screen name="AddReview" component={AddReview} options={({ route }: any) => ({ title: 'Add a review', headerTitleAlign: 'center' })} />
+          {/*  */}
+
           <Stack.Screen name="CreateNovel" component={CreateNovel} options={({ route }: any) => ({ title: 'Add new novel', headerTitleAlign: 'center' })} />
           <Stack.Screen name="UserNovelDetail" component={UserNovelDetail} />
           {/* Chapter */}
@@ -59,7 +64,7 @@ function App() {
           <Stack.Screen name="CoinExchange" component={CoinExchange} options={({ route }: any) => ({ title: 'Top Up', headerTitleAlign: 'center' })} />
           <Stack.Screen name="LoginByEmail" component={LoginByEmail} />
           <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerTitle: 'Chỉnh sửa hồ sơ' }} />
+          <Stack.Screen name="EditProfile" component={EditProfile}/>
           <Stack.Screen name="SettingAccount" component={SettingAccount} />
           <Stack.Screen name="EmailBox" component={MailBox} options={{ headerTitle: 'Hộp thư đến' }} />
 

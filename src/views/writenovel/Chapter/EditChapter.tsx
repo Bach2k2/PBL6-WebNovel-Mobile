@@ -8,6 +8,8 @@ import Toast from "react-native-toast-message";
 import { AuthContext } from "../../../context/AuthContext";
 import { postChapter } from "../../../hook/ChapterApi";
 import Pdf from "react-native-pdf";
+import { convertPdfToHtml } from "../../../hook/ConvertPdfToHtmlApi";
+import { ActivityIndicator } from "react-native-paper";
 var RNFS = require('react-native-fs');
 const handleHead = ({ tintColor }: any) => <Text style={{ color: tintColor }}>H1</Text>;
 
@@ -15,11 +17,13 @@ const EditChapter = ({ route, navigation }: any) => {
     const { novel, chapter } = route.params
     const [title, setTitle] = useState(`${chapter.name}`);
     const [content, setContent] = useState('');
+    const [htmlContent, setHtmlContent] = useState('');
     const headerText = useRef();
     const richText = useRef();
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [keyboardShow, setKeyBoardShow] = useState(false);
     const [pdfFilePath, setPdfFilePath] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     // const [fileChapter, setFileChapter] = useState(null);
     // const [fileChapter, setFileChapter] = useState<string | null>(null);
     var fileChapter = null;
@@ -33,9 +37,56 @@ const EditChapter = ({ route, navigation }: any) => {
     //     }
     //     getContent();
     // }, []);
+    useEffect(() => {
+        // Fetch HTML file
+        const fecthHTMLFromPdf = async () => {
+            const formData = new FormData();
+            formData.append('File', chapter.fileContent)
+            formData.append('StoreFile', true);
+            const resData = await convertPdfToHtml(formData);
+
+            // if(resData){
+            //     console.log(resData)
+            //     fetch(resData.Files.Url)
+            //     .then(response => response.text())
+            //     .then(data => {
+            //         // Update state with HTML content
+            //         setContent(data);
+            //         setHtmlContent(`<html><body style="fontSize:5">${data}</body></html>`)
+            //         console.log(data);
+            //     })
+            //     .catch(error => console.error('Error fetching HTML:', error));
+            // }
+            if (resData && resData.Files && resData.Files.length > 0) {
+                const firstFile = resData.Files[0];
+
+                if (firstFile && firstFile.Url) {
+                    const url = firstFile.Url;
+                    console.log('URL:', url);
+
+                    // Now you can fetch the content using the obtained URL
+                    fetch(url)
+                        .then(response => response.text())
+                        .then(data => {
+                            // Update state with HTML content
+                            setContent(data);
+                            setHtmlContent(`<html><body style="fontSize:5">${data}</body></html>`);
+                            setIsLoading(false);
+                            // console.log(data);
+                        })
+                        .catch(error => console.error('Error fetching HTML:', error));
+                } else {
+                    console.error('Error: No URL found in the response');
+                }
+            } else {
+                console.error('Error: No files found in the response');
+            }
+
+        }
+        fecthHTMLFromPdf();
+    }, []);
 
     const handleCreateChapter = async () => {
-        // const { htmlContent } = content;
         console.log('Title', title, 'content', content)
 
         if (title === '' || content === '') {
@@ -119,7 +170,7 @@ const EditChapter = ({ route, navigation }: any) => {
                 />
             ),
         });
-    }, [navigation, novel]);
+    }); //, [navigation, novel]
 
 
     const setHeaderTextRef = (ref: any) => {
@@ -133,6 +184,15 @@ const EditChapter = ({ route, navigation }: any) => {
             richText.current = ref;
         }
     };
+
+    if (isLoading) {
+        return (
+            <SafeAreaView>
+                <ActivityIndicator color="black" size={"large"} />
+            </SafeAreaView>
+        );
+
+    }
 
     return (
         <SafeAreaView style={{ backgroundColor: '#333' }}>
@@ -157,7 +217,8 @@ const EditChapter = ({ route, navigation }: any) => {
                             setContent(descriptionText);
                             handleSetContent(descriptionText);
                         }}
-                        initialContentHTML={content}
+                        // initialContentHTML={content}
+                        initialContentHTML={htmlContent}
                     />
                     {pdfFilePath && (<Pdf
                         trustAllCerts={false}

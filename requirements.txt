@@ -37,3 +37,7 @@ selectbox for multiselect
  // html to pdf:
  npm i react-native-html-to-pdf
 
+
+npm install @react-native-community/datetimepicker
+//
+npm i --save react-native-hyperlink

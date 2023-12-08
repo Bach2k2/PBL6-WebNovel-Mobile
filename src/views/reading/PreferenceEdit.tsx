@@ -3,7 +3,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
-import getPreferenceData from '../../hook/PreferenceApi';
+import getPreferenceData, { deletePreferenceApi } from '../../hook/PreferenceApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Preference } from '../../models/Preference';
 import { Checkbox } from 'react-native-paper';
@@ -24,7 +24,30 @@ const PreferenceEdit = ({ navigation }: any) => {
       [novelId]: !prevCheckedNovels[novelId],
     }));
   };
+  const handleSelectAll = () => {
+    preferenceData.map((preference) => {
+      handleCheckboxPress(preference.novelId);
+    })
+  }
+  const handleDeletePreference = async (novelId: string) => {
+    if (user) {
+      const res = await deletePreferenceApi(user.id, novelId, authState.accessToken);
+      console.log(res);
+    } else {
+      console.log("Chua dang nhap");
+      preferenceData.filter((preference) => preference.novelId !== novelId);
+      const parsedData = JSON.stringify(preferenceData);
+      await AsyncStorage.setItem('preferList', parsedData);
+      console.log("Da cap nhat")
+    }
 
+  }
+  const deletePreferences = () => {
+    console.log('delete')
+    Object.keys(checkedNovels).map((novelId) => {
+      handleDeletePreference(novelId);
+    })
+  }
   useEffect(() => {
     navigation.setOptions({
       header: () => <CustomEditHeader />,
@@ -101,9 +124,24 @@ const PreferenceEdit = ({ navigation }: any) => {
   };
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView style={{ height: '100%' }}>
         <View>{Array.from({ length: Math.ceil(preferenceData.length / 3) }, (_, i) => renderRow(i))}</View>
       </ScrollView>
+      <View style={styles.functionButtons}>
+        <TouchableOpacity style={styles.buttonSelect} onPress={() => {
+          handleSelectAll();
+        }}>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>Select All</Text>
+        </TouchableOpacity>
+        {/* <View>
+
+        </View> */}
+        <TouchableOpacity style={styles.buttonDelete} onPress={() => {
+          deletePreferences();
+        }} >
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600', textAlign: 'center' }}>Delete</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -132,6 +170,7 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     alignItems: 'stretch',
+    position: 'relative',
   },
   row: {
     flex: 1,
@@ -163,7 +202,32 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     zIndex: 1,
+  },
+  functionButtons: {
+    borderRadius: 10,
+    position: 'absolute',
+    bottom: 30,
+    marginBottom: 'auto',
+    flexDirection: 'row',
+    backgroundColor: '#23F4DC',
+    justifyContent: 'space-around',
+    // alignItems: 'center',
+    alignSelf: 'center',
+    width: '95%',
+    // padding: 10,
+  },
+  buttonSelect: {
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    textAlign: 'center',
+    width: '50%',
+  },
+  buttonDelete: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '50%',
+    borderLeftWidth: 1, borderColor: '#EBEBEB'
   }
-
-
-})
+});

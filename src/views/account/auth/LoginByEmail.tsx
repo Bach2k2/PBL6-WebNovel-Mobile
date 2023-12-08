@@ -7,7 +7,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { AxiosContext } from '../../../context/AxiosContext';
 import * as Keychain from 'react-native-keychain';
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import AccountApi from '../../../hook/AccountApi';
+import GetAccountApi from '../../../hook/AccountApi';
 import Toast from 'react-native-toast-message';
 // import jwt from 'jsonwebtoken';
 
@@ -118,7 +118,7 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
             const userId = decoded.nameidentifier;
 
             console.log(userId);
-            const accountApi = AccountApi(authContext);
+            const accountApi = GetAccountApi(authContext);
             const userData = await accountApi(userId, accessToken);
             await authContext.setUserData(userData); // thành công, đã check
             Toast.show({

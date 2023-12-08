@@ -1,12 +1,12 @@
-import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { TextInput } from 'react-native-paper'
 import { Novel } from '../../models/Novel';
 import { searchNovelByKey } from '../../hook/NovelApi';
 import { ActivityIndicator } from 'react-native';
-;
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
-const Search = () => {
+const Search = ({ navigation }: any) => {
     const [isLoading, setIsLoading] = useState(false);
     const [novelSearch, setNovelSearch] = useState<Novel[]>([])
     const [searchQuery, setSearchQuery] = useState("");
@@ -14,6 +14,15 @@ const Search = () => {
     // const updateSearch = (search: string) => {
     //     setSearch(search);
     // };
+    const handleAddToLib = () => {
+
+    }
+    useEffect(() => {
+        navigation.setOptions({
+            title: '',
+        });
+    });
+
     useEffect(() => {
         if (searchQuery == "") {
             setIsLoading(false);
@@ -46,14 +55,20 @@ const Search = () => {
     // }
     return (
         <View style={styles.container}>
-            <TextInput
-                style={styles.searchBar}
-                placeholder='Search for stories'
-                onChangeText={(searchQuery) => handleSearch(searchQuery)}
-                clearButtonMode='always'
-                autoCorrect={false}
-                value={searchQuery}
-            />
+            <View style={{ flexDirection: 'row', backgroundColor: '#fff', marginVertical: 10, width: '95%', borderRadius: 10, marginRight: 10, }}>
+                <View style={{ position: 'absolute', zIndex: 1, left: 15, top: 16 }}>
+                    <MaterialIcons name="search" size={24} color="black" />
+                </View>
+                <TextInput
+                    style={styles.searchBar}
+                    placeholder='Search for novels'
+                    onChangeText={(searchQuery) => handleSearch(searchQuery)}
+                    clearButtonMode='always'
+                    autoCorrect={false}
+                    value={searchQuery}
+                />
+            </View>
+
             {isLoading ? (
                 <View style={[styles.resultContainer, { justifyContent: 'center' }]}>
                     <ActivityIndicator size={'large'} color="#5500dc" />
@@ -62,9 +77,26 @@ const Search = () => {
                 <ScrollView style={styles.resultContainer}>
                     {novelSearch.length > 0 ? (
                         novelSearch.map((novel, index) => (
-                            <View key={index} style={styles.row}>
-                                <Text style={styles.normalText}>{novel.name}</Text>
-                            </View>
+                            <TouchableOpacity key={index} onPress={() => {
+                                navigation.navigate('NovelDetail',{novelId:novel.id})
+                            }}>
+                                <View style={styles.row}>
+                                    <View>
+                                        <Image source={{ uri: novel.imagesURL }} style={{ height: 100, width: 70 }} />
+                                    </View>
+                                    <View style={{ marginLeft: 10, justifyContent: 'center' }}>
+                                        <Text style={styles.headerText}>{novel.name}</Text>
+                                        <Text style={styles.normalText}>{novel.author}</Text>
+                                        <Text style={styles.normalText}>{novel.genreName[0]}</Text>
+                                    </View>
+
+                                    <View style={{ marginLeft: 'auto', right: 10, justifyContent: 'center' }}>
+                                        <Pressable onPress={() => { handleAddToLib() }}>
+                                            <MaterialIcons name='add-box' size={25} />
+                                        </Pressable>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
                         ))
                     ) : (
                         <View style={styles.row}>
@@ -85,7 +117,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         // width: '100%',
         alignItems: 'center',
-        justifyContent: 'center',
+        // justifyContent: 'center',
     },
     subContainer: {
         flex: 1,
@@ -98,6 +130,7 @@ const styles = StyleSheet.create({
         width: '95%',
         borderRadius: 10,
         backgroundColor: '#fff',
+        marginLeft: 30,
     },
     // textInput
     //result:
@@ -115,7 +148,14 @@ const styles = StyleSheet.create({
         flex: 1,
         margin: 10,
     },
+    headerText: {
+        color: '#333',
+        fontSize: 16,
+        textAlign: 'left',
+        fontWeight: '600'
+    },
     normalText: {
+        color: '#333',
         fontSize: 16,
         textAlign: 'left',
     }

@@ -4,7 +4,7 @@ import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const BookmarkEditBS= ({ isVisible, onClose }: any) => {
+const BookmarkEditBS = ({ isVisible, onClose }: any) => {
     const navigation = useNavigation();
     const handleEdit = () => {
         navigation.navigate('BookmarkEdit');
@@ -29,17 +29,17 @@ const BookmarkEditBS= ({ isVisible, onClose }: any) => {
                     <TouchableOpacity onPress={() => {
 
                     }} style={styles.selectItem}>
-                        <View style={styles.selectItemContent}>
-                            <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
-                            <Text style={styles.googleText}>Dạng lưới</Text>
+                        <View style={[styles.selectItemContent,{alignSelf:'center'}]}>
+                            <Icon name='view-grid-outline' size={25} color={'#333'} />
+                            <Text style={styles.itemText}>Grid</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
 
                     }} style={styles.selectItem}>
                         <View style={styles.selectItemContent}>
-                            <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
-                            <Text style={styles.googleText}>Dạng danh sách</Text>
+                            <Icon name='view-list-outline' size={25} color={'#333'} />
+                            <Text style={styles.itemText}>List</Text>
                         </View>
 
                     </TouchableOpacity>
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     selectItemContent: {
+        flex:1,
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
@@ -124,80 +125,10 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
     },
-    googleText: {
-        marginLeft: 40,
+    itemText: {
         color: "black",
         fontSize: 18,
         fontWeight: 'bold',
     },
-    facebookBtn: {
-        width: '80%',
-        height: 50, // Adjusted height
-        backgroundColor: "#3b5998",
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: 'gray',
-        marginTop: 10,
-    },
-    facebookIcon: {
-        marginLeft: 10,
-    },
-    facebookText: {
-        marginLeft: 40,
-        color: "white",
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    roundButtonsContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '70%',
-        marginTop: 60,
-    },
-    roundButton: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        borderColor: 'gray', // Change the background color as needed
-        borderWidth: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'gray',
-    },
 
-    zaloRoundBtn: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-    },
-    roundButtonImage: {
-        width: 50, // Adjust the width and height to fit the round button
-        height: 50, // Adjust the width and height to fit the round button
-        borderRadius: 50,
-    },
-    lineRoundBtn: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-    },
-    twitterRoundBtn: {
-        width: 50, // Adjust the width and height to fit the round button
-        height: 50, // Adjust the width and height to fit the round button
-        borderRadius: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#1da1f2',
-    }
-    , createAccountText: {
-        color: 'black',
-        marginTop: 20,
-        fontSize: 18,
-    }
 });

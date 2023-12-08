@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import { Novel } from '../../models/Novel';
 import Skeleton from 'react-loading-skeleton';
 import NovelGridSkeleton from '../Loading/NovelGridSkeleton';
 import { useNavigation } from '@react-navigation/native';
+import { User } from '../../models/User';
+import { AuthContext } from '../../context/AuthContext';
 // Phần để recommend truyện
 const NovelGrid = ({ novelData }: any) => {
-      const navigation = useNavigation();
+    const navigation = useNavigation();
     const [novels, setNovels] = useState<Novel[]>([]);// Initial with null array
     const [loading, setLoading] = useState(true);
     const [visibleNovelWeekly, setVisibleNovelWeekly] = useState(8);
     const [displayedNovels, setDisplayedNovels] = useState<Novel[]>([]);
 
+    const [user, setUser] = useState<User | null>()
+    const { getUserData } = useContext(AuthContext)
 
+    useEffect(() => {
+        setUser(getUserData());
+    }, [user])
     useEffect(() => {
         // Simulate data loading delay (replace with your actual data fetching logic)
         const fetchData = async () => {
@@ -44,7 +51,7 @@ const NovelGrid = ({ novelData }: any) => {
 
     // Hàm dùng đê random truyện
     const loadMoreNovels = () => {
-        const availableNovels = novelData.filter((novel:any) => !displayedNovels.includes(novel));
+        const availableNovels = novelData.filter((novel: any) => !displayedNovels.includes(novel));
         const randomNovels = shuffleArray(availableNovels);
         setDisplayedNovels(randomNovels.slice(0, 8));
     };
@@ -59,7 +66,11 @@ const NovelGrid = ({ novelData }: any) => {
                         }}>
                             <View style={styles.itemWrapper}>
                                 <Image source={{ uri: item.imagesURL }} style={styles.image} />
-                                <Text numberOfLines={1} style={styles.text}>{item.name}</Text>
+                                <Text numberOfLines={2} style={styles.normalText}>{item.name}</Text>
+
+                            </View>
+                            <View>
+                                <Text style={styles.subText}>{item.genreName[0]}</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -72,6 +83,9 @@ const NovelGrid = ({ novelData }: any) => {
         if (loading) {
             return (<NovelGridSkeleton />);
         }
+        // if(user){
+
+        // }
         return (
             <View style={styles.gridContainer}>
                 <View style={{
@@ -128,7 +142,7 @@ const styles = StyleSheet.create({
     },
     itemWrapper: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // căn chỉnh theo chiều dọc
         alignItems: 'stretch',
         alignSelf: 'stretch',
     },
@@ -142,6 +156,17 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         overflow: 'hidden',
 
+    },
+    normalText: {
+        color: 'black',
+        fontSize: 14,
+        marginTop: 5,
+        textAlign: 'left',
+        overflow: 'hidden',
+    },
+    subText: {
+        marginTop: 5,
+        fontSize: 14,
     },
     loadingContainer: {
         flex: 1,

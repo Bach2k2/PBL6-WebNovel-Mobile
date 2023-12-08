@@ -8,6 +8,7 @@ import Register from './auth/Register';
 import { useNavigation } from '@react-navigation/native';
 import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
+import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
 const AccountNavigator = createNativeStackNavigator();
 
 function Account() {
@@ -32,12 +33,15 @@ function Account() {
 const AccountMainPage = ({ navigation }: { navigation: any }) => {
     const [user, setUserData] = useState<User | null>(null);
     const { getUserData } = useContext(AuthContext);
-    // const userData = getUserData();
+    const [isShownBottomSheet, setShowBottomSheet] = useState(false);
+    const toggleBottomSheet = () => {
+        setShowBottomSheet(!isShownBottomSheet);
+    }
+
 
     useEffect(() => {
         setUserData(getUserData());
-        // console.log(user);
-
+        console.log('call user when user change', user)
     }, [user, getUserData]); // Cập nhật khi có sự thay đổi cua
 
     function handleNavigate(path: string) {
@@ -47,6 +51,13 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                 {
                     navigation.navigate('EmailBox');
                 }
+        }
+    }
+    const handleCoinExchange = () => {
+        if (user) {
+            navigation.navigate('CoinExchange');
+        } else {
+            toggleBottomSheet();
         }
     }
 
@@ -65,50 +76,47 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                             <Icon name='settings' size={20} color={'gray'} />
                         </TouchableOpacity>
                     </View>
-                    {
-                        user ?
-                            (
-                                <View>
-                                    <TouchableOpacity onPress={() => {
-                                        navigation.navigate('Profile');
-                                    }}>
-                                        <View style={styles.avatar_container}>
-                                            <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
-                                            <Text style={styles.username}>{user?.username}</Text>
-                                        </View>
-                                    </TouchableOpacity>
+                    {user ? (
+                        <View>
+                            <TouchableOpacity onPress={() => {
+                                navigation.navigate('Profile');
+                            }}>
+                                <View style={styles.avatar_container}>
+                                    {user.imagesURL ? (
+                                        <Image source={{ uri: user.imagesURL }} style={styles.avatar} />
+                                    ) :
+                                        (<Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />)
+                                    }
+                                    <Text style={styles.username}>{user?.username}</Text>
                                 </View>
-                            ) :
-                            (<View>
-                                <TouchableOpacity onPress={() => {
-                                    navigation.navigate('Login');
-                                }}>
-                                    <View style={styles.avatar_container}>
-                                        <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
-                                        <Text style={styles.username}>Bấm để đăng nhập</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-
-                            )
+                            </TouchableOpacity>
+                        </View>) :
+                        (<View>
+                            <TouchableOpacity onPress={() => {
+                                navigation.navigate('Login');
+                            }}>
+                                <View style={styles.avatar_container}>
+                                    <Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />
+                                    <Text style={styles.username}>Bấm để đăng nhập</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>)
                     }
-
-
                     <View style={styles.allIn4container}>
                         <View style={styles.infor_container}>
                             <View style={styles.coinRow}>
                                 <View style={styles.infor_column}>
-                                    <Text>Số dư coins</Text>
-                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 25, height: 25 }} />
+                                        <Text style={styles.textItem}>Số dư coins</Text>
+                                    </View>
+
+                                    <Text style={styles.infor_text}>{user ? user.walletAmmount : '-'}</Text>
                                 </View>
                                 <View style={styles.infor_column}>
 
                                     <TouchableOpacity onPress={() => {
-                                        {
-                                            user ?
-                                                navigation.navigate('CoinExchange')
-                                                : navigation.navigate('CoinExchange')
-                                        }
+                                        handleCoinExchange();
                                     }}>
                                         <LinearGradient colors={['#EADEDB', '#BC70A4', '#BFD641']} start={{ x: 0.0, y: 0.0 }}
                                             end={{ x: 1.0, y: 1.0 }}
@@ -122,15 +130,15 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                             <View style={styles.infor_row}>
                                 <View style={styles.infor_column}>
                                     <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
-                                    <Text>Phiếu đọc sách</Text>
+                                    <Text style={styles.textItem}>Phiếu đọc sách</Text>
                                 </View>
                                 <View style={styles.infor_column}>
                                     <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
-                                    <Text>Điểm của tôi</Text>
+                                    <Text style={styles.textItem}>Điểm của tôi</Text>
                                 </View>
                                 <View style={styles.infor_column}>
                                     <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
-                                    <Text>Phiếu</Text>
+                                    <Text style={styles.textItem}>Phiếu</Text>
                                 </View>
                             </View>
 
@@ -180,6 +188,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
 
                 </View>
             </ScrollView >
+            <SignInBottomSheet isVisible={isShownBottomSheet} onClose={toggleBottomSheet} />
         </View >
     );
 }

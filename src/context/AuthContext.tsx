@@ -11,8 +11,8 @@ const AuthContext = createContext({
     refreshToken: null,
     authenticated: false,
   },
-  getUserData: () => null,
-  setUserData: (userData: any) => { },
+  getUserData: () => null as User | null,
+  setUserData: (userData: User | null) => { },
   getAccessToken: () => null,
   setAuthState: (authData: any) => { },
   logout: async () => { },
@@ -20,16 +20,12 @@ const AuthContext = createContext({
 const { Provider } = AuthContext;
 
 const AuthProvider = ({ children }: any) => {
-  // const [test,setTest]= useState('Test Value');
-  // const [isLoading,setIsLoading]= useState(true);
-  // const [accessToken,setAccessToken]= useState(null);
-
 
   const [authState, setAuthState] = useState({
     accessToken: null,
     refreshToken: null,
     authenticated: false,
-    userData: null,
+    userData: null as User | null,
   });
 
   const logout = async () => {
@@ -48,7 +44,7 @@ const AuthProvider = ({ children }: any) => {
     return authState.accessToken;
   };
 
-  const setUserData = async (userData: any) => {
+  const setUserData = async (userData: User | null) => {
     // await Keychain.resetGenericPassword();
     setAuthState((prevState) => ({
       ...prevState,
@@ -56,7 +52,7 @@ const AuthProvider = ({ children }: any) => {
     }));
   };
 
-  const getUserData = (): any => {
+  const getUserData = (): User | null => {
     return authState.userData;
   };
 

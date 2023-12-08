@@ -1,8 +1,8 @@
-export interface Comment {
+export interface Rating {
     "id": number,
     "accountId": string,
     "novelId": string,
     "text": string,
-    "createOn": Date
-
+    "createOn": Date,
+    "ratingScore": number | 0,
 }

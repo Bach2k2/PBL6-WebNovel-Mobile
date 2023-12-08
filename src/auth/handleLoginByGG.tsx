@@ -6,19 +6,24 @@ import { LoginWithGoogleApi } from '../hook/LoginApi';
 import { handleAuth } from './handleAuth';
 GoogleSignin.configure(
     {
-      
+
         webClientId: '1022621922641-e7tpkjpkbaiu2fl2j7lsv67umjvv6mug.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
         offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
     }
 );
 
-export const handleLoginByGG = async (authContext:any) => {
+export const handleLoginByGG = async (authContext: any) => {
 
+    if (await GoogleSignin.isSignedIn() === true)
+        await GoogleSignin.signOut();
     try {
         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
         const userInfo = await GoogleSignin.signIn();
+        //   console.log('ui',userInfo)
         const response = await LoginWithGoogleApi(userInfo);
         const userData = await handleAuth({ authContext, response });
+        userData.imagesURL = userInfo.user.photo;
+        console.log('ui', userData)
         Toast.show({
             type: 'success',
             text1: 'Login Notification!',

@@ -9,19 +9,22 @@ import { AuthContext } from '../../context/AuthContext';
 const SignInBottomSheet = ({ isVisible, onClose }: any) => {
     const navigation = useNavigation();
     const authContext = useContext(AuthContext);
-    const [loading,setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const handleLoginByEmail = () => {
         navigation.navigate('LoginByEmail');
         // console.log('handleLoginByEmail');
     }
     const loginByGG = async () => {
         try {
-            console.log("Hello")
+            
             const userData = handleLoginByGG(authContext)
+            // isVisible = false;
+            // console.log(isVisible);
+            onClose();
             setTimeout(() => {
                 setLoading(true);
                 navigation.navigate('Account');
-               // navigation.goBack(); // Go back
+                // navigation.goBack(); // Go back
             }, 5000);
             //setLoading(false);
         } catch (error) {

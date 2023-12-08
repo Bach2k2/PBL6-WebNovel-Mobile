@@ -1,14 +1,86 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native'
-import React from 'react'
+import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, TextInput } from 'react-native'
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Novel } from '../../models/Novel'
+import { ImagePickerBS } from '../../components/BottomSheet/ImagePickerBS'
+import { AuthContext } from '../../context/AuthContext'
+import { DeleteNovel, EditNovel } from '../../hook/NovelApi'
+import Modal from 'react-native-modal'
 
 
 const NovelInforSettings = ({ novel }: { novel: Novel }) => {
-  function handleDeleteNovel(): void {
-    console.log('delete');
 
+  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const [imageSelect, setImageSelect] = useState('');
+  const [isNovelValid, setNovelValid] = useState(false);
+
+  const [isBSNameVisible, setBSNameVisible] = useState(false);
+  const [textInputValue, setTextInputValue] = useState('');
+
+  const toggleNameBS = () => {
+    setBSNameVisible(!isBSNameVisible);
+  };
+
+  const handleSubmit = () => {
+    // Xử lý hành động submit ở đây
+    console.log('Submitted:', textInputValue);
+
+    // Đóng Modal
+    toggleNameBS();
+  };
+
+  //Image BS
+  const toggleBottomSheet = () => {
+    setBottomSheetVisible(!isBottomSheetVisible);
+  };
+  const { authState, getUserData } = useContext(AuthContext)
+  const user = getUserData();
+
+  const handleDeleteNovel = async () => {
+    console.log('delete');
+    const res = await DeleteNovel(novel, authState.accessToken);
+    console.log(res);
   }
+
+  const checkNovelIsValid = () => {
+    if (novel.name == "" || novel.genreIds.length == 0 || novel.imagesURL == "") {
+      return false;
+    }
+    return true
+  }
+
+  const handleEditNovel = async () => {
+    if (checkNovelIsValid()) {
+      const res = await EditNovel(novel, authState.accessToken);
+      console.log(res);
+    }
+  }
+
+  useLayoutEffect(() => {
+    // setImageSelect()
+    console.log(imageSelect)
+  }, [imageSelect])
+
+  const NameBS = () => {
+    return (
+      <Modal isVisible={isBSNameVisible}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <TextInput
+            placeholder="Enter text"
+            onChangeText={(text) => setTextInputValue(text)}
+            style={{ borderWidth: 1, padding: 10, marginBottom: 20 }}
+          />
+          <TouchableOpacity onPress={handleSubmit}>
+            <Text>Submit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={toggleNameBS}>
+            <Text>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )
+  }
+
 
   // const {novel} = route.params;
   return (
@@ -28,7 +100,15 @@ const NovelInforSettings = ({ novel }: { novel: Novel }) => {
             <View style={styles.imageInforCol}>
               <Text style={styles.headerText}>Book Cover</Text>
               <Text>Image size restrictions: 800*600px, within 5M, format: .JPG, JPEG</Text>
-              <TouchableOpacity style={styles.button} onPress={() => { }}>
+              <TouchableOpacity style={styles.button}
+                onPress={() => {
+                  toggleBottomSheet()
+                  if (imageSelect != '') {
+                    novel.imagesURL = imageSelect
+                    console.log(imageSelect)
+                  }
+
+                }}>
                 <Icon name="upload" size={20} color={'blue'} />
                 <Text style={styles.buttonText}>Upload</Text>
               </TouchableOpacity>
@@ -38,7 +118,7 @@ const NovelInforSettings = ({ novel }: { novel: Novel }) => {
             </View>
           </View>
           {/* TITLE */}
-          <TouchableOpacity onPress={() => { console.log('Hello') }}>
+          <TouchableOpacity onPress={() => { toggleNameBS() }}>
             <View style={styles.row}>
 
               <View style={styles.rowItem}>
@@ -118,6 +198,8 @@ const NovelInforSettings = ({ novel }: { novel: Novel }) => {
         <TouchableOpacity onPress={handleDeleteNovel}>
           <Text style={styles.deleteButtonText}>Delete novel</Text>
         </TouchableOpacity>
+        <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} onImageSelect={setImageSelect} />
+        <NameBS />
       </View>
     </ScrollView>
   )
@@ -141,7 +223,9 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    marginBottom: 10,
+    margin: 10,
+    // marginBottom: 10,
+    // marginTop: 10,
     justifyContent: 'space-between',
   },
   row: {
@@ -206,8 +290,8 @@ const styles = StyleSheet.create({
     height: 2,
   },
 
-  deleteButtonText:{
-    color:'red',
+  deleteButtonText: {
+    color: 'red',
     fontSize: 18,
 
   }

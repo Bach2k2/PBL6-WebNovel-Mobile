@@ -9,11 +9,8 @@ import Modal from 'react-native-modal';
 import getGenreData from '../../hook/GenreApi';
 import { createNovel } from '../../hook/NovelApi';
 import { AuthContext } from '../../context/AuthContext';
-import { useNavigation } from '@react-navigation/native';
-import { AppNavigatorProps, RootStackParamList } from '../../models/NavigationModel';
 import { MultipleSelectList } from 'react-native-dropdown-select-list'
-// import PickerCheckBox from 'react-native-picker-checkbox';
-// import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
+import Toast from 'react-native-toast-message';
 
 // type NovelDetailProps = AppNavigatorProps<'CreateNovel'>;
 type genreType = {
@@ -22,12 +19,11 @@ type genreType = {
 }
 const CreateNovel = ({ route, navigation }: any) => {
   const [image, setImage] = useState('');
-  const [preview, setPreview] = useState(null);
   const [description, setDescription] = useState('');
   const [author, setAuthor] = useState('');
   const [genreList, setGenreList] = useState<genreType[]>([]);
-  const [selectedGenres, setSelectedGenres] = useState([]);
-  const [disableCreateBtn, setDisableCreateBtn] = useState(true);
+  const [selectGenre, setSelectedGenres] = useState([]);
+  const [isDisableBtn, setDisableCreateBtn] = useState(true);
 
   const handleConfirm = (pItems: any) => {
     console.log('pItems =>', pItems);
@@ -38,7 +34,7 @@ const CreateNovel = ({ route, navigation }: any) => {
     Title: '',
     Description: '',
     AccountId: '',
-    GenresId: [1],
+    GenresId: [],
     File: null,
   });
 
@@ -51,6 +47,7 @@ const CreateNovel = ({ route, navigation }: any) => {
 
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const toggleBottomSheet = () => {
+
     setBottomSheetVisible(!isBottomSheetVisible);
   };
 
@@ -81,13 +78,7 @@ const CreateNovel = ({ route, navigation }: any) => {
       toggleBottomSheet();
     });
   }
-  // const toggleGenreSelection = (genreId: any) => {
-  //   if (selectedGenres.includes(genreId)) {
-  //     setSelectedGenres(selectedGenres.filter((id) => id !== genreId));
-  //   } else {
-  //     setSelectedGenres([...selectedGenres, genreId]);
-  //   }
-  // };
+
   const renderInner = (
     <View style={styles.panel}>
       <View style={{ alignItems: 'center' }}>
@@ -132,7 +123,17 @@ const CreateNovel = ({ route, navigation }: any) => {
     if (user) {
       setPostNovel({ ...postNovel, AccountId: user?.id });
     }
-  },[]);
+  }, []);
+
+  useEffect(() => {
+    if (postNovel.Name == '' || postNovel.Title == '' || postNovel.AccountId == null || postNovel.Description == '' || postNovel.File == null) {
+      setDisableCreateBtn(true);
+    }
+    else {
+      setDisableCreateBtn(false);
+    }
+  }, [postNovel]);
+
 
   const onChangeName = (text: any) => {
     // setPostNovel({ ...postNovel, Name: text });
@@ -148,9 +149,11 @@ const CreateNovel = ({ route, navigation }: any) => {
     setDescription(text);
     setPostNovel({ ...postNovel, Description: text });
   };
-  const onChangeAuthor = (text: any) => {
-    setAuthor(text);
-    // setPostNovel({ ...postNovel, Author: text });
+
+  const onChangeGenres = (genres: any) => {
+    console.log('genres',genres);
+    setSelectedGenres(genres);
+    setPostNovel({ ...postNovel, GenresId: genres });
   };
 
   const onChangeImage = (selectedImage: any) => {
@@ -182,20 +185,17 @@ const CreateNovel = ({ route, navigation }: any) => {
 
     // console.log(user.id);
     if (user) {
-      // setPostNovel({ ...postNovel, AccountId: user?.id });
-      console.log(postNovel.Name);
-      console.log(postNovel.Title)
-      console.log(postNovel.Description)
-      console.log(postNovel.AccountId)
-      console.log(postNovel.GenresId)
-      console.log(postNovel.File)
-      // const formData = new FormData();
 
       if (postNovel.Name && postNovel.Description && postNovel.AccountId && postNovel.GenresId && postNovel.File) {
         createNovel(postNovel, authState.getAccessToken())
           .then((data) => {
-            console.log("check novel, it's okay");
-            console.log(data);
+            // console.log("check novel, it's okay");
+            // console.log(data);Toast.show({
+            Toast.show({
+              type: 'success',
+              text1: 'Create your novel successfully 👋',
+              text2: 'This is some something 👋'
+            });
             navigation.navigate('WriteDashboard');
           })
           .catch(error => {
@@ -214,21 +214,32 @@ const CreateNovel = ({ route, navigation }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <TouchableOpacity onPress={() => toggleBottomSheet()} style={styles.imageContainer}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.image} />
-          ) : (
-            <Image source={require('../../assets/img/waiting_img.jpg')} style={styles.image} />
-          )}
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 5 }}>
+          <TouchableOpacity onPress={() => toggleBottomSheet()} style={styles.imageContainer}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <Image source={require('../../assets/img/waiting_img.jpg')} style={styles.image} />
+            )}
+          </TouchableOpacity>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', top: 0 }}>Upload cover novel</Text>
+        </View>
+
         <View style={styles.inputContainer}>
-          <Text>Book title</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={styles.headerTitle}>Book title</Text>
+            <Text style={{ color: 'red', marginLeft: 5 }}>*</Text>
+          </View>
+
           <TextInput style={styles.inputField} placeholder='Enter book title' onChangeText={onChangeName} />
         </View>
         <View style={styles.inputContainer}>
-          <Text>Genres</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={styles.headerTitle}>Genres</Text>
+            <Text style={{ color: 'red', marginLeft: 5 }}>*</Text>
+          </View>
           <MultipleSelectList
-            setSelected={(val: any) => setSelectedGenres(val)}
+            setSelected={(val: any) =>onChangeGenres(val)}
             data={genreList}
             //data={genreList.map((genre) => ({ label: genre.value, value: genre.key }))}
             save="value"
@@ -238,7 +249,10 @@ const CreateNovel = ({ route, navigation }: any) => {
 
         </View>
         <View style={styles.inputContainer}>
-          <Text>Short Description</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={styles.headerTitle}> Short Description</Text>
+            <Text style={{ color: 'red', marginLeft: 5 }}>*</Text>
+          </View>
           <TextInput
             style={[styles.inputField, { height: 100, textAlignVertical: 'top' }]}
             value={description}
@@ -248,8 +262,8 @@ const CreateNovel = ({ route, navigation }: any) => {
             placeholder='Tell us more about your novels...'
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleCreate} >
-          <Text style={styles.buttonText}>Publish</Text>
+        <TouchableOpacity style={isDisableBtn ? styles.btnDisabled : styles.button} onPress={handleCreate} disabled={isDisableBtn}>
+          <Text style={isDisableBtn ? styles.disabledText : styles.buttonText}>Publish</Text>
         </TouchableOpacity>
         <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
       </ScrollView>
@@ -293,6 +307,7 @@ const styles = StyleSheet.create({
     width: '80%',
     height: '80%',
   },
+  headerTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 5 },
   button: {
     backgroundColor: '#FF6347',
     padding: 16,
@@ -389,5 +404,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#FF0000',
     paddingBottom: 5,
+  },
+  btnDisabled: {
+    backgroundColor: '#EBEBEB',
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  disabledText: {
+    color: 'gray',
+    fontSize: 16,
   },
 });

@@ -1,22 +1,108 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Image, Touchable, TouchableOpacity, ScrollView } from 'react-native';
+import { Alert, Text, View, StyleSheet, Image, Touchable, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'react-native-linear-gradient';
+import { createOrderApi, createPaymentApi, getBundlesApi } from '../../hook/PaymentApi';
+import { AuthContext } from '../../context/AuthContext';
+import { User } from '../../models/User';
+import { Linking } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
+// import Hyperlink from 'react-native-hyperlink'
 
-export default function CoinExchange() {
-    const data = [
-        { coin: 50, money: '24000.0' },
-        { coin: 250, money: '122000.0' },
-        { coin: 500, money: '244000.0' },
-        { coin: 1000, money: '489000.0' },
-        { coin: 2500, money: '12000000.0' },
-        { coin: 5000, money: '2450000.0' },
-    ];
+export default function CoinExchange({navigation}:any) {
+    // const data = [
+    //     { coin: 50, money: '24000.0' },
+    //     { coin: 250, money: '122000.0' },
+    //     { coin: 500, money: '244000.0' },
+    //     { coin: 1000, money: '489000.0' },
+    //     { coin: 2500, money: '12000000.0' },
+    //     { coin: 5000, money: '2450000.0' },
+    // ];
+    const [loading, setLoading] = React.useState(true);
+    const [bundles, setBundles] = React.useState([]);
+    const [user, setUser] = React.useState<User | null>();
+    const { authState, getUserData } = React.useContext(AuthContext);
+    React.useEffect(() => {
+        setUser(getUserData())
+    });
+    React.useEffect(() => {
+        const fetchBundles = async () => {
+            const data = await getBundlesApi();
+            setBundles(data);
+            setLoading(false);
+            // console.log(data);
+        }
+        fetchBundles();
+    }, []);
+
+
+    const redirectToVNPAY = async (vnpayPaymentUrl: string) => {
+        // Alert.alert(`Don't know how to open this URL: ${vnpayPaymentUrl}`);
+        try {
+            // const url = 'https://expo.dev'
+            // const supported = await Linking.canOpenURL(url);
+
+            // if (supported) {
+            await Linking.openURL(vnpayPaymentUrl);
+            // } else {
+            //     Alert.alert(`Don't know how to open this URL: ${url}`);
+            //     // console.error(`Don't know how to open this URL: ${url}`);
+            // }
+        } catch (error) {
+            console.error("Error opening the VNPAY payment URL: ", error);
+        }
+    };
+
+    const handleBuyCoin = async (bundle: any) => {
+        const res = await createOrderApi(user?.id, bundle, authState.accessToken)
+        console.log(res.data);
+        const paymentRes = await createPaymentApi(res.data.OrderId, res.data.Price, authState.accessToken)
+        console.log(paymentRes);
+        console.log(paymentRes.paymentUrl)
+        redirectToVNPAY(paymentRes.paymentUrl)//
+        console.log('hello');
+        // Call handleDeepLink when the app is reopened
+        handleDeepLink();
+    }
+
+    const handleDeepLink = async () => {
+        try {
+            const url = await Linking.getInitialURL();
+
+            if (url) {
+                console.log('Deep link URL:', url);
+                // Add your logic here based on the deep link URL
+            }
+            else {
+                console.log('Nothing ');
+            }
+        } catch (error) {
+            console.error("Error handling deep link: ", error);
+        }
+    };
+
+    React.useEffect(() => {
+        const doWait = () => {
+            Linking.getInitialURL().then(ev => {
+                console.warn(ev)
+            })
+        };
+        Linking.addEventListener('url', doWait);
+        return () => Linking.removeAllListeners('url');
+    }, [navigation])
+
+    if(loading){
+        return (
+            <ActivityIndicator size={'large'} color='black'/>
+        );
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
 
             <View style={styles.container}>
                 <ScrollView>
+
                     <View style={[styles.row, { marginTop: 10 }]}>
                         <Text style={styles.header}>Top Up</Text>
                         <Text style={styles.subheader}>Unit: VND</Text>
@@ -49,30 +135,35 @@ export default function CoinExchange() {
                     </LinearGradient>
                     {/* Row1 - but use loop */}
                     {
-                        data.map((level, index) => (
-                            <View key={index}>
-                                <View key={index} style={styles.row}>
-                                    <View style={{ flex: 1, justifyContent: 'flex-start', flexDirection: 'row' }}>
-                                        <View style={{ flexDirection: 'column' }}>
-                                            <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 50, height: 50 }} />
+                        bundles.map((bundle, index) => (
+                            <Pressable key={index} onPress={() => {
+                                console.log('press')
+                                handleBuyCoin(bundle);
+                            }}>
+                                <View >
+                                    <View key={index} style={styles.row}>
+                                        <View style={{ flex: 1, justifyContent: 'flex-start', flexDirection: 'row' }}>
+                                            <View style={{ flexDirection: 'column' }}>
+                                                <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 50, height: 50 }} />
+                                            </View>
+                                            <View style={{ flexDirection: 'column' }}>
+                                                <Text style={{ color: 'black', fontSize: 18 }}>{bundle.coinAmount}</Text>
+                                                <Text style={{ color: 'green' }}>+156 Bonus</Text>
+                                            </View>
                                         </View>
-                                        <View style={{ flexDirection: 'column' }}>
-                                            <Text style={{ color: 'black', fontSize: 18 }}>{level.coin}</Text>
-                                            <Text style={{ color: 'green' }}>+156 Bonus</Text>
+                                        <View>
+                                            <View style={{ flexDirection: 'column', flex: 1 }}>
+                                                <TouchableOpacity style={{ flex: 1, margin: 10, justifyContent: 'center', backgroundColor: 'green', borderRadius: 5, marginRight: 0 }} onPress={() => { }}>
+                                                    <Text style={{ color: 'white', fontWeight: '500' }}> {bundle.price}.000 </Text>
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
-                                    </View>
-                                    <View>
-                                        <View style={{ flexDirection: 'column', flex: 1 }}>
-                                            <TouchableOpacity style={{ flex: 1, margin: 10, justifyContent: 'center', backgroundColor: 'green', borderRadius: 5, marginRight: 0 }} onPress={() => { }}>
-                                                <Text style={{ color: 'white', fontWeight: '500' }}> {level.money} </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
 
+                                    </View>
+                                    <View style={{ marginTop: 10, marginBottom: 10, width: '90%', backgroundColor: 'gray', height: 1, alignSelf: 'center' }}>
+                                    </View>
                                 </View>
-                                <View style={{ marginTop: 10, marginBottom: 10, width: '90%', backgroundColor: 'gray', height: 1, alignSelf: 'center' }}>
-                                </View>
-                            </View>
+                            </Pressable>
                         ))
                     }
                     <View style={styles.row}>
@@ -85,6 +176,14 @@ export default function CoinExchange() {
                     <View style={[styles.row, { marginBottom: 15 }]}>
                         <Text>2. Click here to manage your subscription</Text>
                     </View>
+                    {/* <Hyperlink
+                        linkStyle={{ color: '#2980b9', fontSize: 20 }}
+                        linkText={url => url === 'https://www.facebook.com/' ? 'Hyperlink' : url}
+                    >
+                        <Text style={{ fontSize: 15 }}>
+                            Make clickable strings cleaner with https://www.facebook.com/
+                        </Text>
+                    </Hyperlink> */}
                 </ScrollView>
             </View>
         </SafeAreaView>

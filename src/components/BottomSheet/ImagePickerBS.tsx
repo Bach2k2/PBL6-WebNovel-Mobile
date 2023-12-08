@@ -1,184 +1,198 @@
-// import React, { useState } from 'react';
-// import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-// import Modal from 'react-native-modal';
-// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-// import { useNavigation } from '@react-navigation/native';
+import ImagePicker from 'react-native-image-crop-picker';
+import React, { useContext, useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Modal from 'react-native-modal';
+export const ImagePickerBS = ({ isVisible, onClose, onImageSelect }: any) => {
 
-// const BottomSheet = ({ isVisible, onClose }: any) => {
-//     const navigation = useNavigation();
-    
-//     return (
-//         <Modal
-//             isVisible={isVisible}
-//             onBackdropPress={onClose}
-//             style={styles.bottomModal}
-//             backdropOpacity={0.5}
-//         >
-//             <View style={styles.modalContent}>
-//                 <View style={styles.textContainer}>
-//                     <Text style={styles.titleText}>Đăng nhập/ đăng ký để tiếp tục</Text>
-//                     <Text style={styles.bodyText}>Đăng nhập để nhận các đặc quyền độc lặp: nhiệm vụ, phần thưởng và phần thưởng đăng ký hằng ngày</Text>
-//                 </View>
+    const takePhotoFromCamera = () => {
+        ImagePicker.openCamera({
+            compressImageMaxWidth: 300,
+            compressImageMaxHeight: 300,
+            cropping: false,
+            compressImageQuality: 0.7
+        }).then(image => {
+            onImageSelect(image.path);
+            isVisible = !isVisible;
+        });
+    }
 
-//                 <View style={{ width: '100%', height: '20%', justifyContent: 'flex-start', alignItems: 'center' }}>
-//                     <TouchableOpacity onPress={() => { }} style={styles.googleBtn}>
-//                         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-//                             <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
-//                             <Text style={styles.googleText}>Login with Google</Text>
-//                         </View>
-//                     </TouchableOpacity>
-//                     <TouchableOpacity onPress={() => { }} style={styles.facebookBtn}>
-//                         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-//                             <Icon name='facebook' size={30} color="white" style={styles.facebookIcon} />
-//                             <Text style={styles.facebookText}>Login with Facebook</Text>
-//                         </View>
+    const choosePhotoFromLibrary = () => {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 300,
+            cropping: false,
+            compressImageQuality: 0.7
+        }).then(image => {
+            onImageSelect(image.path);
+            isVisible = !isVisible;
+        });
+    }
 
-//                     </TouchableOpacity>
-//                 </View>
-//                 <View style={styles.roundButtonsContainer}>
-//                     {/* Add your 4 round buttons here */}
-//                     <TouchableOpacity style={styles.zaloRoundBtn}>
-//                         <Image style={styles.roundButtonImage} source={require('../../assets/logo/zalo.png')} />
-//                     </TouchableOpacity>
-//                     <TouchableOpacity style={styles.lineRoundBtn}>
-//                         <Image style={styles.roundButtonImage} source={require('../../assets/logo/line.png')} />
-//                     </TouchableOpacity>
-//                     <TouchableOpacity style={styles.twitterRoundBtn}>
-//                         <Icon name='twitter' size={30} color="white" />
-//                     </TouchableOpacity>
-//                     <TouchableOpacity style={styles.roundButton} onPress={handleLoginByEmail}>
-//                         <Icon name='gmail' size={30} color="white" />
-//                     </TouchableOpacity>
-//                 </View>
-//                 <TouchableOpacity style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }} onPress={() => {
-//                     navigation.navigate('Register');
-//                 }}>
-//                     <Text style={styles.createAccountText}>Create an account</Text>
-//                 </TouchableOpacity>
-//                 <TouchableOpacity onPress={onClose}>
-//                     <Text style={styles.closeButton}>Close</Text>
-//                 </TouchableOpacity>
-//             </View>
-//         </Modal>
-//     );
-// };
+    const renderInner = (
+        <View style={styles.panel}>
+            <View style={{ alignItems: 'center' }}>
+                <Text style={styles.panelTitle}>Upload Photo</Text>
+                <Text style={styles.panelSubtitle}>Choose Your Profile Picture</Text>
+            </View>
+            <TouchableOpacity style={styles.panelButton} onPress={takePhotoFromCamera}>
+                <Text style={styles.panelButtonTitle}>Take Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.panelButton} onPress={choosePhotoFromLibrary}>
+                <Text style={styles.panelButtonTitle}>Choose From Library</Text>
+            </TouchableOpacity>
+        </View>
+    );
 
-// const styles = StyleSheet.create({
-//     bottomModal: {
-//         justifyContent: 'flex-end',
-//         margin: 0,
-//     },
-//     modalContent: {
-//         backgroundColor: 'white',
-//         padding: 22,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         borderTopLeftRadius: 15,
-//         borderTopRightRadius: 15,
-//     },
-//     closeButton: {
-//         marginTop: 10,
-//         color: 'blue',
-//         fontSize: 18,
-//     },textContainer:{
-//         alignSelf:'flex-start'
-//     }
-//     , titleText: {
-//         fontSize: 22,
-//         fontWeight: 'bold',
-//     }, bodyText: {
-//         fontSize: 18,
-//     },
-//     googleBtn: {
-//         // width: '70%',
-//         width: '80%',
-//         height: '40%',
-//         marginTop: 10,
-//         backgroundColor: 'white',
-//         borderRadius: 10,
-//         borderWidth: 1,
-//         borderColor: 'black',
-//         justifyContent: 'center',
-//         color: 'black'
-//     },
-//     googleBtnImage: {
-//         marginLeft: 10,
-//         width: 30,
-//         height: 30,
-//     },
-//     googleText: {
-//         marginLeft: 40,
-//         color: "black",
-//         fontSize: 18,
-//         fontWeight: 'bold',
-//     },
-//     facebookBtn: {
-//         width: '80%',
-//         height: '40%',
-//         backgroundColor: "#3b5998",
-//         borderRadius: 10,
-//         borderWidth: 1,
-//         borderColor: 'gray',
-//         marginTop: 10,
-//     },
-//     facebookIcon: {
-//         marginLeft: 10,
-//     },
-//     facebookText: {
-//         marginLeft: 40,
-//         color: "white",
-//         fontSize: 18,
-//         fontWeight: 'bold',
-//     },
-//     roundButtonsContainer: {
-//         flexDirection: 'row',
-//         justifyContent: 'space-between',
-//         width: '70%',
-//         marginTop: 20,
-//     },
-//     roundButton: {
-//         width: 50,
-//         height: 50,
-//         borderRadius: 25,
-//         borderColor: 'gray', // Change the background color as needed
-//         borderWidth: 1,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: 'gray',
-//     },
+    const renderHeader = (
+        <View style={styles.header}>
+            <View style={styles.panelHeader}>
+                <View style={styles.panelHandle} />
+            </View>
+        </View>
+    );
 
-//     zaloRoundBtn: {
-//         width: 50,
-//         height: 50,
-//         borderRadius: 25,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: 'white',
-//     },
-//     roundButtonImage: {
-//         width: 50, // Adjust the width and height to fit the round button
-//         height: 50, // Adjust the width and height to fit the round button
-//         borderRadius: 50,
-//     },
-//     lineRoundBtn: {
-//         width: 50,
-//         height: 50,
-//         borderRadius: 25,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: 'white',
-//     },
-//     twitterRoundBtn: {
-//         width: 50, // Adjust the width and height to fit the round button
-//         height: 50, // Adjust the width and height to fit the round button
-//         borderRadius: 50,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: '#1da1f2',
-//     }
-//     , createAccountText: {
-//         color: 'black',
-//         marginTop: 20,
-//         fontSize: 18,
-//     }
-// });
+    return (
+        <Modal
+            isVisible={isVisible}
+            onBackdropPress={onClose}
+            style={styles.bottomModal}
+            backdropOpacity={0.5}>
+            <View style={styles.modalContent}>
+                {renderHeader}
+                {renderInner}
+                <TouchableOpacity onPress={onClose}>
+                    <Text style={styles.closeButton}>Close</Text>
+                </TouchableOpacity>
+            </View>
+        </Modal>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 16,
+        // backgroundColor:'green',
+        borderRadius: 5,
+
+    },
+    imageContainer: {
+        alignItems: 'center',
+    },
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        marginBottom: 16,
+    },
+    inputContainer: {
+        marginBottom: 16,
+        // height:50,
+    },
+    inputField: {
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 6,
+    },
+    selectBox: {
+        width: '80%',
+        height: '80%',
+    },
+    button: {
+        backgroundColor: '#FF6347',
+        padding: 16,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    commandButton: {
+        padding: 15,
+        borderRadius: 10,
+        backgroundColor: '#FF6347',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    bottomModal: {
+        justifyContent: 'flex-end',
+        margin: 0,
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
+    },
+    closeButton: {
+        marginTop: 10,
+        color: 'blue',
+        fontSize: 18,
+    },
+    panel: {
+        padding: 20,
+        backgroundColor: '#FFFFFF',
+        paddingTop: 20,
+    },
+
+    header: {
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#333333',
+        shadowOffset: { width: -1, height: -3 },
+        shadowRadius: 2,
+        shadowOpacity: 0.4,
+        paddingTop: 20,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+    panelHeader: {
+        alignItems: 'center',
+    },
+    panelHandle: {
+        width: 40,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#00000040',
+        marginBottom: 10,
+    },
+    panelTitle: {
+        fontSize: 27,
+        height: 35,
+    },
+    panelSubtitle: {
+        fontSize: 14,
+        color: 'gray',
+        height: 30,
+        marginBottom: 10,
+    },
+    panelButton: {
+        padding: 13,
+        borderRadius: 10,
+        backgroundColor: '#FF6347',
+        alignItems: 'center',
+        marginVertical: 7,
+    },
+    panelButtonTitle: {
+        fontSize: 17,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    action: {
+        flexDirection: 'row',
+        marginTop: 10,
+        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f2f2f2',
+        paddingBottom: 5,
+    },
+    actionError: {
+        flexDirection: 'row',
+        marginTop: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#FF0000',
+        paddingBottom: 5,
+    },
+});

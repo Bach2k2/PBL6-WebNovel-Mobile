@@ -1,16 +1,22 @@
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
+import HomeSettingsBS from '../BottomSheet/HomeSettingsBS';
 const Header = () => {
     const navigation = useNavigation();
+    const [isShownBottomSheet, setShowBottomSheet] = useState(false);
+    const toggleSettingBtn = () => {
+        console.log(isShownBottomSheet)
+        setShowBottomSheet(!isShownBottomSheet);
+    }
     return (
 
         <View style={styles.header}>
             <TouchableOpacity onPress={
                 () => { navigation.navigate('Welcome') }
             }>
-                <Image source={require('../../assets/img/TTQBA.png')} style={styles.logo} />
+                <Image source={require('../../assets/img/logo-login.png')} style={styles.logo} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.searchContainer} onPress={
@@ -22,9 +28,12 @@ const Header = () => {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.settingButton}>
+            <TouchableOpacity style={styles.settingButton} onPress={() => {
+                toggleSettingBtn()
+            }}>
                 <Icon name="settings" size={24} color="black"></Icon>
             </TouchableOpacity>
+            <HomeSettingsBS isVisible={isShownBottomSheet} onClose={toggleSettingBtn}/>
         </View>
 
     );
@@ -59,7 +68,7 @@ const styles = StyleSheet.create({
         padding: 15,
         marginLeft: 10,
     },
-    searchInnerContainer:{
+    searchInnerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },

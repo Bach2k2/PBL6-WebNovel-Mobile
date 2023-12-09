@@ -76,25 +76,24 @@ const ChapterDetail = ({ route }: any) => {
                 const bmList = await getBookmarkedData(user, authState.accessToken);
                 if (
                     bmList &&
-                    bmList.some((item:any) => item.novelId == novel.id && item.accountId == user.id)
+                    bmList.some((item: any) => item.novelId == novel.id && item.accountId == user.id)
                 ) {
-                    if (bmList.some((item:any) => item.chapterId != chapterId)) {
+                    if (bmList.some((item: any) => item.chapterId != chapterId)) {
                         console.log('Call put')
                         const res = await putBookmarkData(user.id, novel.id, chapterId, authState.accessToken);
                         console.log(res);
                     }
                 } else {
-                    console.log('bm',bmList)
-                    if (bmList.length > 0) {
-                        const res = await postBookmarkData(user.id, novel.id, chapterId, authState.accessToken);
-                        console.log(res);
-                    }
+                    console.log('bm', bmList)
+                    const res = await postBookmarkData(user.id, novel.id, chapterId, authState.accessToken);
+                    console.log(res);
+
                 }
             } else {
                 const newBookmark = {
                     novelId: novel.id,
                     chapterId: chapterId,
-                    chapterIndex:0,
+                    chapterIndex: 0,
                     accountId: '',
                     name: novel.name,
                     title: novel.title,

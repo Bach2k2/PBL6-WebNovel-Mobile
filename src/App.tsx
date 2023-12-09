@@ -49,7 +49,7 @@ function App() {
           <Stack.Screen name="ChapterList" component={ChapterList} options={({ route }: any) => ({ title: 'Content', headerTitleAlign: 'center' })} />
           <Stack.Screen name="ChapterDetail" component={ChapterDetail} options={({ route }: any) => ({ title: route.params.title })} />
           {/* Rating  */}
-          <Stack.Screen name="AddReview" component={AddReview} options={({ route }: any) => ({ title: 'Add a review', headerTitleAlign: 'center' })} />
+          {/* <Stack.Screen name="AddReview" component={AddReview} options={({ route }: any) => ({ title: 'Add a review', headerTitleAlign: 'center' })} /> */}
           {/*  */}
 
           <Stack.Screen name="CreateNovel" component={CreateNovel} options={({ route }: any) => ({ title: 'Add new novel', headerTitleAlign: 'center' })} />

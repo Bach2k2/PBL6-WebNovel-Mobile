@@ -21,7 +21,7 @@ const Stars = (props: any) => {
     useEffect(() => {
         console.log('stars ha', stars)
         setLocalStarRating(props.stars);
-    }, [starRating]);
+    }, [stars,starRating]);
     const handlePressIn = () => {
         Animated.spring(animatedButtonScale, {
             toValue: 1.5,

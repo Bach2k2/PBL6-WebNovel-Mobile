@@ -20,8 +20,8 @@ const getBookmarkedData = async (user: User, accessToken: any) => {
         throw new Error("Failed to fetch bookmarked data");
     }
 };
-export const postBookmarkData = async (userId: any, novelId: any,chapterId:any, accessToken: any) => {
- 
+export const postBookmarkData = async (userId: any, novelId: any, chapterId: any, accessToken: any) => {
+
     const axiosConfig = {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -41,8 +41,8 @@ export const postBookmarkData = async (userId: any, novelId: any,chapterId:any, 
     }
 };
 
-export const putBookmarkData = async (userId: any, novelId: any,chapterId:any, accessToken: any) => {
- 
+export const putBookmarkData = async (userId: any, novelId: any, chapterId: any, accessToken: any) => {
+
     const axiosConfig = {
         headers: {
             'Authorization': `Bearer ${accessToken}`,

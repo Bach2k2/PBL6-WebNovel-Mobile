@@ -69,7 +69,17 @@ const EditChapter = ({ route, navigation }: any) => {
                         .then(response => response.text())
                         .then(data => {
                             // Update state with HTML content
+                            const bodyContentMatch = data.match(/<body.*?>([\s\S]*?)<\/body>/i);
+
+                            // Check if there's a match
+                            if (bodyContentMatch && bodyContentMatch.length > 1) {
+                                data = bodyContentMatch[1];
+                                console.log(data);
+                            } else {
+                                console.log('No <body> tag found or empty content.');
+                            }
                             setContent(data);
+                            console.log(data);
                             setHtmlContent(`<html><body style="fontSize:5">${data}</body></html>`);
                             setIsLoading(false);
                             // console.log(data);
@@ -97,6 +107,7 @@ const EditChapter = ({ route, navigation }: any) => {
             return;
         }
 
+        console.log(content)
         let options = {
             html: `<html><body>${content}</body></html>`,
             // html: '<html><body><h1>Hello</h1><div><p>Hi</p></div></body></html>',
@@ -106,8 +117,8 @@ const EditChapter = ({ route, navigation }: any) => {
         };
 
         try {
-            const pdfContent = await RNFS.readFile(chapter.fileContent, 'base64');
-            console.log('hello:', pdfContent);
+            // const pdfContent = await RNFS.readFile(chapter.fileContent, 'base64');
+            // console.log('hello:', pdfContent);
             const file = await RNHTMLtoPDF.convert(options);
             console.log(file);
             if (file.filePath) {

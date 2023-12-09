@@ -58,19 +58,23 @@ export const getNovelByAccount = async (accountId: any) => {
     }
 }
 
-export const createNovel = async (novel: any, accessToken: any) => {
-    console.log('nv.genreIDs',novel.GenresId)
+export const createNovel = async (novel: any, GenreIds: any, accessToken: any) => {
+    console.log('genreIDs', novel)
     const formData = new FormData();
     formData.append('Name', novel.Name);
     formData.append('Title', novel.Title);
     formData.append('AccountId', novel.AccountId);
     formData.append('Description', novel.Description);
-    formData.append('GenreIds', novel.GenresId);
+    // formData.append('GenreIds', novel.GenreIds);
+    GenreIds.forEach((genreId: any) => {
+        formData.append('GenreIds', genreId);
+    });
     formData.append('File', {
         uri: novel.File,
         name: 'novelImage.jpg',
         type: 'image/jpeg',
     });
+    console.log(formData);
     const axiosConfig = {
         headers: {
             'Authorization': `Bearer ${accessToken}`,

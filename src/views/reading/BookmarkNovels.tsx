@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import getBookmarkedData from "../../hook/BookmarkedApi";
 import { useEffect, useState, useContext, useCallback } from "react";
 import { Bookmarked } from "../../models/Bookmarked";
@@ -32,28 +32,52 @@ const BookmarkNovels = () => {
 
     // // Gọi hàm để xóa tất cả dữ liệu
     // clearAsyncStorage();
-    useEffect(() => {
-        const getChapter = async () => {
-            bookmarkedData.map((novel, index) => {
-                getChapterByChapterId(novel.chapterId).then((chapter) => {
-                    // console.log('Chapter', chapter)
-                    novel.chapterIndex = chapter.chapIndex;
-                }
-                );
-            })
+    // useEffect(() => {
+    //     const getChapter = async () => {
+    //         bookmarkedData.map((novel, index) => {
+    //             getChapterByChapterId(novel.chapterId).then((chapter) => {
+    //                 // console.log('Chapter', chapter)
+    //                 novel.chapterIndex = chapter.chapIndex;
+    //             }
+    //             );
+    //         })
 
-        }
-        getChapter();
-    });
+    //     }
+    //     getChapter();
+    // });
 
     useFocusEffect(
         useCallback(() => {
             const fetchData = async () => {
                 try {
                     if (authState.authenticated) {
-                        const data = await getBookmarkedData(user, authState.accessToken);
-                        setBookmarkedData(data);
-                        // console.log(data); // Log the updated preferenceData
+                        // const bmData=[];
+                        await getBookmarkedData(user, authState.accessToken).then((data) => {
+
+                            // const bmData= data.map((bm: Bookmarked) => {
+                            //     getChapterByChapterId(bm.chapterId).then((chapter) => {
+                            //         // console.log('Chapter', chapter)
+                            //         bm.chapterIndex = chapter.chapIndex;
+                            //         // console.log('nv index',bm.chapterIndex);
+                            //         // bookmarkedData.push(bm);
+                            //     });
+                            // })
+                            // console.log('bmData',bmData);
+                            // setBookmarkedData(data);
+                            Promise.all(data.map((bm: Bookmarked) => getChapterByChapterId(bm.chapterId)))
+                                .then((chapters) => {
+                                    // Assuming chapters is an array of resolved values
+                                    const newData = data.map((bm: Bookmarked, index: number) => {
+                                        bm.chapterIndex = chapters[index].chapIndex;
+                                        return bm;
+                                    });
+                                    setBookmarkedData(newData);
+                                })
+                                .catch((error) => {
+                                    console.error("Error fetching chapters:", error);
+                                });
+                        });
+
                     } else {
                         console.log("get bookmark from AsyncStorage");
                         const storedData = await AsyncStorage.getItem('bookmarkList');
@@ -63,29 +87,18 @@ const BookmarkNovels = () => {
                             // console.log('hêllo', parsedData.length);
                         }
                     }
-                } catch (error:any) {
+                } catch (error: any) {
                     console.error('Error fetching data:', error.message);
                     console.error('Stack trace:', error.stack);
                 }
             };
-            const getChapter = async () => {
-                bookmarkedData.map((novel, index) => {
-                    getChapterByChapterId(novel.chapterId).then((chapter) => {
-                        // console.log('Chapter', chapter)
-                        novel.chapterIndex = chapter.chapIndex;
-                    }
-                    );
-                })
-    
-            }
-            getChapter();
 
             fetchData();
 
             return () => {
                 // Cleanup or clear any subscriptions if needed
             };
-        }, [authState.authenticated, user])
+        }, [, authState.authenticated, user])
     );
 
     if (bookmarkedData.length == 0) {
@@ -98,26 +111,29 @@ const BookmarkNovels = () => {
     }
     return (
         <View style={styles.mycontainer} >
-            <View style={styles.row}>
-                {bookmarkedData.map((novel, index) => (
-                    <TouchableOpacity key={index} onPress={() => {
-                        console.log('Press to novel detail');
-                        navigation.navigate('NovelDetail', { novelId: novel.novelId, title: novel.name });
-                    }}>
-                        <View style={styles.novelContainer} >
-                            <Image source={{ uri: novel.imagesURL }} alt='image' style={styles.novelImage} />
-                            <View style={styles.novelContent}>
-                                <Text numberOfLines={1} style={styles.novelTitle}>{novel.name}</Text>
-                                <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
-                                <Text numberOfLines={1} style={styles.novelGenre}>{novel.chapterIndex}/{novel.numChapter}</Text>
+            <ScrollView style={styles.mycontainer}>
+                {bookmarkedData.map((bookmark, index) => (
+                    <View key={index} style={styles.row}>
+                        <TouchableOpacity style={{ flex: 1, }} onPress={() => {
+                            // console.log('Press to novel detail');
+                            navigation.navigate('NovelDetail', { novelId: bookmark.novelId, title: bookmark.name });
+                        }}>
+                            <View style={styles.novelContainer} >
+                                <Image source={{ uri: bookmark.imagesURL }} alt='image' style={styles.novelImage} />
+                                <View style={styles.novelContent}>
+                                    <Text numberOfLines={1} style={styles.novelTitle}>{bookmark.name}</Text>
+                                    <Text numberOfLines={1} style={styles.novelAuthor}>{bookmark.author}</Text>
+                                    <Text numberOfLines={1} style={styles.novelGenre}>{bookmark.chapterIndex}/{bookmark.numChapter}</Text>
+                                </View>
+                                <Icon.Button name='plus-box' size={24} color="black" backgroundColor="transparent" style={{ marginRight: 'auto', alignSelf: 'flex-end', right: 10, }} />
                             </View>
-                            <Icon.Button name='plus-box' size={24} color="black" backgroundColor="transparent" />
-                        </View>
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
                 ))
                 }
-            </View>
+            </ScrollView>
         </View>
+
     );
 };
 const styles = StyleSheet.create({
@@ -127,12 +143,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         // margin: 10,
         width: '100%',
+        flexDirection: 'column',
     },
     mycontainer: {
-        // flex: 1,
         flex: 1,
         margin: 10,
+        // justifyContent: 'center',
+        // alignItems: 'center',
         width: '100%',
+        height: '100%',
+
 
     },
     nodataContainer: {
@@ -149,15 +169,19 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
+        // flex:1,
+        marginTop: 10,
+        // alignItems:'flex-start',
+        // justifyContent:'flex-start',
     },
     novelContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        margin: 5,
-        width: '100%',
+        // margin: 5,
+        // width: '100%',
     },
     novelContent: {
-        // flex: 1,
+        flex: 1,
         flexDirection: 'column',
     },
     novelImage: {

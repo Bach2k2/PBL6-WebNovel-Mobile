@@ -12,7 +12,7 @@ import NovelDetailSkeleton from '../../components/Loading/NovelDetailSkeleton';
 import { getCommentFromNovelId, postCommentApi } from '../../hook/CommentApi';
 import { Comment } from '../../models/Comment';
 
-import getPreferenceData, { postPreferenceData } from '../../hook/PreferenceApi';
+import getPreferenceData, { getPreferenceByUANApi, postPreferenceData } from '../../hook/PreferenceApi';
 import { Preference } from '../../models/Preference';
 import { AuthContext } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,6 +37,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     const [ratingList, setRatingList] = useState<Rating[]>([]);
     const [stars, setStars] = useState(0);
     const [isRating, setIsRating] = useState(false);
+    const [isExistLibrary, setIsExistLibrary] = useState(false);
 
     const { authState, getUserData } = useContext(AuthContext);
     const [user, setUser] = useState<User | null>()
@@ -65,76 +66,9 @@ const NovelDetail = ({ navigation, route }: any) => {
     })
     useEffect(() => {
         setUser(getUserData());
-    }, [user, getUserData])
+    }, [, user, getUserData])
 
     // Call api get rating before if it is exist
-    useEffect(() => {
-        const fetchRating = async () => {
-            try {
-                setLoading(true);
-                await setUser(getUserData());// this is important
-                if (user) {
-                    const rating = await getRatingByUserApi(novel?.id, user?.id, authState.accessToken);
-                    console.log(`rating: ${rating}`);
-                    if (rating) {
-                        setStars(rating.rateScore);
-                        setIsRating(true);
-
-                    } else {
-                        setStars(0);
-                        setIsRating(false);
-                    }
-                    setLoading(false);
-                } else {
-                    console.log('not login')
-                }
-
-            } catch (error) {
-                console.error('Error fetching rating:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchRating();
-    }, [, user]);
-    useFocusEffect(
-        useCallback(() => {
-            const fetchRating = async () => {
-                try {
-                    setLoading(true);
-                    await setUser(getUserData());// this is important
-                    if (user) {
-                        const rating = await getRatingByUserApi(novel?.id, user?.id, authState.accessToken);
-                        console.log(`rating: ${rating}`);
-                        if (rating) {
-                            setStars(rating.rateScore);
-                            setIsRating(true);
-
-                        } else {
-                            setStars(0);
-                            setIsRating(false);
-                        }
-                        setLoading(false);
-                    } else {
-                        console.log('not login')
-                    }
-
-                } catch (error) {
-                    console.error('Error fetching rating:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-            if (user) {
-                fetchRating();
-            }
-
-            return () => {
-                // Cleanup or clear any subscriptions if needed
-            };
-
-        }, [,novel,user])
-    )
 
     const fetchNovelDetailData = async () => {
         await getNovelById(novelId).then((data) => {
@@ -184,18 +118,41 @@ const NovelDetail = ({ navigation, route }: any) => {
             console.log('Lay danh sach truyen binh luan that bai')
         });
     }
-    // const fetchRatingFromNovel = async () => {
-    //     comments.map((comment) => {
-    //         console.log(comment.accountId)
-    //         getRatingByUserApi(novelId, comment.accountId, authState).then((data) => {
-    //             comment.ratingScore = data.ratingScore;
-    //         });
-    //     })
-    // }
+    // ----------------------------------------------------------------
+    const fetchRating = async () => {
+        try {
+            setLoading(true);
+            setUser(getUserData());
+            console.log('userday', user)
+            //f (user) {
+            getRatingByUserApi(novelId, user?.id, authState.accessToken)
+                .then((rating) => {
+                    // setUser(getUserData());
+                    console.log(`rating: ${rating}`);
+                    console.log(`rating: ${rating.rateScore}`);
+                    if (rating) {
+                        setStars(rating.rateScore);
+                        setIsRating(true);
+                    } else {
+                        setStars(0);
+                        setIsRating(false);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching rating:", error);
 
+                });
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching rating:', error);
+        } finally {
+            // setLoading(false);
+        }
+    };
 
     // Fetch novels and comments
     useEffect(() => {
+        setLoading(true);
         fetchNovelDetailData();
         fetchChapterByNovelId();
         fetchRcmData();
@@ -203,55 +160,75 @@ const NovelDetail = ({ navigation, route }: any) => {
             fetchRelatedData();
         }
         fetchCommentFromNovel();
-        // fetchRatingFromNovel();
+        fetchRating();
+
         setTimeout(() => {
             setLoading(false);
         }, 1000);
 
-    }, []);
-    const [preferList, setPreferList] = useState<Preference[]>([]);
+    }, [, user, getUserData, isExistLibrary]);
+
     useEffect(() => {
-        const fetchPreferenceData = async () => {
-            if (authState.authenticated && user) {
-                getPreferenceData(user, authState.accessToken).then((data) => {
-                    setPreferList(data);
-                }).catch((error) => {
-                    console.log(error);
-                })
-
-            } else {
-                const data = await AsyncStorage.getItem('preferList');
-                if (data) {
-                    setPreferList(JSON.parse(data));
+        const fetchPreferenceByUserAndNovel = async () => {
+            if (user) {
+                const res = await getPreferenceByUANApi(user, novelId, authState.accessToken);
+                if (res) {
+                    setIsExistLibrary(true);
                 } else {
-                    setPreferList([]);
+                    setIsExistLibrary(false);
                 }
-
             }
+
         }
+        fetchPreferenceByUserAndNovel();
+    }, [novelId, user])
+
+    const [preferList, setPreferList] = useState<Preference[]>([]);
+    const fetchPreferenceData = async () => {
+        if (authState.authenticated && user) {
+            getPreferenceData(user, authState.accessToken).then((data) => {
+                setPreferList(data);
+            }).catch((error) => {
+                console.log(error);
+            })
+
+        } else {
+            const data = await AsyncStorage.getItem('preferList');
+            if (data) {
+                setPreferList(JSON.parse(data));
+            } else {
+                setPreferList([]);
+            }
+
+        }
+    }
+    useEffect(() => {
         fetchPreferenceData()
     }, [])
 
     const handleAddToLib = async (novel: Novel) => {
         console.log('add novel into lib', novel.id);
-        console.log(preferList)
+        // console.log(preferList)
         if (user) {
             if (
                 preferList &&
                 preferList.some(item => item.novelId === novel.id && item.accountId === user.id)
             ) {
                 novel.isExistLib = true;
+                setIsExistLibrary(true)
                 console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
             } else {
+                setIsExistLibrary(false)
                 novel.isExistLib = false;
                 console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
-            }
-            await postPreferenceData(user.id, novel.id, authState.accessToken).then((response) => {
-                console.log(response)
+                await postPreferenceData(user.id, novel.id, authState.accessToken).then((response) => {
+                    console.log(response)
 
-            }).catch((err) => {
-                ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
-            })
+                }).catch((err) => {
+                    ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
+                })
+            }
+
         } else {
             const newPreferList = {
                 novelId: novel.id,
@@ -293,6 +270,7 @@ const NovelDetail = ({ navigation, route }: any) => {
             }
             // console.log('chua dang nhap');
         }
+        fetchPreferenceData()
     }
     const handleDeleteRating = async () => {
         if (user) {
@@ -329,11 +307,14 @@ const NovelDetail = ({ navigation, route }: any) => {
     function handleAddingBtnPress(): void {
         // console.log('function not implemented');
         try {
-            if (novel) {
+            if (novel && !isExistLibrary) {
                 handleAddToLib(novel);
+            } else {
+                Alert.alert('Something went wrong')
             }
 
-        } catch (err) {
+        }
+        catch (err) {
         }
 
     }
@@ -445,7 +426,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                     <View style={styles.row}>
                         <View style={styles.column}>
                             <Text style={styles.descHeader}>Description:</Text>
-                            <Text>{novel?.description}</Text>
+                            <Text style={styles.normalText}>{novel?.description}</Text>
                         </View>
                     </View>
 
@@ -492,7 +473,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                                         <Image style={styles.avatar} source={{ uri: 'https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3' }} />
                                     </View>
                                     <View style={{ marginLeft: 5, flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', flex: 1 }}>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>{comment.nickName || comment.username}</Text>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>{comment.username || comment.nickName}</Text>
                                         <View style={styles.stars}>
                                             <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 1) ? styles.starSelected : styles.starUnselected} />
                                             <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 2) ? styles.starSelected : styles.starUnselected} />
@@ -599,9 +580,11 @@ const NovelDetail = ({ navigation, route }: any) => {
                 <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
                     <Text>Reading now</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => handleAddingBtnPress()}>
+                {isExistLibrary ? (
+                    <Icon name="check" size={20} style={styles.button} />
+                ) : (<TouchableOpacity style={styles.button} onPress={() => handleAddingBtnPress()}>
                     <Icon name="plus" size={20} />
-                </TouchableOpacity>
+                </TouchableOpacity>)}
             </View>
         </View>
 
@@ -831,6 +814,10 @@ const styles = StyleSheet.create({
         marginTop: 5,
         right: 20,
     },
+    normalText: {
+        fontSize: 18,
+        color: 'black',
+    }
 });
 
 export default NovelDetail;

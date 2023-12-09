@@ -21,6 +21,23 @@ const getPreferenceData = async (user: User, accessToken: any) => {
     }
 };
 
+export const getPreferenceByUANApi = async (user: User, novelId: any, accessToken: any) => {
+
+    const axiosConfig = {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    };
+    try {
+        const response = await axiosInstance.get(`preferences/${user.id}/${novelId}`, axiosConfig);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch preferences data");
+    }
+};
+
+
 export const postPreferenceData = async (userId: any, novelId: any, accessToken: any) => {
 
     const axiosConfig = {

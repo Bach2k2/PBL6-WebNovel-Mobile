@@ -22,7 +22,8 @@ const CreateNovel = ({ route, navigation }: any) => {
   const [description, setDescription] = useState('');
   const [author, setAuthor] = useState('');
   const [genreList, setGenreList] = useState<genreType[]>([]);
-  const [selectGenre, setSelectedGenres] = useState([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [selectGenres, setSelectedGenres] = useState([]);
   const [isDisableBtn, setDisableCreateBtn] = useState(true);
 
   const handleConfirm = (pItems: any) => {
@@ -34,7 +35,7 @@ const CreateNovel = ({ route, navigation }: any) => {
     Title: '',
     Description: '',
     AccountId: '',
-    GenresId: [],
+    GenreIds: [1],
     File: null,
   });
 
@@ -151,9 +152,17 @@ const CreateNovel = ({ route, navigation }: any) => {
   };
 
   const onChangeGenres = (genres: any) => {
-    console.log('genres',genres);
+
+    console.log(genres);
     setSelectedGenres(genres);
-    setPostNovel({ ...postNovel, GenresId: genres });
+    // console.log('s', selectGenres)
+    // // console.log(genreList);
+    // const selectedGenreKeys = selectGenres.map(genre => {
+    //   const foundGenre = genreList.find(item => item.value === genre);
+    //   return foundGenre ? Number.parseInt(foundGenre.key) : null;
+    // }) as number[];
+    // console.log(selectedGenreKeys)
+    setPostNovel({ ...postNovel, GenreIds: selectGenres });
   };
 
   const onChangeImage = (selectedImage: any) => {
@@ -183,11 +192,10 @@ const CreateNovel = ({ route, navigation }: any) => {
 
   const handleCreate = () => {
 
-    // console.log(user.id);
+    console.log(selectGenres);
     if (user) {
-
-      if (postNovel.Name && postNovel.Description && postNovel.AccountId && postNovel.GenresId && postNovel.File) {
-        createNovel(postNovel, authState.getAccessToken())
+      if (postNovel.Name && postNovel.Description && postNovel.AccountId && selectGenres.length > 0 && postNovel.File) {
+        createNovel(postNovel, selectGenres, authState.getAccessToken())
           .then((data) => {
             // console.log("check novel, it's okay");
             // console.log(data);Toast.show({
@@ -203,10 +211,12 @@ const CreateNovel = ({ route, navigation }: any) => {
             // Handle error
           });
       }
+      else {
+        console.log("error");
+      }
     } else {
       console.log("Can't find user");
     }
-
   };
 
 
@@ -239,11 +249,13 @@ const CreateNovel = ({ route, navigation }: any) => {
             <Text style={{ color: 'red', marginLeft: 5 }}>*</Text>
           </View>
           <MultipleSelectList
-            setSelected={(val: any) =>onChangeGenres(val)}
+            setSelected={(val: any) => setSelectedGenres(val)}
             data={genreList}
             //data={genreList.map((genre) => ({ label: genre.value, value: genre.key }))}
-            save="value"
-            onSelect={() => console.log('selected')}
+            save="key"
+            // onSelect={() => {
+            //   console.log()
+            // }}
             label="Genres"
           />
 

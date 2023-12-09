@@ -17,6 +17,7 @@ import NovelGridSkeleton from '../../components/Loading/NovelGridSkeleton';
 import NovelRowSkeleton from '../../components/Loading/NovelRowSkeleton';
 import { Preference } from '../../models/Preference';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '../../models/User';
 
 
 function HotNovels() {
@@ -27,6 +28,7 @@ function HotNovels() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>()
   const { getUserData } = useContext(AuthContext)
+  const [checkedNovels, setCheckedNovels] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     setUser(getUserData());

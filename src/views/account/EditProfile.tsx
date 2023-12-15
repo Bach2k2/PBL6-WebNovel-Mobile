@@ -1,38 +1,39 @@
 import { AuthContext } from '../../context/AuthContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { User } from '../../models/User';
-import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform } from 'react-native';
+import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform, } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import ImagePicker from 'react-native-image-crop-picker';
 import { ActivityIndicator, TextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { UpdateAccountApi } from '../../hook/AccountApi';
+// import DatePicker from 'react-native-datepicker'
+import GetAccountApi, { UpdateAccountApi } from '../../hook/AccountApi';
 
 const EditProfile = ({ navigation }: any) => {
 
+    const [mounted, setMounted] = useState(false);
     // const [user, setUserData] = useState<User | null>(null);
     const [isLoading, setLoading] = useState(true)
     const { getUserData } = useContext(AuthContext);
     const [avatarImg, setAvatarImg] = useState('https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3')
-    const user = getUserData()
     const [date, setDate] = useState(new Date())
     const [dateString, setDateString] = useState("");
     const [isShowDatePicker, setShowDatePicker] = useState(false);
     const [formReady, setFormReady] = useState(false);
     const authContext = useContext(AuthContext);
-    const { authState } = useContext(AuthContext)
-    const [updateUser, setUpdateUser] = useState<User>(
+    const { authState, setUserData } = useContext(AuthContext)
+    const [updateUser, setUpdateUser] = useState<User | null>(
         {
-            id: '',
+            id: "",
             nickName: "",
             username: "",
             password: "",
             email: "",
             isAdmin: false,
             roleIds: ["READER"],
-            birthday: new Date(),
-            imagesURL: "",
+            birthday: '0001-01-01',
+            imagesURL: "https://lh3.googleusercontent.com/a/ACg8ocIB4vOa8zS_5XybONwLtpIOqUftfgKmhtthODMANyBNjw=s96-c",
             phone: "",
             walletAmmount: 0,
             isActive: true
@@ -52,26 +53,34 @@ const EditProfile = ({ navigation }: any) => {
         });
     });
 
+    //Hiển thị khi component mount
     useEffect(() => {
-        setFormReady(updateUser.nickName != "" && updateUser.email != "" && updateUser.imagesURL != "")
-        // return () => {
-        //     setFormReady(false);
-        // }
-        // if(formReady){
-
-        // }
-    }, [updateUser])
-    useEffect(() => {
-        if (user) {
-            setUpdateUser(user);
-            setLoading(false);
+        if (!mounted && updateUser && updateUser.birthday) {
+            // console.log('check')
+            setUpdateUser(getUserData());
+            setTimeout(() => {
+                setDateString(updateUser?.birthday || '0001-01-01');
+                setLoading(false);
+                setMounted(true);
+            }, 1000)
+            setDate(new Date(updateUser?.birthday))
         }
-    }, [user]);
+    }, [mounted, getUserData, updateUser]);
+
+
+    useEffect(() => {
+        if (updateUser) {
+            setFormReady(updateUser.nickName != "" && updateUser.username != "" && updateUser.email != "" && updateUser.imagesURL != "")
+        }
+    }, [getUserData, updateUser])
+
+
 
 
     const handleIconPress = () => {
 
     }
+
     const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
     const toggleBottomSheet = () => {
         setBottomSheetVisible(!isBottomSheetVisible);
@@ -83,11 +92,15 @@ const EditProfile = ({ navigation }: any) => {
     const onChange = ({ type }: any, selectedDate: any) => {
         if (type == "set") {
             const currentDate = selectedDate
-            setUpdateUser((prevUser) => ({
+            console.log('cr', currentDate)
+            setDateString(currentDate.toISOString().slice(0, 10));
+            setDate(currentDate)
+            console.log(dateString)
+            setUpdateUser(prevUser => ({
                 ...prevUser,
-                birthday: currentDate
-            }))
-            setDateString(currentDate.toDateString());
+                birthday: currentDate.toISOString().slice(0, 10)
+            }));
+            console.log('birthday', updateUser?.birthday)
             if (Platform.OS === "android") {
                 toggleDatePicker();
             }
@@ -98,46 +111,22 @@ const EditProfile = ({ navigation }: any) => {
         }
     }
 
-
-
-    const takePhotoFromCamera = () => {
-        ImagePicker.openCamera({
-            compressImageMaxWidth: 300,
-            compressImageMaxHeight: 300,
-            cropping: true,
-            compressImageQuality: 0.7
-        }).then(image => {
-            console.log(image);
-            // onChangeImage(image);
-            // setPostNovel({ ...postNovel, File: image.path });
-            toggleBottomSheet();
-        });
-    }
-    const choosePhotoFromLibrary = () => {
-        ImagePicker.openPicker({
-            width: 300,
-            height: 300,
-            cropping: true,
-            compressImageQuality: 0.7
-        }).then(image => {
-            console.log(image);
-            //   onChangeImage(image);
-            // setPostNovel({ ...postNovel, File: image.path });
-            toggleBottomSheet();
-        });
-    }
     const handleUpdateUser = async () => {
-        console.log(updateUser)
-        const updateAccount = UpdateAccountApi(authContext);
-        const res = await updateAccount(updateUser,authState.accessToken)
-        console.log(res);
+        if (formReady && updateUser) {
 
+            const updateAccount = UpdateAccountApi(authContext);
+            const res = await updateAccount(updateUser, authState.accessToken)
+            console.log(res)
+            const user = await GetAccountApi(updateUser.id, authState.accessToken)
+            setUserData(user);
+            setUpdateUser(getUserData());
+        }
     }
     const onChangeUsername = (username: string) => {
-        setUpdateUser({
-            ...updateUser, username: username
-        })
-        console.log(username)
+        setUpdateUser(prevUser => ({
+            ...prevUser,
+            username: username,
+        }));
     }
 
 
@@ -156,7 +145,7 @@ const EditProfile = ({ navigation }: any) => {
             </View>
             <View style={styles.row}>
                 <View style={styles.avatar_container}>
-                    <Image style={styles.avatar} source={{ uri: user?.imagesURL }} />
+                    <Image style={styles.avatar} source={{ uri: updateUser?.imagesURL }} />
                     <TouchableOpacity style={styles.iconContainer} onPress={handleIconPress}>
                         <Icon name="camera" size={30} color={'white'} />
                     </TouchableOpacity>
@@ -166,7 +155,7 @@ const EditProfile = ({ navigation }: any) => {
                 <View style={{ marginTop: 5, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={styles.label}>Username</Text>
                     <View style={styles.inputContainer} >
-                        <TextInput style={styles.input} value={updateUser.username} onChangeText={onChangeUsername} />
+                        <TextInput style={styles.input} value={updateUser?.username} onChangeText={onChangeUsername} />
                     </View>
                 </View>
             </View>
@@ -174,7 +163,7 @@ const EditProfile = ({ navigation }: any) => {
                 <View style={{ marginTop: 5, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={styles.label}>Email</Text>
                     <View style={styles.inputContainer} >
-                        <TextInput style={styles.input} value={updateUser.email} />
+                        <TextInput style={styles.input} value={updateUser?.email} />
                     </View>
 
                 </View>
@@ -197,20 +186,19 @@ const EditProfile = ({ navigation }: any) => {
 
                             <TextInput
                                 style={styles.input}
-                                placeholder='Wed Dec 4 2022'
+                                placeholder='2022-4-11'
                                 value={dateString}
                                 onChangeText={setDateString}
                                 editable={false} />
-
                         </Pressable>
                     </View>
                     {isShowDatePicker && (
                         <DateTimePicker
-
                             mode="date"
                             display="spinner"
                             onChange={onChange}
                             value={date}
+                        // format="YYYY-MM-DD"
                         />
                     )}
                 </View>

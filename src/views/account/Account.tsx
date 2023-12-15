@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,6 +12,7 @@ import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
 const AccountNavigator = createNativeStackNavigator();
 
 function Account() {
+
     const navigation = useNavigation();
 
     return (
@@ -31,6 +32,7 @@ function Account() {
 }
 
 const AccountMainPage = ({ navigation }: { navigation: any }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [user, setUserData] = useState<User | null>(null);
     const { getUserData } = useContext(AuthContext);
     const [isShownBottomSheet, setShowBottomSheet] = useState(false);
@@ -39,10 +41,60 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
     }
 
 
+    // useEffect(() => {
+    //     setUserData(getUserData());
+    //     console.log('call user when user change in account page:', user)
+    // }, [,getUserData]); // Cập nhật khi có sự thay đổi 
+    //use callback:  khong khac
+
+    // useEffect(() => {
+    //     setIsLoading(true);
+    //     setUserData(prevUserData => {
+    //         const newUserData = getUserData();
+    //         console.log('call user when user changes in account page:', newUserData);
+    //         return newUserData;
+    //     });
+    //     setIsLoading(false);
+    // }, [getUserData]);
+
+
     useEffect(() => {
-        setUserData(getUserData());
-        console.log('call user when user change', user)
-    }, [user, getUserData]); // Cập nhật khi có sự thay đổi cua
+        const fetchUserData = async () => {
+            try {
+                setIsLoading(true);
+                const newUserData = await getUserData();
+                setUserData(newUserData);
+                console.log('call user when user changes in account page:', newUserData);
+            } catch (error) {
+                // Handle any errors that might occur during the async operation
+                console.error('Error fetching user data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData(); // Call the async function
+
+    }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                setIsLoading(true);
+                const newUserData = await getUserData();
+                setUserData(newUserData);
+                console.log('call user when user changes in account page:', newUserData);
+            } catch (error) {
+                // Handle any errors that might occur during the async operation
+                console.error('Error fetching user data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData(); // Call the async function
+
+    }, [user, getUserData]);
 
     function handleNavigate(path: string) {
         console.log(path);
@@ -50,7 +102,14 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
             case 'EmailBox':
                 {
                     navigation.navigate('EmailBox');
+                    break;
                 }
+            case 'PaymentHistory':
+                {
+                    navigation.navigate('PaymentHistory');
+                    break;
+                }
+
         }
     }
     const handleCoinExchange = () => {
@@ -61,6 +120,11 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
         }
     }
 
+    if (isLoading) {
+        return (
+            <ActivityIndicator size={'large'} color={'black'} />
+        );
+    }
     return (
         <View>
             <ScrollView>
@@ -87,7 +151,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                                     ) :
                                         (<Image source={require('../../assets/img/avt1.jpg')} style={styles.avatar} />)
                                     }
-                                    <Text style={styles.username}>{user?.username}</Text>
+                                    <Text style={styles.username}>{user?.nickName || user?.username}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>) :

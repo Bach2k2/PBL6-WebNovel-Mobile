@@ -1,17 +1,17 @@
 export interface User {
-    id: string,
+    id?: string,
     username?: string,
     password?: string,
     email?: string,
     roleName?: string[],
     nickName?: string,
-    imagesURL: string,
-    birthday: Date,
-    walletAmmount: number,
+    imagesURL?: string,
+    birthday?: string,
+    walletAmmount?: number,
     // status?: 0,
     phone?: string,
     roleIds?: string[],
     isAdmin?: boolean,
-    isActive: boolean
+    isActive?: boolean
 
 }

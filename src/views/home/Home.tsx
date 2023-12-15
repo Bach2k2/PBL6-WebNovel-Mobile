@@ -50,7 +50,7 @@ function HotNovels() {
       }
     }
     fetchData();
-  }, [,user]);
+  }, [, user]);
 
   const [headerSticky, setHeaderSticky] = useState(false);
 
@@ -236,7 +236,7 @@ function NovelsList({ navigation }: any) {
       {novels.map((novel, index) => (
         <View key={index}>
           <TouchableOpacity style={styles.novelContainer} onPress={() => {
-            navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.name });
+            navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title });
           }}>
             <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
             <View style={styles.novelContent}>

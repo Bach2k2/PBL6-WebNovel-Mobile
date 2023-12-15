@@ -16,19 +16,14 @@ const SignInBottomSheet = ({ isVisible, onClose }: any) => {
     }
     const loginByGG = async () => {
         try {
-            
             const userData = handleLoginByGG(authContext)
-            // isVisible = false;
-            // console.log(isVisible);
             onClose();
             setTimeout(() => {
                 setLoading(true);
-                navigation.navigate('Account');
+                // navigation.navigate('Account');
                 // navigation.goBack(); // Go back
             }, 5000);
-            //setLoading(false);
         } catch (error) {
-            // Toast.show("ERROR");
         }
 
     }

@@ -36,7 +36,7 @@ import { User } from '../models/User';
 
 // };
 
-const GetAccountApi = (authContext: any) => async (accountId: any, accessToken: any) => {
+const GetAccountApi = async (accountId: any, accessToken: any) => {
   const axiosConfig = {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -45,9 +45,8 @@ const GetAccountApi = (authContext: any) => async (accountId: any, accessToken: 
   try {
     const response = await axiosInstance.get(`/accounts/${accountId}`, axiosConfig);
     if (response.status === 200) {
-      console.log('Lấy dữ liệu thành công');
       console.log(response.data);
-      authContext.setUserData(response.data);
+      // authContext.setUserData(response.data);
     } else if (response.status === 500) {
       console.error('Lỗi server 500!');
     } else {
@@ -63,33 +62,38 @@ const GetAccountApi = (authContext: any) => async (accountId: any, accessToken: 
 
 
 export const UpdateAccountApi = (authContext: any) => async (user: User, accessToken: any) => {
-  console.log('user', user);
+  console.log('user in update api', user);
   const formData = new FormData();
   formData.append('Id', user.id)
   formData.append('Nickname', user.nickName)
   formData.append('Username', user.username)
-  formData.append('Password', user.password)
-  formData.append('ConfirmPassword', user.password)
+  formData.append('Password', null)
+  formData.append('ConfirmPassword', null)
   formData.append('Email', user.email)
   formData.append('IsAdmin', user.isAdmin)
   formData.append('RoleIds', user.roleIds)
-  formData.append('Phone', user.email)
+  formData.append('Phone', user.phone)
   formData.append('WalletAmmount', user.walletAmmount)
   formData.append('IsActive', user.isActive)
-  formData.append('File', user.imagesURL)
+  // formData.append('File', user.imagesURL)
+  formData.append('File', {
+    uri: user.imagesURL,
+    name: 'novelImage.jpg',
+    type: 'image/jpeg',
+  });
   formData.append('Birthday', user.birthday)
+  // console.log('fd inside api', formData);
+  // console.log(accessToken);
   const axiosConfig = {
     headers: {
       'Content-Type': 'multipart/form-data',
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
     },
   };
   try {
     const response = await axiosInstance.put(`/accounts/`, formData, axiosConfig);
     if (response.status === 200) {
       console.log('Lấy dữ liệu thành công');
-      console.log(response.data);
-      authContext.setUserData(response.data);
     } else if (response.status === 500) {
       console.error('Lỗi server 500!');
     } else {

@@ -2,13 +2,14 @@
  * @format
  */
 
-import {AppRegistry} from 'react-native';
+import { AppRegistry } from 'react-native';
 import App from './src/App';
-import {name as appName} from './app.json';
+import { name as appName } from './app.json';
 import { AuthProvider } from './src/context/AuthContext';
 import { AxiosProvider } from './src/context/AxiosContext';
 import React from 'react';
 import { decode, encode } from 'base-64';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -22,7 +23,7 @@ const Root = () => {
   return (
     <AuthProvider>
       <AxiosProvider>
-        <App />
+          <App />
       </AxiosProvider>
     </AuthProvider>
   );

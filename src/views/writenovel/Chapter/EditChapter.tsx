@@ -45,18 +45,6 @@ const EditChapter = ({ route, navigation }: any) => {
             formData.append('StoreFile', true);
             const resData = await convertPdfToHtml(formData);
 
-            // if(resData){
-            //     console.log(resData)
-            //     fetch(resData.Files.Url)
-            //     .then(response => response.text())
-            //     .then(data => {
-            //         // Update state with HTML content
-            //         setContent(data);
-            //         setHtmlContent(`<html><body style="fontSize:5">${data}</body></html>`)
-            //         console.log(data);
-            //     })
-            //     .catch(error => console.error('Error fetching HTML:', error));
-            // }
             if (resData && resData.Files && resData.Files.length > 0) {
                 const firstFile = resData.Files[0];
 

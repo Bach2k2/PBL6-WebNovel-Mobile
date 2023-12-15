@@ -37,29 +37,11 @@ export const handleAuth = async ({ authContext, response }: any) => {
 
     const userId = decoded.nameidentifier;
 
-    console.log(userId);
-    const accountApi = GetAccountApi(authContext);
-    const userData = await accountApi(userId, accessToken);
+    const userData = await GetAccountApi(userId, accessToken);
+    // userData.birthday= new Date(userData.birthday);// Đổi là hợp lý
     await authContext.setUserData(userData); // thành công, đã check
     return userData;
 }
 
 
-// export const signOut = async ({authContext}:any) => {
-//     try {
-//         await GoogleSignin.revokeAccess();
-//         await GoogleSignin.signOut();
-//         authContext.logout();
-//         //   auth()
-//         //     .signOut()
-//         //     .then(() => alert('Your are signed out!'));
-//         //   setloggedIn(false);
-//         // setuserInfo([]);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// };
-
-
-// export default handleAuth
 

@@ -120,6 +120,7 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
             console.log(userId);
             const accountApi = GetAccountApi(authContext);
             const userData = await accountApi(userId, accessToken);
+          //  console.log(userData);
             await authContext.setUserData(userData); // thành công, đã check
             Toast.show({
                 type: 'success',

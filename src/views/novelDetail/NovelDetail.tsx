@@ -23,15 +23,19 @@ import GetAccountApi from '../../hook/AccountApi';
 import { Rating } from '../../models/Rating';
 import Stars from '../../components/StarRating/Stars';
 import { User } from '../../models/User';
+
 const NovelDetail = ({ navigation, route }: any) => {
     // const navigation = useNavigation();
-    const [novel, setNovel] = useState<Novel>();
-    const [chapter, setChapters] = useState<Chapter[]>([]);
     const { novelId } = route.params;
+    const [novel, setNovel] = useState<Novel>();
+    //Lay danh sach chapter
+    const [chapter, setChapters] = useState<Chapter[]>([]);
+    
     const [isDownload, setDownloadStatus] = useState(false);
+
     const [rcmNovel, setRcmNovels] = useState<Novel[]>([]);
     const [relatedNovel, setRelatedNovels] = useState<Novel[]>([]);
-    const [loading, setLoading] = useState(true);
+
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentText, setCommentText] = useState('');
     const [ratingList, setRatingList] = useState<Rating[]>([]);
@@ -41,8 +45,8 @@ const NovelDetail = ({ navigation, route }: any) => {
 
     const { authState, getUserData } = useContext(AuthContext);
     const [user, setUser] = useState<User | null>()
-    // const  = useContext(AuthContext);
-    // const user = getUserData();
+
+    const [loading, setLoading] = useState(true);
 
     const [generalStarCount, setGeneralStarCount] = useState(3.5);
     const [customStarCount, setCustomStarCount] = useState(2.5);
@@ -63,7 +67,7 @@ const NovelDetail = ({ navigation, route }: any) => {
             }
 
         })
-    })
+    },[novel])
     useEffect(() => {
         setUser(getUserData());
     }, [, user, getUserData])
@@ -73,7 +77,6 @@ const NovelDetail = ({ navigation, route }: any) => {
     const fetchNovelDetailData = async () => {
         await getNovelById(novelId).then((data) => {
             setNovel(data);
-            // setLoading(false);
         }).catch((error) => {
             console.log('Lay thong tin chi tiet cua novel that bai')
             console.log(error);
@@ -92,7 +95,6 @@ const NovelDetail = ({ navigation, route }: any) => {
     const fetchRcmData = async () => {
         await getNovelDataExcept(novelId).then((data) => {
             setRcmNovels(data);
-            // setLoading(false);
         }).catch((err) => {
             console.error(err);
             console.log('Lay danh sach recommend that bai')
@@ -112,7 +114,6 @@ const NovelDetail = ({ navigation, route }: any) => {
     const fetchCommentFromNovel = async () => {
         getCommentFromNovelId(novelId).then((data) => {
             setComments(data);
-            console.log(data)
             // setCommentsLength(data.length);
         }).catch((err) => {
             console.log('Lay danh sach truyen binh luan that bai')
@@ -123,8 +124,6 @@ const NovelDetail = ({ navigation, route }: any) => {
         try {
             setLoading(true);
             setUser(getUserData());
-            console.log('userday', user)
-            //f (user) {
             getRatingByUserApi(novelId, user?.id, authState.accessToken)
                 .then((rating) => {
                     // setUser(getUserData());
@@ -142,21 +141,19 @@ const NovelDetail = ({ navigation, route }: any) => {
                     console.error("Error fetching rating:", error);
 
                 });
-            setLoading(false);
+            // setLoading(false);
         } catch (error) {
             console.error('Error fetching rating:', error);
         } finally {
-            // setLoading(false);
         }
     };
 
     // Fetch novels and comments
     useEffect(() => {
-        setLoading(true);
         fetchNovelDetailData();
         fetchChapterByNovelId();
         fetchRcmData();
-        if (novel?.genreIds[0]) { // them dieu kien
+        if (novel?.genreIds[0]) {
             fetchRelatedData();
         }
         fetchCommentFromNovel();
@@ -164,9 +161,12 @@ const NovelDetail = ({ navigation, route }: any) => {
 
         setTimeout(() => {
             setLoading(false);
-        }, 1000);
+            console.log('Loading')
+        }, 2000);
 
-    }, [, user, getUserData, isExistLibrary]);
+    }, [user, isExistLibrary]);
+
+
 
     useEffect(() => {
         const fetchPreferenceByUserAndNovel = async () => {
@@ -213,14 +213,13 @@ const NovelDetail = ({ navigation, route }: any) => {
             if (
                 preferList &&
                 preferList.some(item => item.novelId === novel.id && item.accountId === user.id)
-            ) {
+            ) { // Trường hợp lib đã có truyện
                 novel.isExistLib = true;
                 setIsExistLibrary(true)
-                console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
             } else {
+                // Trường hợp lib chưa có truyện
                 setIsExistLibrary(false)
                 novel.isExistLib = false;
-                console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
                 await postPreferenceData(user.id, novel.id, authState.accessToken).then((response) => {
                     console.log(response)
 
@@ -577,16 +576,26 @@ const NovelDetail = ({ navigation, route }: any) => {
                 <TouchableOpacity style={styles.buttonDownload} onPress={() => handleDownloadBtnPress()}>
                     {isDownload ? <Icon name="check" size={20} /> : <Icon name="download" size={20} />}
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
+                {
+                    (novel?.numChapter > 0) ? (
+                        <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
+                            <Text>Reading now</Text>
+                        </TouchableOpacity>
+                    ) :
+                        (<TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
+                            <Text>Reading now</Text>
+                        </TouchableOpacity>)
+                }
+                {/* <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
                     <Text>Reading now</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 {isExistLibrary ? (
                     <Icon name="check" size={20} style={styles.button} />
                 ) : (<TouchableOpacity style={styles.button} onPress={() => handleAddingBtnPress()}>
                     <Icon name="plus" size={20} />
                 </TouchableOpacity>)}
             </View>
-        </View>
+        </View >
 
 
     );

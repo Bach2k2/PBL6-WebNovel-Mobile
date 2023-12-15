@@ -41,3 +41,5 @@ selectbox for multiselect
 npm install @react-native-community/datetimepicker
 //
 npm i --save react-native-hyperlink
+// drawer
+npm install @react-navigation/drawer

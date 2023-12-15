@@ -34,8 +34,8 @@ export const LoginApi = async (email:any, password:any) => {
 export const LoginWithGoogleApi = async (userInfo: any) => {
     try {
         const user = userInfo.user
-        console.log('here', user);
-        console.log(userInfo.idToken);
+        // console.log('here', user);
+        // console.log(userInfo.idToken);
 
         const formData = new FormData();
         formData.append('Name', user.name);

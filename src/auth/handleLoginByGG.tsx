@@ -19,11 +19,10 @@ export const handleLoginByGG = async (authContext: any) => {
     try {
         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
         const userInfo = await GoogleSignin.signIn();
-        //   console.log('ui',userInfo)
         const response = await LoginWithGoogleApi(userInfo);
         const userData = await handleAuth({ authContext, response });
         userData.imagesURL = userInfo.user.photo;
-        console.log('ui', userData)
+        userData.nickName = userInfo.user.name
         Toast.show({
             type: 'success',
             text1: 'Login Notification!',

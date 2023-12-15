@@ -7,18 +7,7 @@ import { ActivityIndicator } from 'react-native-paper';
 const Profile = ({ navigation }: any) => {
     const { getUserData } = useContext(AuthContext);
     const [like, setLike] = useState(false);
-    // const user = {
-    //     email: "namtruong0900@gmail.com",
-    //     id: "dckfGkjWXEG7jy4u0zc_rg",
-    //     isAdmin: true,
-    //     nickName: "SkywoodNick",
-    //     phone: "0353670461",
-    //     refreshToken: "3ZzbRuZW8wj7GTdF7ASHY39Rq22+qTWPhhMV4pA2HGI=",
-    //     refreshTokenExpiryTime: "2023-11-15T08:11:45.884609",
-    //     roleIds: ["ADMIN", "DEV"],
-    //     status: 0,
-    //     username: "Skywood",
-    // }
+    
     const handleEditBtn = () => {
         navigation.navigate('EditProfile');
     }
@@ -34,7 +23,7 @@ const Profile = ({ navigation }: any) => {
                     <View style={styles.row}>
                         <View style={styles.avatar_container}>
                             <Image style={styles.avatar} source={{ uri: user.imagesURL }} />
-                            <Text numberOfLines={2} style={styles.username}>{user.username}</Text>
+                            <Text numberOfLines={2} style={styles.username}>{user.nickName||user.username}</Text>
                             <Text style={styles.userid}>ID:{user.id}</Text>
                         </View>
                         <View style={styles.funcBtn}>

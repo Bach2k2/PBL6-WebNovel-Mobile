@@ -16,6 +16,7 @@ const MAX_TRANSLATE_Y = -SCREEN_HEIGHT + 50;
 
 type BottomSheetProps = {
     children?: React.ReactNode;
+    onBackdropPress?: () => void; // Add this prop
 };
 
 export type BottomSheetRefProps = {
@@ -24,7 +25,7 @@ export type BottomSheetRefProps = {
 };
 
 export const BottomSheet = React.forwardRef<BottomSheetRefProps, BottomSheetProps>(
-    ({ children }, ref) => {
+    ({ children, onBackdropPress }, ref) => {
         const translateY = useSharedValue(0);
         const active = useSharedValue(false);
 
@@ -94,8 +95,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: SCREEN_HEIGHT,
         borderRadius: 25,
-        borderColor:'#EBEBEB',
-        borderWidth:2,
+        borderColor: '#EBEBEB',
+        borderWidth: 2,
 
     },
     line: {

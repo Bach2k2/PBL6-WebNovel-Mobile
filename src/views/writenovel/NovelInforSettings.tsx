@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, TextInput } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, TextInput, Alert } from 'react-native'
 import React, { useContext, useEffect, useLayoutEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Novel } from '../../models/Novel'
@@ -6,10 +6,11 @@ import { ImagePickerBS } from '../../components/BottomSheet/ImagePickerBS'
 import { AuthContext } from '../../context/AuthContext'
 import { DeleteNovel, EditNovel } from '../../hook/NovelApi'
 import Modal from 'react-native-modal'
+import { useNavigation } from '@react-navigation/native'
 
 
 const NovelInforSettings = ({ novel }: { novel: Novel }) => {
-
+  const navigation = useNavigation();
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [imageSelect, setImageSelect] = useState('');
   const [isNovelValid, setNovelValid] = useState(false);
@@ -38,8 +39,21 @@ const NovelInforSettings = ({ novel }: { novel: Novel }) => {
 
   const handleDeleteNovel = async () => {
     console.log('delete');
-    const res = await DeleteNovel(novel, authState.accessToken);
-    console.log(res);
+    Alert.alert('Delete novel', 'Are you sure to delete this one', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'OK', onPress: async () => {
+          const res = await DeleteNovel(novel, authState.accessToken);
+          console.log(res);
+          navigation.navigate('WriteDashboard');
+        }
+      },
+    ]);
+
   }
 
   const checkNovelIsValid = () => {
@@ -126,7 +140,7 @@ const NovelInforSettings = ({ novel }: { novel: Novel }) => {
                 <Text style={styles.headerText}>Title</Text>
               </View>
               <View style={styles.rowValue}>
-                <Text>{novel.name}</Text>
+                <Text numberOfLines={1} >{novel.name}</Text>
                 <Icon name="chevron-right" size={20} />
               </View>
 
@@ -177,7 +191,7 @@ const NovelInforSettings = ({ novel }: { novel: Novel }) => {
                 <Text style={styles.headerText}>Description</Text>
               </View>
               <View style={styles.rowValue}>
-                {/* <Text>{novel.description}</Text> */}
+
                 <Icon name="chevron-right" size={20} />
               </View>
             </View>
@@ -242,9 +256,10 @@ const styles = StyleSheet.create({
     left: 0,
   },
   rowValue: {
+    width: '40%',
     alignSelf: 'flex-end',
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     right: 10,
   },

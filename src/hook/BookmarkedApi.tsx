@@ -61,6 +61,30 @@ export const putBookmarkData = async (userId: any, novelId: any, chapterId: any,
         ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
     }
 };
+export const deleteBookmarkApi = async (userId: any, novelId: any, accessToken: any) => {
+
+    const deleteData = {
+        novelId: novelId,
+        accountId: userId,
+    };
+    const axiosConfig = {
+
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    };
+    console.log(userId, novelId, accessToken);
+
+    try {
+        const response = await axiosInstance.delete('bookmarkeds/', { data: deleteData, ...axiosConfig });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
+    }
+};
 
 
 export default getBookmarkedData;

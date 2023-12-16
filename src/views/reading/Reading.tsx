@@ -33,6 +33,8 @@ export default class Reading extends React.Component<{}, ReadingState> {
             { key: 'second', title: 'History' },
         ],
         isBottomSheetVisible: false,
+        isPreferenceGrid: true,
+        isBookmarkGrid: false,
     };
 
     toggleBottomSheet = () => {
@@ -40,6 +42,16 @@ export default class Reading extends React.Component<{}, ReadingState> {
             isBottomSheetVisible: !prevState.isBottomSheetVisible,
         }));
     };
+
+    setIsPreferenceGrid = () => {
+        this.state.isPreferenceGrid = !this.state.isPreferenceGrid
+    }
+
+    setIsBookmarkGrid = () => {
+        this.state.isBookmarkGrid = !this.state.isBookmarkGrid
+    }
+
+
     _handleIndexChange = (index: any) => this.setState({ index });
 
     _renderTabBar = (props: any) => {
@@ -75,10 +87,29 @@ export default class Reading extends React.Component<{}, ReadingState> {
         );
     };
 
-    _renderScene = SceneMap({
-        first: PreferenceNovels,
-        second: BookmarkNovels,
-    });
+    // _renderScene = SceneMap({
+    //     first: PreferenceNovels,
+    //     second: BookmarkNovels,
+    // });
+    _renderScene = ({ route }:any) => {
+        const preferenceProps = {
+            isGrid: this.state.isPreferenceGrid,
+        };
+
+        const BookmarkProps = {
+            isGrid: this.state.isBookmarkGrid,
+        };
+
+        switch (route.key) {
+            case 'first':
+                return <PreferenceNovels {...preferenceProps} />;
+
+            case 'second':
+                return <BookmarkNovels {...BookmarkProps} />;
+            default:
+                return null;
+        }
+    }
 
 
     render() {
@@ -96,11 +127,15 @@ export default class Reading extends React.Component<{}, ReadingState> {
                     <PreferenceEditBS
                         isVisible={this.state.isBottomSheetVisible}
                         onClose={this.toggleBottomSheet}
+                        isPreferenceGrid={this.state.isPreferenceGrid}
+                        setIsPreferenceGrid={this.setIsPreferenceGrid}
                     />
                 ) : (
                     <BookmarkEditBS
                         isVisible={this.state.isBottomSheetVisible}
                         onClose={this.toggleBottomSheet}
+                        isBookmarkGrid={this.state.isBookmarkGrid}
+                        setIsBookmarkGrid={this.setIsBookmarkGrid}
                     />
                 )}
             </View>

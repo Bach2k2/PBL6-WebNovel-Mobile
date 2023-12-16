@@ -11,10 +11,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import CustomEditReading from "../../components/BottomSheet/PreferenceEditBS";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import PropTypes from 'prop-types';
-const PreferenceNovels = () => {
+const PreferenceNovels = (props:any) => {
     const { authState, getUserData } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
-    const [isGrid, setIsGrid] = useState(true);
+    // const [isGrid, setIsGrid] = useState(true);
+    const isGrid = props.isGrid;
     const [preferenceData, setPreferenceData] = useState<Preference[]>([]);
     const navigation = useNavigation();
     const user = getUserData();
@@ -25,57 +26,7 @@ const PreferenceNovels = () => {
     const toggleBottomSheet = () => {
         setBottomSheetVisible(!isBottomSheetVisible);
     };
-
-    // useEffect(() => {
-    //     // const fetchPrefenceData = async () => {
-    //     //     await getPreferenceData(user, authState.accessToken).then((data) => {
-    //     //         setPreferenceData(data);
-    //     //         console.log(preferenceData);
-    //     //     }).catch((error) => {
-    //     //         console.log(error);
-    //     //     })
-    //     // };
-    //     const fetchPrefenceData = async () => {
-    //         try {
-    //             const data = await getPreferenceData(user, authState.accessToken);
-    //             setPreferenceData(data);
-    //             console.log(data); // Log the updated preferenceData
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-    //     const getStoredPreferenceData = async () => {
-    //         try {
-    //             const storedData = await AsyncStorage.getItem('preferList');
-    //             if (storedData) {
-    //                 const parsedData = JSON.parse(storedData);
-    //                 setPreferenceData(parsedData); // add this array to understand
-    //                 console.log(preferenceData.length);
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching preferList from AsyncStorage:', error);
-    //         }
-    //     };
-
-    //     if (authState.authenticated) {
-    //         console.log("call api preference");
-    //         fetchPrefenceData();
-    //     } else {
-    //         console.log("get preferList from AsyncStorage");
-    //         getStoredPreferenceData();
-    //     }
-    // }, []);
-
-    // useEffect(() => {
-    //     // Check if preferenceData has changed
-    //     if (preferenceData !== prevPreferenceDataRef.current) {
-    //         // Your logic to handle the change goes here
-    //         console.log('preferenceData has changed:', preferenceData);
-
-    //         // Update the ref with the current preferenceData
-    //         prevPreferenceDataRef.current = preferenceData;
-    //     }
-    // }, [preferenceData]); // Add preferenceData as a dependency
+    // Fetch preference data
     useFocusEffect(
         useCallback(() => {
             const fetchData = async () => {
@@ -106,6 +57,8 @@ const PreferenceNovels = () => {
             };
         }, [authState.authenticated, user])
     );
+
+    // Process with each row of grid
     const renderRow = (row: number) => {
         return (
             <View style={styles.row} key={row}>
@@ -142,6 +95,7 @@ const PreferenceNovels = () => {
             </View>
         );
     }
+   // Process with each row of grid
     return (
         <View style={styles.container}>
             <ScrollView>

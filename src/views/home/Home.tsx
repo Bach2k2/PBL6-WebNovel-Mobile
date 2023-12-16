@@ -243,7 +243,7 @@ function NovelsList({ navigation }: any) {
               <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
               <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
               <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
-              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.join()} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
+              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0,2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
             </View>
             <TouchableOpacity onPress={() => {
               handleAddToLib(novel)

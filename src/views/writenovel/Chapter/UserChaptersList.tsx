@@ -1,22 +1,30 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Novel } from '../../../models/Novel'
-import { getChaptersByNovelId } from '../../../hook/ChapterApi';
+import { getChapters } from '../../../hook/ChapterApi';
 import { Chapter } from '../../../models/Chapter';
 import { useNavigation } from '@react-navigation/native';
+import { User } from '../../../models/User';
+import { AuthContext } from '../../../context/AuthContext';
 
 const UserChaptersDetail = ({ novel }: { novel: Novel }) => {
   const [chapterList, setChapterList] = useState<Chapter[]>([]);
   const [loading,setLoading] = useState(true)
+  const {authState,getUserData} = useContext(AuthContext);
+  const [user, setUser]= useState<User|null>();
   const navigation = useNavigation();
+
   const handleClickChapter= (chapter:Chapter)=>{
     console.log('handleClick');
     navigation.navigate('EditChapter',{novel: novel,chapter: chapter});
   }
   useEffect(() => {
+
+    setUser(getUserData());
+
     const fecthChapterByNovelId = async () => {
       try {
-        const data = await getChaptersByNovelId(novel.id);
+        const data = await getChapters(user?.id,novel.id,authState.accessToken);
         setChapterList(data);
       } catch (error) {
         console.error('Error fetching chapters:', error);

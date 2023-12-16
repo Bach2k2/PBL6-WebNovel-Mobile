@@ -7,6 +7,7 @@ export interface Comment {
     email: string,
     nickName: string,
     roleIds: Array<string>,
-    createOn: Date,
-    ratingScore: number
+    createOn: string,
+    ratingScore: number,
+    accountImagesURL: string,
 }

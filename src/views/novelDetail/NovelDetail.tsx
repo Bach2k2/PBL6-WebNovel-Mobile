@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect } from 'react';
-import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, TextInput, ToastAndroid, Alert, Pressable } from "react-native";
+import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, TextInput, ToastAndroid, Alert, Pressable, KeyboardAvoidingView } from "react-native";
 
 import { useEffect, useState, useContext } from "react";
 import { Novel } from "../../models/Novel";
@@ -7,9 +7,9 @@ import { getNovelByGenre, getNovelById, getNovelData, getNovelDataExcept, getRel
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Chapter } from '../../models/Chapter';
-import { getChaptersByNovelId } from '../../hook/ChapterApi';
+import { getChapters } from '../../hook/ChapterApi';
 import NovelDetailSkeleton from '../../components/Loading/NovelDetailSkeleton';
-import { getCommentFromNovelId, postCommentApi } from '../../hook/CommentApi';
+import { deleteCommentApi, getCommentFromNovelId, postCommentApi } from '../../hook/CommentApi';
 import { Comment } from '../../models/Comment';
 
 import getPreferenceData, { getPreferenceByUANApi, postPreferenceData } from '../../hook/PreferenceApi';
@@ -23,6 +23,8 @@ import GetAccountApi from '../../hook/AccountApi';
 import { Rating } from '../../models/Rating';
 import Stars from '../../components/StarRating/Stars';
 import { User } from '../../models/User';
+import { getTimeDiff } from '../../utils/getTimeDiff';
+import ShowStars from '../../components/StarRating/ShowStars';
 
 const NovelDetail = ({ navigation, route }: any) => {
     // const navigation = useNavigation();
@@ -30,7 +32,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     const [novel, setNovel] = useState<Novel>();
     //Lay danh sach chapter
     const [chapter, setChapters] = useState<Chapter[]>([]);
-    
+
     const [isDownload, setDownloadStatus] = useState(false);
 
     const [rcmNovel, setRcmNovels] = useState<Novel[]>([]);
@@ -67,7 +69,7 @@ const NovelDetail = ({ navigation, route }: any) => {
             }
 
         })
-    },[novel])
+    }, [novel])
     useEffect(() => {
         setUser(getUserData());
     }, [, user, getUserData])
@@ -82,9 +84,10 @@ const NovelDetail = ({ navigation, route }: any) => {
             console.log(error);
         })
     }
-    // ----------------------------------------------------------------
+    // ---------------Display the chapter by novels -------------
     const fetchChapterByNovelId = async () => {
-        await getChaptersByNovelId(novelId).then((data) => {
+        // If user is not logged in:
+        await getChapters(user, novelId,authState.accessToken).then((data) => {
             setChapters(data);
         }).catch((error) => {
             console.log('Lay thong tin chi tiet cua chapter that bai')
@@ -147,6 +150,18 @@ const NovelDetail = ({ navigation, route }: any) => {
         } finally {
         }
     };
+    // ----------------------------------------------------------------
+    const fetchPreferenceByUserAndNovel = async () => {
+        if (user) {
+            const res = await getPreferenceByUANApi(user, novelId, authState.accessToken);
+            if (res) {
+                setIsExistLibrary(true);
+            } else {
+                setIsExistLibrary(false);
+            }
+        }
+
+    }
 
     // Fetch novels and comments
     useEffect(() => {
@@ -158,30 +173,13 @@ const NovelDetail = ({ navigation, route }: any) => {
         }
         fetchCommentFromNovel();
         fetchRating();
-
+        fetchPreferenceByUserAndNovel();
         setTimeout(() => {
             setLoading(false);
             console.log('Loading')
-        }, 2000);
+        }, 1000);
 
-    }, [user, isExistLibrary]);
-
-
-
-    useEffect(() => {
-        const fetchPreferenceByUserAndNovel = async () => {
-            if (user) {
-                const res = await getPreferenceByUANApi(user, novelId, authState.accessToken);
-                if (res) {
-                    setIsExistLibrary(true);
-                } else {
-                    setIsExistLibrary(false);
-                }
-            }
-
-        }
-        fetchPreferenceByUserAndNovel();
-    }, [novelId, user])
+    }, [novelId, isExistLibrary]); // need only a para to trigger
 
     const [preferList, setPreferList] = useState<Preference[]>([]);
     const fetchPreferenceData = async () => {
@@ -202,6 +200,7 @@ const NovelDetail = ({ navigation, route }: any) => {
 
         }
     }
+
     useEffect(() => {
         fetchPreferenceData()
     }, [])
@@ -251,23 +250,23 @@ const NovelDetail = ({ navigation, route }: any) => {
                 preferList.some(item => item.novelId === novel.id)
             ) {
                 novel.isExistLib = true;
-                console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
+                console.log("Already added to lib");
+
             } else {
                 novel.isExistLib = false;
-                console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
+                console.log("Add to lib successfully");
             }
 
-            // Lưu danh sách mới vào AsyncStorage
-            try {
+            try {  // Lưu danh sách mới vào AsyncStorage
                 setPreferList([...preferList, newPreferList]);
                 await AsyncStorage.setItem('preferList', JSON.stringify(preferList));
-                // console.log('Danh sách đã lưu vào AsyncStorage:', newPreferList);
-                // setPreferList([...preferList, newPreferList]);
+                console.log("Added to asyncstorage successfully");
+                render();
             } catch (error) {
                 ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
-                // console.error('Lỗi khi lưu danh sách vào AsyncStorage:', error);
             }
-            // console.log('chua dang nhap');
+
+
         }
         fetchPreferenceData()
     }
@@ -292,7 +291,9 @@ const NovelDetail = ({ navigation, route }: any) => {
         }
     }
 
-
+    // const getUserFromUserId= async ()=>{
+    //     const userData = await GetAccountApi() 
+    // }
 
     function handleDownloadBtnPress(): void {
         setDownloadStatus(true);
@@ -317,6 +318,16 @@ const NovelDetail = ({ navigation, route }: any) => {
         }
 
     }
+
+    const checkSameAuthor = (userId: string) => {
+        if (user && user.id === userId) {
+            return true;
+        }
+        return false;
+    }
+
+
+
     function handleNavigateToChapterList() {
         console.log("Navigate to chapter list")
         navigation.navigate('ChapterList', { novel: novel });
@@ -343,6 +354,27 @@ const NovelDetail = ({ navigation, route }: any) => {
         } else {
             Alert.alert('You should sign in first.')
         }
+
+    }
+
+    const handleDeleteComment = async (comment: Comment) => {
+
+        Alert.alert('DELETE COMMENT', 'Are you sure to delete your comment?', [
+            {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'OK', onPress: async () => {
+                    const res = await deleteCommentApi(comment, authState.accessToken);
+                    Alert.alert('Your comment has deleted');
+                    console.log(res);
+                    fetchCommentFromNovel();
+                    render();
+                }
+            },
+        ]);
 
     }
 
@@ -391,217 +423,256 @@ const NovelDetail = ({ navigation, route }: any) => {
 
     };
 
-    if (loading) {
-        return <NovelDetailSkeleton />
-    }
-
-    return (
-        <View style={styles.container} >
-            <ScrollView>
-                {/* <Text>Novel Detail</Text> */}
-                <View style={styles.row}>
-                    <View style={styles.imgContainer}>
-                        <Image style={styles.img} source={{ uri: novel?.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} />
-                        {/* source={{ uri: novel?.imagesURL }} */}
-                    </View>
-                    <View style={styles.inforColumn}>
-                        <Text numberOfLines={4} style={styles.nameInfor}>{novel?.name}</Text>
-                        <Text style={styles.authorInfor}>by {novel?.author}</Text>
-                        <Text style={styles.genreInfor}>{novel?.genreName}</Text>
-                    </View>
-                </View>
-                <View style={styles.viewrow}>
-                    <View style={styles.column}>
-                        <Text style={styles.title}>Views</Text>
-                        <Text>{novel?.views}</Text>
-                    </View>
-                    <View style={styles.column}>
-                        <Text style={styles.title}>Rating</Text>
-                        <Text>{novel?.rating}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.descBox}>
+    const render = () => {
+        if (loading) {
+            return <NovelDetailSkeleton />
+        }
+        return (
+            <KeyboardAvoidingView style={styles.container}
+                behavior="padding"
+                enabled
+                keyboardVerticalOffset={-100}
+            >
+                <ScrollView>
+                    {/* <Text>Novel Detail</Text> */}
                     <View style={styles.row}>
+                        <View style={styles.imgContainer}>
+                            <Image style={styles.img} source={{ uri: novel?.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} />
+                            {/* source={{ uri: novel?.imagesURL }} */}
+                        </View>
+                        <View style={styles.inforColumn}>
+                            <Text numberOfLines={4} style={styles.nameInfor}>{novel?.name}</Text>
+                            <Text style={styles.authorInfor}>by {novel?.author}</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={styles.genreInfor}>Novel . {novel?.genreName.slice(0, 1).join(' ')}</Text>
+                                <Icon name={'chevron-right'} size={18} />
+                            </View>
+
+                        </View>
+                    </View>
+                    <View style={styles.viewrow}>
                         <View style={styles.column}>
-                            <Text style={styles.descHeader}>Description:</Text>
-                            <Text style={styles.normalText}>{novel?.description}</Text>
+                            <Text style={styles.title}>Views</Text>
+                            <Text>{novel?.views}</Text>
+                        </View>
+                        <View style={styles.column}>
+                            <Text style={styles.title}>Rates</Text>
+                            <View>
+                                {novel?.rating ? (<ShowStars ratingScores={novel?.rating} />) : (<ShowStars ratingScores={0} />)}
+                            </View>
                         </View>
                     </View>
 
-                    <View style={styles.separator}>
-                        <View style={styles.separatorLine}></View>
-                    </View>
+                    <View style={styles.descBox}>
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Text style={styles.descHeader}>Description:</Text>
+                                <Text style={styles.normalText}>{novel?.description}</Text>
+                            </View>
+                        </View>
 
-                    <View style={styles.row}>
-                        <TouchableOpacity style={{ marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }} onPress={handleNavigateToChapterList}>
-                            <Text style={{ fontSize: 18 }} >{novel?.numChapter} Chapters updated</Text>
-                            <Icon style={{ alignSelf: 'flex-end' }} name='chevron-right' size={20} color={'black'} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                {/* Danh sach binh luan */}
-                <View style={styles.box1}>
-                    <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Text style={styles.title}>Reviews</Text>
-                            <Text style={{ marginLeft: 2, marginBottom: 3 }}>{comments.length}</Text>
-                            {/* {commentLength > 0 ?
-                                (<Text style={{top:1}}>{commentLength}</Text>) :
-                                (<></>)
-                            } */}
+                        <View style={styles.separator}>
+                            <View style={styles.separatorLine}></View>
+                        </View>
 
+                        <View style={styles.row}>
+                            <TouchableOpacity style={{ marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }} onPress={handleNavigateToChapterList}>
+                                <Text style={{ fontSize: 18 }} >{novel?.numChapter} Chapters updated</Text>
+                                <Icon style={{ alignSelf: 'flex-end' }} name='chevron-right' size={20} color={'black'} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    {/* Danh sach binh luan */}
+                    <View style={styles.box1}>
+                        <View style={{ margin: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={styles.title}>Reviews</Text>
+                                <Text style={{ marginLeft: 2, marginBottom: 3 }}>{comments.length}</Text>
+                                {/* {commentLength > 0 ?
+                                    (<Text style={{top:1}}>{commentLength}</Text>) :
+                                    (<></>)
+                                } */}
+
+                            </View>
+                            {
+                                comments.length > 0 ?
+                                    (<TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { }}>
+                                        <Text style={styles.title}>More</Text>
+                                        <Icon style={{ alignSelf: 'flex-end' }} name='chevron-right' size={20} color={'black'} />
+                                    </TouchableOpacity>) :
+                                    (<TouchableOpacity style={{ flexDirection: 'row', margin: 10 }} onPress={() => { }}>
+                                        <Text style={{ fontSize: 16 }}>Write the first review!</Text>
+                                        <Icon style={{ alignSelf: 'flex-end' }} name='chevron-right' size={20} color={'gray'} />
+                                    </TouchableOpacity>)
+                            }
                         </View>
                         {
-                            comments.length > 0 ?
-                                (<TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { }}>
-                                    <Text style={styles.title}>More</Text>
-                                    <Icon style={{ alignSelf: 'flex-end' }} name='chevron-right' size={20} color={'black'} />
-                                </TouchableOpacity>) :
-                                (<TouchableOpacity style={{ flexDirection: 'row', margin: 10 }} onPress={() => { }}>
-                                    <Text style={{ fontSize: 16 }}>Write the first review!</Text>
-                                    <Icon style={{ alignSelf: 'flex-end' }} name='chevron-right' size={20} color={'gray'} />
-                                </TouchableOpacity>)
-                        }
-                    </View>
-                    {
-                        comments.map((comment, index) => (
-                            <React.Fragment key={index}>
-                                <View style={[styles.row]}>
-                                    <View style={styles.avatar_container}>
-                                        <Image style={styles.avatar} source={{ uri: 'https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3' }} />
-                                    </View>
-                                    <View style={{ marginLeft: 5, flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', flex: 1 }}>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>{comment.username || comment.nickName}</Text>
-                                        <View style={styles.stars}>
-                                            <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 1) ? styles.starSelected : styles.starUnselected} />
-                                            <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 2) ? styles.starSelected : styles.starUnselected} />
-                                            <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 3) ? styles.starSelected : styles.starUnselected} />
-                                            <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 4) ? styles.starSelected : styles.starUnselected} />
-                                            <MaterialIcons name="star-border" size={15} style={(comment.ratingScore == 5) ? styles.starSelected : styles.starUnselected} />
+                            comments.slice(0, 5).map((comment, index) => (
+                                <React.Fragment key={index}>
+                                    <View style={[styles.row, { marginTop: 10 }]}>
+                                        <View style={styles.avatar_container}>
+                                            {
+                                                comment.accountImagesURL ? (
+                                                    <Image style={styles.avatar} source={{ uri: comment.accountImagesURL }} />
+                                                ) : (
+                                                    <Image style={styles.avatar} source={{ uri: 'https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3' }} />
+                                                )
+                                            }
+
+                                        </View>
+                                        <View style={{ marginLeft: 5, flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', flex: 1 }}>
+                                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>{comment.username || comment.nickName}</Text>
+                                            <View style={styles.stars}>
+                                                <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 1) ? styles.starSelected : styles.starUnselected} />
+                                                <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 2) ? styles.starSelected : styles.starUnselected} />
+                                                <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 3) ? styles.starSelected : styles.starUnselected} />
+                                                <MaterialIcons name="star-border" size={15} style={(comment.ratingScore >= 4) ? styles.starSelected : styles.starUnselected} />
+                                                <MaterialIcons name="star-border" size={15} style={(comment.ratingScore == 5) ? styles.starSelected : styles.starUnselected} />
+                                            </View>
+                                        </View>
+                                        <View style={{
+                                            flexDirection: 'column', justifyContent: 'center', right: 20, alignItems: 'center', alignSelf: 'flex-end'
+                                        }}>
+                                            <Text style={{ fontSize: 15 }}>{getTimeDiff(comment.createOn)}</Text>
+                                            {checkSameAuthor(comment.accountId) && (
+                                                <TouchableOpacity onPress={() => { handleDeleteComment(comment) }}>
+                                                    <Icon name="trash-can" size={20} />
+                                                </TouchableOpacity>
+                                            )}
                                         </View>
                                     </View>
-                                    <View style={{
-                                        flexDirection: 'column', justifyContent: 'center', right: 20, alignItems: 'flex-end'
-                                    }}>
-                                        <Text>6mth ago</Text>
+                                    <View style={[styles.row, { flex: 1 }]}>
+                                        <View style={styles.avatar_container}>
+                                            <View style={styles.avatar_1}></View>
+                                        </View>
+                                        <View style={{ flex: 2, flexDirection: 'column', alignItems: 'flex-start', marginTop: 5, marginRight: 10, }}>
+                                            <Text style={{ fontSize: 16, color: '#333' }}>{comment.text}</Text>
+                                        </View>
                                     </View>
-                                </View>
-                                <View style={[styles.row, { flex: 1 }]}>
-                                    <View style={styles.avatar_container}>
-                                        <View style={styles.avatar_1}></View>
-                                    </View>
-                                    <View style={{ flex: 2, flexDirection: 'column', alignItems: 'flex-start', marginTop: 5, marginRight: 10, }}>
-                                        <Text>{comment.text}</Text>
-                                    </View>
-                                </View>
-                            </React.Fragment>
-                        ))
-                    }
-                    <View style={{ marginTop: 10, borderRadius: 10, borderWidth: 1, borderColor: '#EBEBEB', width: '90%', alignSelf: 'center', flexDirection: 'row', alignItems: 'center' }}>
-                        <TextInput
-                            multiline numberOfLines={2}
-                            placeholder='Please write your comment here. At least 40 characters'
-                            value={commentText}
-                            onChangeText={(comment) => { setCommentText(comment) }}
-                            style={{ margin: 10, width: '80%', textAlignVertical: 'top' }} />
-                        <Pressable onPress={() => {
-                            handleSendComment()
-                        }}>
-                            <Icon name='send' size={25} style={{ alignSelf: 'flex-end' }} />
-                        </Pressable>
-                        <Text style={styles.characterCount}>
-                            {commentText.length}/{40}
-                        </Text>
-
-                    </View>
-                    <View style={styles.separator}>
-                        <View style={styles.separatorLine}></View>
-                    </View>
-                    {/* onPress={() => { navigation.navigate('AddReview') }} */}
-                    <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }} >
-                        <View style={styles.textInput} >
-                            <Text style={{ fontSize: 16, color: '#333' }}>Rate this book</Text>
-
-                            <Stars stars={stars} setStarRating={setStars} />
-                            <TouchableOpacity onPress={() => {
-                                if (isRating) {
-                                    Alert.alert('Rating alert', 'Do you want to delete this rating', [
-                                        {
-                                            text: 'Cancel',
-                                            onPress: () => { setIsRating(true); },
-                                            style: 'cancel',
-                                        },
-                                        {
-                                            text: 'OK', onPress: () => {
-                                                handleDeleteRating();
-                                                setIsRating(false);
-                                            }
-                                        },
-                                    ]);
-                                    // setIsRating(false);
-                                } else {
-                                    if (stars > 0) {
-                                        handleCreateRating();
-                                        setIsRating(true);
-                                    } else {
-                                        Alert.alert('Please rate before submit')
-                                    }
-
-                                }
+                                </React.Fragment>
+                            ))
+                        }
+                        <View style={{ marginTop: 10, borderRadius: 10, borderWidth: 1, borderColor: '#EBEBEB', width: '90%', alignSelf: 'center', flexDirection: 'row', alignItems: 'center' }}>
+                            <TextInput
+                                multiline numberOfLines={2}
+                                placeholder='Please write your comment here. At least 40 characters'
+                                value={commentText}
+                                onChangeText={(comment) => { setCommentText(comment) }}
+                                style={{ margin: 10, width: '80%', textAlignVertical: 'top' }} />
+                            <Pressable onPress={() => {
+                                handleSendComment()
                             }}>
-                                {isRating ? <Icon name='trash-can-outline' size={20} style={{ right: 10 }} /> : <Icon name='check' size={20} style={{ right: 10 }} />}
-                            </TouchableOpacity>
+                                <Icon name='send' size={25} style={{ alignSelf: 'flex-end' }} />
+                            </Pressable>
+                            <Text style={styles.characterCount}>
+                                {commentText.length}/{40}
+                            </Text>
 
                         </View>
-                    </TouchableOpacity>
-                </View>
+                        <View style={styles.separator}>
+                            <View style={styles.separatorLine}></View>
+                        </View>
+                        {/* onPress={() => { navigation.navigate('AddReview') }} */}
+                        <TouchableOpacity style={{ flex: 1, flexDirection: 'row' }} >
+                            <View style={styles.textInput} >
+                                <Text style={{ fontSize: 16, color: '#333' }}>Rate this book</Text>
 
-                <View style={styles.box1}>
-                    <Text style={styles.title}>May be you can like: </Text>
-                    <View style={styles.imageGrid}>
-                        {Array.from({ length: Math.ceil(8 / 4) }, (_, i) => renderRCMRow(i))}
-                    </View>
-                </View>
+                                <Stars stars={stars} setStarRating={setStars} />
+                                <TouchableOpacity onPress={() => {
+                                    if (isRating) {
+                                        Alert.alert('Rating alert', 'Do you want to delete this rating', [
+                                            {
+                                                text: 'Cancel',
+                                                onPress: () => { setIsRating(true); },
+                                                style: 'cancel',
+                                            },
+                                            {
+                                                text: 'OK', onPress: () => {
+                                                    handleDeleteRating();
+                                                    setIsRating(false);
+                                                }
+                                            },
+                                        ]);
+                                        // setIsRating(false);
+                                    } else {
+                                        if (stars > 0) {
+                                            handleCreateRating();
+                                            setIsRating(true);
+                                        } else {
+                                            Alert.alert('Please rate before submit')
+                                        }
 
+                                    }
+                                }}>
+                                    {isRating ? <Icon name='trash-can-outline' size={20} style={{ right: 10 }} /> : <Icon name='check' size={20} style={{ right: 10 }} />}
+                                </TouchableOpacity>
 
-                <View style={styles.box1}>
-                    <Text style={styles.title}>Relating novels:</Text>
-                    <View style={styles.imageGrid}>
-                        {Array.from({ length: Math.ceil(8 / 4) }, (_, i) => renderRelatedRow(i))}
-                    </View>
-                </View>
-            </ScrollView>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.buttonDownload} onPress={() => handleDownloadBtnPress()}>
-                    {isDownload ? <Icon name="check" size={20} /> : <Icon name="download" size={20} />}
-                </TouchableOpacity>
-                {
-                    (novel?.numChapter > 0) ? (
-                        <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
-                            <Text>Reading now</Text>
+                            </View>
                         </TouchableOpacity>
-                    ) :
-                        (<TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
-                            <Text>Reading now</Text>
-                        </TouchableOpacity>)
-                }
-                {/* <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
-                    <Text>Reading now</Text>
-                </TouchableOpacity> */}
-                {isExistLibrary ? (
-                    <Icon name="check" size={20} style={styles.button} />
-                ) : (<TouchableOpacity style={styles.button} onPress={() => handleAddingBtnPress()}>
-                    <Icon name="plus" size={20} />
-                </TouchableOpacity>)}
-            </View>
-        </View >
+                    </View>
+
+                    <View style={styles.box1}>
+                        <Text style={styles.title}>May be you can like: </Text>
+                        <View style={styles.imageGrid}>
+                            {Array.from({ length: Math.ceil(8 / 4) }, (_, i) => renderRCMRow(i))}
+                        </View>
+                    </View>
 
 
-    );
+                    <View style={styles.box1}>
+                        <Text style={styles.title}>Relating novels:</Text>
+                        <View style={styles.imageGrid}>
+                            {Array.from({ length: Math.ceil(8 / 4) }, (_, i) => renderRelatedRow(i))}
+                        </View>
+                    </View>
+                    <View style={{ marginTop: 5, flexDirection: 'column' }}>
+                        <Text style={{ textAlign: 'center' }}>This book is released and published by TTQBA WebNovel.All rights reserved, policy must be investigate</Text>
+                        <TouchableOpacity>
+                            <View style={styles.reportRow}>
+                                <Icon name="flag" size={25} />
+                                <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Report</Text>
+                            </View>
+
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ height: 150 }}>
+                    </View>
+
+
+                </ScrollView>
+
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.buttonDownload} onPress={() => handleDownloadBtnPress()}>
+                        {isDownload ? <Icon name="check" size={25} color={'black'} /> : <Icon name="download" size={25} color={'black'} />}
+                    </TouchableOpacity>
+                    {
+                        (novel?.numChapter > 0) ? (
+                            <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
+                                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Read now</Text>
+                            </TouchableOpacity>
+                        ) :
+                            (<TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
+                                <Text style={{ color: 'white', fontSize: 16 }}>No Chapter Available</Text>
+                            </TouchableOpacity>)
+                    }
+                    {/* <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
+                        <Text>Reading now</Text>
+                    </TouchableOpacity> */}
+                    {isExistLibrary ? (
+                        <Icon name="check" size={25} style={styles.buttonAdd} />
+                    ) : (<TouchableOpacity style={styles.buttonAdd} onPress={() => handleAddingBtnPress()}>
+                        <Icon name="plus" size={25} />
+                    </TouchableOpacity>)}
+                </View>
+
+            </KeyboardAvoidingView >
+        );
+    }
+    return render();
 };
 const styles = StyleSheet.create({
     container: {
+        position: 'relative',
         flex: 1,
         flexDirection: 'column',
         width: '100%',
@@ -635,17 +706,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     authorInfor: {
-        fontSize: 14,
+        fontSize: 16,
+        fontWeight: '600'
         //   color: 'gray',
         // fontWeight:'bold'
     },
     genreInfor: {
+        marginTop: 2,
         fontSize: 15,
         //   color: 'gray',
         // fontWeight:'bold'
     },
     viewrow: {
-        margin: 10,
+        marginTop: 10,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
         // borderWidth: 2,
@@ -653,12 +726,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
+        width: '95%',
+        alignSelf: 'center',
     },
     column: {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10,
         // margin: 50,
     },
     title: {
@@ -713,34 +789,42 @@ const styles = StyleSheet.create({
     },
     // Button section
     buttonContainer: {
+        // opacity:10,
+        position: 'absolute',
+        sticky: true,
+        // position: 'relative',
+        width: '98%',
+        backgroundColor: '#001a00',
+        alignSelf: 'center',
+        bottom: 10,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         padding: 10,
         borderTopWidth: 1,
         borderTopColor: 'lightgray',
+        borderRadius: 10,
+        // zIndex:-1,
     },
     buttonDownload: {
-
-        backgroundColor: 'lightblue',
-        padding: 10,
+        backgroundColor: 'white',
+        padding: 12,
         borderRadius: 5,
     },
     readingButton: {
         width: '60%',
-        padding: 10,
+        padding: 12,
         borderRadius: 5,
-        backgroundColor: 'lightblue',
+        backgroundColor: '#2d8659',
         textAlign: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    button: {
-        backgroundColor: 'lightblue',
-        padding: 10,
+    buttonAdd: {
+        backgroundColor: 'white',
+        padding: 12,
         borderRadius: 5,
     },
-
     box1: {
-
         margin: 10,
         borderRadius: 15,
         backgroundColor: '#FFFFFF',
@@ -826,7 +910,16 @@ const styles = StyleSheet.create({
     normalText: {
         fontSize: 18,
         color: 'black',
+    },
+    // Report rows:
+
+    reportRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 5,
     }
+
 });
 
 export default NovelDetail;

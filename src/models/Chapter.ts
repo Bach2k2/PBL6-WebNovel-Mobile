@@ -1,4 +1,4 @@
-export interface Chapter{
+export interface Chapter {
     id: string
     name: string,
     isLocked: boolean,
@@ -6,6 +6,7 @@ export interface Chapter{
     views: number,
     rating: number,
     feeId: number,
+    fee: number,
     fileContent: string,
     discount: number,
     approvalStatus: boolean,

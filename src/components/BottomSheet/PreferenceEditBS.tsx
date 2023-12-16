@@ -4,14 +4,14 @@ import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const PreferenceEditBS = ({ isVisible, onClose }: any) => {
+const PreferenceEditBS = ({ isVisible, onClose, isPreferenceGrid, setIsPreferenceGrid }: any) => {
     const navigation = useNavigation();
     const handleEdit = () => {
         navigation.navigate('PreferenceEdit');
     }
     useEffect(() => {
 
-    })
+    }, [isPreferenceGrid])
     return (
         <Modal
             isVisible={isVisible}
@@ -27,16 +27,16 @@ const PreferenceEditBS = ({ isVisible, onClose }: any) => {
 
                 <View style={styles.rowContainer}>
                     <TouchableOpacity onPress={() => {
-
-                    }} style={styles.selectItem}>
+                        setIsPreferenceGrid(true);
+                    }} style={[styles.selectItem, isPreferenceGrid ? { borderColor: 'gray', borderWidth: 2 } : null]}>
                         <View style={[styles.selectItemContent, { alignSelf: 'center' }]}>
                             <Icon name='view-grid-outline' size={25} color={'#333'} />
                             <Text style={styles.itemText}>Grid</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
-
-                    }} style={styles.selectItem}>
+                        setIsPreferenceGrid(false);
+                    }} style={[styles.selectItem, !isPreferenceGrid ? { borderColor: 'gray', borderWidth: 2 } : null]}>
                         <View style={styles.selectItemContent}>
                             <Icon name='view-list-outline' size={25} color={'#333'} />
                             <Text style={styles.itemText}>List</Text>
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     selectItemContent: {
-        flex:1,
+        flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',

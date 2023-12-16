@@ -8,11 +8,12 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chapter } from "../../models/Chapter";
 import { getChapterByChapterId } from "../../hook/ChapterApi";
-const BookmarkNovels = () => {
+const BookmarkNovels = (props:any) => {
     // const authContext = useContext(AuthContext);
     const { authState, getUserData } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
-    const [isGrid, setIsGrid] = useState(true);
+    // const [isGrid, setIsGrid] = useState(true);
+    const {isGrid} = props;
     const [bookmarkedData, setBookmarkedData] = useState<Bookmarked[]>([]);
     const user = getUserData();
     const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);

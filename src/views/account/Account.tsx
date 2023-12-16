@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
 import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
+import GetAccountApi from '../../hook/AccountApi';
 const AccountNavigator = createNativeStackNavigator();
 
 function Account() {
@@ -33,8 +34,8 @@ function Account() {
 
 const AccountMainPage = ({ navigation }: { navigation: any }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [user, setUserData] = useState<User | null>(null);
-    const { getUserData } = useContext(AuthContext);
+    const [user, setUser] = useState<User | null>(null);
+    const { authState, getUserData,setUserData } = useContext(AuthContext);
     const [isShownBottomSheet, setShowBottomSheet] = useState(false);
     const toggleBottomSheet = () => {
         setShowBottomSheet(!isShownBottomSheet);
@@ -59,42 +60,29 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
 
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                setIsLoading(true);
-                const newUserData = await getUserData();
-                setUserData(newUserData);
-                console.log('call user when user changes in account page:', newUserData);
-            } catch (error) {
-                // Handle any errors that might occur during the async operation
-                console.error('Error fetching user data:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        if (getUserData) {
+            const fetchUserData = async () => {
+                try {
+                    setIsLoading(true);
+                    //const newUserData = await getUserData();
+                    const newUserData = await GetAccountApi(getUserData().id, authState.accessToken);
+                    setUser(newUserData);
+                    setUserData(newUserData);
+                    console.log('call user when user changes in account page:', newUserData);
+                } catch (error) {
+                    // Handle any errors that might occur during the async operation
+                    console.error('Error fetching user data:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
 
-        fetchUserData(); // Call the async function
-
+            fetchUserData(); // Call the async function
+        }
+        else {
+            console.log('user is not authorized')
+        }
     }, []);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                setIsLoading(true);
-                const newUserData = await getUserData();
-                setUserData(newUserData);
-                console.log('call user when user changes in account page:', newUserData);
-            } catch (error) {
-                // Handle any errors that might occur during the async operation
-                console.error('Error fetching user data:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchUserData(); // Call the async function
-
-    }, [user, getUserData]);
 
     function handleNavigate(path: string) {
         console.log(path);

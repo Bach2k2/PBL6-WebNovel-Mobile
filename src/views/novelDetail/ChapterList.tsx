@@ -2,30 +2,36 @@ import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, Dimensions
 import { useEffect, useState, useContext } from "react";
 import { Chapter } from "../../models/Chapter";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { getChaptersByNovelId } from "../../hook/ChapterApi";
+import { getChapters } from "../../hook/ChapterApi";
 import { useNavigation } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native-paper";
+import { User } from "../../models/User";
+import { AuthContext } from "../../context/AuthContext";
 const ChapterList = ({ navigation, route }: any) => {
     const [loading, setLoading] = useState(true);
     const [chapterList, setChapterList] = useState<Chapter[]>([]);
     const { novel } = route.params;
+    const [user, setUser] = useState<User | null>();
+    const { authState, getUserData } = useContext(AuthContext);
     // const navigation = useNavigation();
-    useEffect(()=>{
-        setTimeout(()=>{
-            setLoading(false);
-        },2000)
-    })
     useEffect(() => {
-        const fetchChapter = async () => {
-            const data = await getChaptersByNovelId(novel.id);
+        setUser(getUserData());
+        setTimeout(() => {
+            setLoading(false);
+        }, 2000)
+    }, [user])
+
+    useEffect(() => {
+        const fetchChapters = async () => {
+            const data = await getChapters(user, novel.id, authState.accessToken);
             setChapterList(data);
         }
-        fetchChapter();
-    }, [novel]);
+        fetchChapters();
+    }, [user, novel]);
 
-    if(loading){
-        return(
-            <ActivityIndicator/>
+    if (loading) {
+        return (
+            <ActivityIndicator />
         )
     }
     return (
@@ -33,7 +39,7 @@ const ChapterList = ({ navigation, route }: any) => {
             <ScrollView>
                 {chapterList.map((chapter, index) => (
                     <TouchableOpacity key={index} onPress={() => {
-                        navigation.navigate('ChapterDetail', { chapterId: chapter.id, novel: novel,title: chapter.name });
+                        navigation.navigate('ChapterDetail', { chapterId: chapter.id, novel: novel });
                     }}>
                         <View style={styles.row}>
                             <Text style={styles.chapIndex}>{chapter.chapIndex}</Text>
@@ -53,7 +59,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor:'#FFFFFF'
+        backgroundColor: '#FFFFFF'
     },
     row: {
         flexDirection: 'row',
@@ -64,14 +70,14 @@ const styles = StyleSheet.create({
     },
     chapIndex: {
         marginRight: 20,
-        fontSize:15,
-        color:'#333'
+        fontSize: 15,
+        color: '#333'
     },
     chapterName: {
         flex: 1,
         marginLeft: 20,
-        fontSize:15,
-        color:'#333',    
+        fontSize: 15,
+        color: '#333',
     },
     lockIcon: {
         alignSelf: 'flex-end',

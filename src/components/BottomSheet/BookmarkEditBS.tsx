@@ -4,7 +4,7 @@ import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const BookmarkEditBS = ({ isVisible, onClose }: any) => {
+const BookmarkEditBS = ({ isVisible, onClose, isBookmarkGrid, setIsBookmarkGrid }: any) => {
     const navigation = useNavigation();
     const handleEdit = () => {
         navigation.navigate('BookmarkEdit');
@@ -27,17 +27,18 @@ const BookmarkEditBS = ({ isVisible, onClose }: any) => {
 
                 <View style={styles.rowContainer}>
                     <TouchableOpacity onPress={() => {
+                        setIsBookmarkGrid(true);
 
-                    }} style={styles.selectItem}>
-                        <View style={[styles.selectItemContent,{alignSelf:'center'}]}>
+                    }} style={[styles.selectItem, isBookmarkGrid ? { borderColor: 'gray', borderWidth: 2 } : null]}>
+                        <View style={[styles.selectItemContent, { alignSelf: 'center' }]}>
                             <Icon name='view-grid-outline' size={25} color={'#333'} />
                             <Text style={styles.itemText}>Grid</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
-
-                    }} style={styles.selectItem}>
-                        <View style={styles.selectItemContent}>
+                        setIsBookmarkGrid(false);
+                    }} style={[styles.selectItem, !isBookmarkGrid ? { borderColor: 'gray', borderWidth: 2 } : null]}>
+                        <View style={[styles.selectItemContent,]}>
                             <Icon name='view-list-outline' size={25} color={'#333'} />
                             <Text style={styles.itemText}>List</Text>
                         </View>
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     selectItemContent: {
-        flex:1,
+        flex: 1,
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',

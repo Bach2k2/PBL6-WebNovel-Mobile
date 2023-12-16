@@ -7,11 +7,12 @@ import {
     Animated,
     Easing,
 } from "react-native";
+import LinearGradient from 'react-native-linear-gradient';
 
 // import {Clock} from "react-native-reanimated"
 
 const { width } = Dimensions.get("window");
-import { LinearGradient } from "expo-linear-gradient";
+
 const AnimatedLG = Animated.createAnimatedComponent(LinearGradient);
 const SkeletonComponent = ({ children, styles }: any) => {
     const animatedValue = new Animated.Value(0);

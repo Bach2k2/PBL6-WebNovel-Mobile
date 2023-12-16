@@ -1,19 +1,23 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { View, StyleSheet, Dimensions, ScrollView, ActivityIndicator, ToastAndroid, Text, StatusBar, Pressable, Image } from "react-native";
+import { View, StyleSheet, Dimensions, ScrollView, ActivityIndicator, ToastAndroid, Text, StatusBar, Pressable, Image, Alert } from "react-native";
 import Pdf from 'react-native-pdf';
 import { Chapter } from "../../models/Chapter";
-import { getChapterByChapterId, getChaptersByNovelId } from "../../hook/ChapterApi";
+import { getChapters, getChapterByChapterId, unlockChapterApi } from "../../hook/ChapterApi";
 import getBookmarkedData, { postBookmarkData, putBookmarkData } from "../../hook/BookmarkedApi";
 import { AuthContext } from "../../context/AuthContext";
 import { Bookmarked } from "../../models/Bookmarked";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from '@react-navigation/native';
 // import BottomSheet from "../../components/BottomSheet/CustomBottomSheet";
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, { WINDOW_WIDTH } from '@gorhom/bottom-sheet';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { createDrawerNavigator } from '@react-navigation/drawer';
-const Drawer = createDrawerNavigator();
+import { TouchableOpacity, TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { ChapterListDrawer } from "./ChapterListDrawer";
+import { DrawerItem, createDrawerNavigator, DrawerContentScrollView } from "@react-navigation/drawer";
+import { BlurView } from '@react-native-community/blur';
+import { User } from "../../models/User";
+import SignInBottomSheet from "../../components/BottomSheet/SignInBottomSheet";
+import GetAccountApi from "../../hook/AccountApi";
 
 
 const ChapterDetail = ({ navigation, route }: any) => {
@@ -24,8 +28,8 @@ const ChapterDetail = ({ navigation, route }: any) => {
     const [isLoading, setIsLoading] = useState(true);
     const [pdfArray, setPdfArray] = useState<JSX.Element[]>([]);
     const { novel, chapterId } = route.params;
-    const { authState, getUserData } = useContext(AuthContext);
-    const user = getUserData();
+    const { authState, getUserData,setUserData } = useContext(AuthContext);
+    const [user, setUser] = useState<User | null>();
     const [bookmarkList, setBookmarkList] = useState<Bookmarked[]>([]);
     const [loadingBookmark, setLoadingBookmark] = useState(true);
 
@@ -34,86 +38,112 @@ const ChapterDetail = ({ navigation, route }: any) => {
 
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const [showSidebar, setShowSidebar] = useState(false);
+    const [showLockBottomSheet, setShowLockBottomSheet] = useState(false);
+    const [showSignInBS, setShowSignInBS] = useState(false);
+
+    const toggleSidebar = () => {
+        console.log("Toggle sidebar")
+        setShowSidebar(!showSidebar);
+    };
+    const navigateToChapter = (chapter: Chapter) => {
+        navigation.replace('ChapterDetail', { chapterId: chapter.id, novel: novel });
+        // Close the sidebar after navigating
+        setShowSidebar(false);
+    };
+
+    const closeSidebar = () => {
+        setShowSidebar(false);
+    };
+
+    const toggleSignInBS = () => {
+        setShowSignInBS(!showSignInBS);
+    }
+
 
     const snapPoints = useMemo(() => ['5%', '25%', '50%'], []);
-    // useEffect(() => {
 
-    // },[chapter]);
-    // callbacks
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
     }, []);
 
-    // fetch bookmark
-    const fetchData = async () => {
+    useEffect(() => {
+        setUser(getUserData());
+    }, [user])
+
+    // Check if is locked chapter:
+    useEffect(() => {
+        if (chapter?.isLocked) {
+            setShowLockBottomSheet(true);
+        } else {
+            setShowLockBottomSheet(false);
+        }
+    }, [])
+    //------------------- Get chapter list -------------------------------- 
+    const fetchChapters = async () => {
         try {
-            if (authState.authenticated) {
-                console.log("call api bookmark");
-                const data = await getBookmarkedData(user, authState.accessToken);
-                setBookmarkList(data);
-                setLoadingBookmark(false);
-            }
+            const data = await getChapters(user, novel.id, authState.accessToken);
+            setChapters(data);;
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.log(error);
+        }
+    }
+    //------------------- Get this chapter -------------------------------- 
+    const fetchChapterById = async () => {
+        try {
+            const data = await getChapterByChapterId(chapterId);
+            // console.log("chapter Response:", data);
+            setChapter(data);
+
+            if (data) {
+                navigation.setOptions({
+                    title: '',
+                    headerStyle: {
+                        backgroundColor: '#EBEBEB',
+                    },
+                    headerLeft: () => (
+                        <TouchableOpacity style={{ alignItems: 'center', marginRight: 10, flexDirection: 'row' }} onPress={() => { navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title }); }}>
+                            <MaterialCommunityIcons name="chevron-left-circle" color='gray' size={20} style={{ marginRight: 5 }} />
+                            <Text style={{ color: 'black', fontSize: 16, }}>{data?.name}</Text>
+                        </TouchableOpacity>
+                    ),
+                });
+            }
+            if (data.fileContent === undefined) {
+                setIsLoading(false);
+            } else {
+                setIsLoading(false);
+                setNumOfPages(1); // Assuming the file has only one page initiallys
+                console.log(data.fileContent)
+                setPdfArray([renderPdf(1, data.fileContent)]);
+            }
+            // Check novel display first chapter{
+            // Check if it's the first or last chapter
+            setIsFirstChapter(chapter?.chapIndex === 1);
+            setIsLastChapter(chapter?.chapIndex === novel.numChapter);
+        } catch (error) {
+            console.error(error);
         }
     };
 
     useEffect(() => {
-        const fetchChapterById = async () => {
-            try {
-                const data = await getChapterByChapterId(chapterId);
-                // console.log("chapter Response:", data);
-                setChapter(data);
-
-                if (data) {
-                    navigation.setOptions({
-                        title: '',
-                        headerStyle: {
-                            backgroundColor: '#EBEBEB',
-                        },
-                        headerLeft: () => (
-                            <TouchableOpacity style={{ alignItems: 'center', marginRight: 10, flexDirection: 'row' }} onPress={() => { navigation.navigate('NovelDetail', { title: novel.title }); }}>
-                                <MaterialCommunityIcons name="chevron-left-circle" color='gray' size={20} />
-                                <Text style={{ color: 'black' }}>{data?.name}</Text>
-                            </TouchableOpacity>
-                        ),
-                    });
-                }
-                if (data.fileContent === undefined) {
-                    setIsLoading(false);
-                } else {
-                    setIsLoading(false);
-                    setNumOfPages(1); // Assuming the file has only one page initially
-                    setPdfArray([renderPdf(1, data.fileContent)]);
-                }
-                // Check novel display first chapter{
-                // Check if it's the first or last chapter
-                setIsFirstChapter(chapter?.chapIndex === 1);
-                setIsLastChapter(chapter?.chapIndex === novel.numChapter);
-
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        const fetchChapters = async () => {
-            try {
-                const data = await getChaptersByNovelId(novel.id);
-                setChapters(data);;
-            } catch (error) {
-                console.log(error);
-            }
+        if (user) {
+            setChapter(chapters.find(ch => ch.id === chapterId))
+        } else {
+            fetchChapterById();
         }
 
-        fetchChapterById();
+    }, [user, novel, chapterId]);
+
+    useEffect(() => {
         fetchChapters();
-    }, [chapterId, novel.id, chapter]);
+    }, [user, novel])
 
 
     // Add bookmarked of chapter:
     useEffect(() => {
         const addToBookmark = async () => {
-            if (authState.authenticated) {
-
+            if (user) {
                 const bmList = await getBookmarkedData(user, authState.accessToken);
                 if (
                     bmList &&
@@ -178,7 +208,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
             }
         }
         addToBookmark();
-    }, []);
+    }, [novel]);
 
     const handlePageChange = (page: number, numberOfPages: number) => {
         console.log(`Current page: ${page}`);
@@ -190,7 +220,8 @@ const ChapterDetail = ({ navigation, route }: any) => {
             <Pdf
                 trustAllCerts={false}
                 key={page}
-                source={{ uri: uri, cache: true }}
+                source={{ uri: uri, cache: false }}
+                fitPolicy={3}
                 page={page}
                 onLoadComplete={(numberOfPages) => {
                     console.log(`Number of pages: ${numberOfPages}`);
@@ -211,6 +242,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
     const renderPages = () => {
         return (
             <ScrollView
+                scrollEnabled={!chapter?.isLocked}
                 horizontal
                 pagingEnabled
                 onMomentumScrollEnd={(event) => {
@@ -226,12 +258,15 @@ const ChapterDetail = ({ navigation, route }: any) => {
 
     const changePreviousChapter = () => {
         try {
-            const previousChapter = chapters.find(c => c.chapIndex === chapter?.chapIndex - 1);
-            if (previousChapter) {
-                navigation.replace('ChapterDetail', { chapterId: previousChapter.id, novel: novel });
-            } else {
-                console.log('Previous chapter not found');
+            if (chapter) {
+                const previousChapter = chapters.find(c => c.chapIndex === chapter?.chapIndex - 1);
+                if (previousChapter) {
+                    navigation.replace('ChapterDetail', { chapterId: previousChapter.id, novel: novel });
+                } else {
+                    console.log('Previous chapter not found');
+                }
             }
+
         } catch (e) {
             console.error('Error navigating to previous chapter', e);
         }
@@ -239,109 +274,245 @@ const ChapterDetail = ({ navigation, route }: any) => {
 
     const changeNextChapter = () => {
         try {
-            const nextChapter = chapters.find(c => c.chapIndex === chapter?.chapIndex + 1);
-            if (nextChapter) {
-                navigation.replace('ChapterDetail', { chapterId: nextChapter.id, novel: novel });
-            } else {
-                console.log('Next chapter not found');
+            if (chapter) {
+                const nextChapter = chapters.find(c => c.chapIndex === chapter?.chapIndex + 1);
+                if (nextChapter) {
+                    navigation.replace('ChapterDetail', { chapterId: nextChapter.id, novel: novel });
+                } else {
+                    console.log('Next chapter not found');
+                }
             }
         } catch (e) {
             console.error('Error navigating to next chapter', e);
         }
     }
+    const handleUnlockChapter = async () => {
+        // Implement logic to handle unlocking the chapter, deducting coins, etc.
+        // For example, you can show an alert for simplicity:
+        Alert.alert('Unlock chapter', 'Are you sure to unlock this chapter', [
+            {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'OK', onPress: async () => {
+                    if (chapter) {
+                        const data = {
+                            chapterId: chapter.id,
+                            accountId: user?.id,
+                            accessToken: authState.accessToken
+                        }
+                        await unlockChapterApi(data);
+                        Alert.alert(`Unlocking chapter ${chapter?.name}`);
+                    }
+                    else {
+                        Alert.alert('Something went wrong, please try again')
+                    }
 
-    const DrawerNavigator = () => {
-        return (
-          <Drawer.Navigator>
-            {chapters.map((chapter, index) => (
-              <Drawer.Screen
-                key={index}
-                name={chapter.name}
-                component={ChapterDetail}
-                initialParams={{ chapterId: chapter.id, novel: novel }}
-              />
-            ))}
-          </Drawer.Navigator>
-        );
-      };
+                }
+            },
+        ]);
+        setShowLockBottomSheet(false); // Close the bottom sheet after unlocking
+        fetchChapterById()
+        const newUserData = await GetAccountApi(getUserData().id, authState.accessToken);
+        setUserData(newUserData);
+        console.log(chapter);
+    };
 
-    if (isLoading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-        );
-    }
+    const renderBlurView = () => {
+        if (user) {
+            if (chapter?.isLocked) {
+                return (
+                    <>
+                        <View style={styles.blurContainer}>
+                            <View style={{ flexDirection: 'column', width: '70%' }}>
+                                <Text style={{ color: '#333', fontSize: 21 }}>Locked Chapter</Text>
+                                <Text numberOfLines={2} style={{ color: '#333', fontSize: 17 }}>Unlock chapters to read and support the author of this book</Text>
+                            </View>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Image source={require('../../assets/icons/book_lock_icon.png')} style={{ width: 80, height: 80 }} />
+                            </View>
 
-    return <View style={styles.container}>
-        {renderPages()}
-        {/* <StatusBar></StatusBar> */}
-        <BottomSheet
-            ref={bottomSheetRef}
-            index={0}
-            snapPoints={snapPoints}
-            onChange={handleSheetChanges}
-        >
-            <View style={styles.contentContainer}>
-                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#333', fontSize: 22 }}>Control Panel</Text>
-                    </View>
-                    <View style={styles.panel}>
-                        <Pressable disabled={isFirstChapter} onPress={() => changePreviousChapter()}>
-                            <MaterialCommunityIcons name="chevron-left-circle-outline" size={22} style={isFirstChapter ? { color: 'gray' } : { color: '#333' }} />
-                        </Pressable>
+                        </View>
+                        <View
+                            style={styles.nestContainer}
+                        >
+                            <View style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                                <View style={styles.panel}>
+                                    {/* Display unlock cost, user balance, and option to get more coins */}
+                                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                        <Text style={styles.normalText}>Unlock Cost</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Text style={styles.normalText}>- {chapter.fee} </Text>
+                                            <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 30, height: 30 }} />
+                                        </View>
 
-                        <Text numberOfLines={2} style={{ color: '#333', fontSize: 18, alignSelf: 'center', width: '70%', textAlign: 'center' }}>{chapter?.chapIndex}.{chapter?.name}</Text>
-                        <Pressable disabled={isLastChapter} onPress={() => changeNextChapter()}>
-                            <MaterialCommunityIcons name="chevron-right-circle-outline" size={22} style={isLastChapter ? { color: 'gray' } : { color: '#333' }} />
-                        </Pressable>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', width: '95%', marginTop: 10 }}>
+                                    </View>
+                                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                        <Text style={styles.normalText}>Your Balance</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Text style={styles.normalText}>{user?.walletAmmount} </Text>
+                                            <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 30, height: 30 }} />
+                                        </View>
 
-                        <View style={[styles.smallContainer, { marginRight: 5, width: '45%' }]}>
-                            <TouchableOpacity style={styles.smallContainer} onPress={() => {navigation.openDrawer}}>
-                                {/* <View style={styles.row} > */}
-                                <MaterialCommunityIcons name="playlist-check" size={25} style={{ color: 'black' }}></MaterialCommunityIcons>
-                                <View>
-                                    <Text style={styles.normalText}>Content</Text>
-                                    <Text>250 chapters</Text>
+                                    </View>
+
+
+                                </View>
+                                <View style={{ width: '95%' }}>
+                                    <TouchableOpacity
+                                        style={styles.btnUnlock}
+                                        onPress={handleUnlockChapter}
+                                    >
+                                        <Text style={styles.btnTextType1}>Unlock Chapter</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.btnTopUp}
+                                        onPress={() => navigation.navigate('CoinExchange')}
+                                    >
+                                        <Text style={styles.btnTextType2}>Get more coins</Text>
+                                    </TouchableOpacity>
                                 </View>
 
+                            </View>
+                        </View>
+                    </>
+
+                );
+            } else {
+                return null;
+            }
+        } else {
+            if (chapter?.isLocked) {
+                return (
+                    <View
+                        style={styles.blurContainer}
+                    >
+                        <View style={styles.blurContent}>
+                            <Text style={{ color: '#333', fontSize: 22 }}>Please sign up/ sign in to continue</Text>
+                            <TouchableOpacity
+                                style={{ backgroundColor: 'lightblue', width: '95%', padding: 10, margin: 5 }}
+                                onPress={toggleSignInBS}
+                            >
+                                <Text style={{ color: 'white' }}>Sign In</Text>
                             </TouchableOpacity>
                         </View>
-                        <View style={[styles.smallContainer, { marginLeft: 5 }]}>
-                            <TouchableOpacity style={styles.smallContainer} onPress={() => { navigation.navigate('NovelDetail', { title: novel.title }); }}>
-                                <Image source={{ uri: novel.imagesURL }} style={{ width: 50, height: 60 }} />
-                                <View style={styles.textContainer}>
-                                    <Text numberOfLines={2} style={[styles.normalText]}>About this book</Text>
-                                </View>
-                                <MaterialCommunityIcons name="chevron-right" size={20} style={{ color: '#333' }} />
-                            </TouchableOpacity>
-                        </View>
-
-
                     </View>
-                </View>
-            </View >
-        </BottomSheet >
-        {/* <DrawerNavigator/> */}
-    </View >;
+                );
+            } else {
+                return null;
+            }
+        }
+    };
+    return (
+        <View style={styles.container}>
+            {renderPages()}
+            {showSidebar && (
+                // <TouchableWithoutFeedback onPress={closeSidebar}>
+
+                <ScrollView style={styles.sidebar}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity style={styles.toggleButton} onPress={toggleSidebar}>
+                            <MaterialCommunityIcons
+                                name={"chevron-left"}
+                                size={30}
+                                style={{ color: '#333' }}
+                            />
+                        </TouchableOpacity>
+                        <Text>Content</Text>
+                    </View>
+
+                    {chapters.map((chapter) => (
+                        <TouchableOpacity
+                            key={chapter.id}
+                            style={styles.chapterItem}
+                            onPress={() => navigateToChapter(chapter)}
+                        >
+                            <Text style={styles.chapterTitle}>{chapter.name}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+                // </TouchableWithoutFeedback>
+            )}
+            {renderBlurView()}
+
+            <BottomSheet
+                ref={bottomSheetRef}
+                index={0}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+                style={{ zIndex: 100 }}
+            // backdropPress={closeSidebar}
+            >
+
+                <View style={styles.contentContainer}>
+                    <View style={styles.blurContent}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ color: '#333', fontSize: 22 }}>Control Panel</Text>
+                        </View>
+                        <View style={styles.panel}>
+                            <Pressable disabled={isFirstChapter} onPress={() => changePreviousChapter()}>
+                                <MaterialCommunityIcons name="chevron-left-circle-outline" size={22} style={isFirstChapter ? { color: 'gray' } : { color: '#333' }} />
+                            </Pressable>
+
+                            <Text numberOfLines={2} style={{ color: '#333', fontSize: 18, alignSelf: 'center', width: '70%', textAlign: 'center' }}>{chapter?.chapIndex}.{chapter?.name}</Text>
+                            <Pressable disabled={isLastChapter} onPress={() => changeNextChapter()}>
+                                <MaterialCommunityIcons name="chevron-right-circle-outline" size={22} style={isLastChapter ? { color: 'gray' } : { color: '#333' }} />
+                            </Pressable>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', width: '95%', marginTop: 10 }}>
+
+                            <View style={[styles.smallContainer, { marginRight: 5, width: '45%' }]}>
+                                <TouchableOpacity style={styles.smallContainer} onPress={() => { toggleSidebar() }}>
+                                    {/* <View style={styles.row} > */}
+                                    <MaterialCommunityIcons name="playlist-check" size={25} style={{ color: 'black' }}></MaterialCommunityIcons>
+                                    <View>
+                                        <Text style={styles.normalText}>Content</Text>
+                                        <Text>{chapters.length} chapters</Text>
+                                    </View>
+
+                                </TouchableOpacity>
+                            </View>
+                            <View style={[styles.smallContainer, { marginLeft: 5 }]}>
+                                <TouchableOpacity style={styles.smallContainer} onPress={() => { navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title }); }}>
+                                    <Image source={{ uri: novel.imagesURL }} style={{ width: 50, height: 60 }} />
+                                    <View style={styles.textContainer}>
+                                        <Text numberOfLines={2} style={[styles.normalText]}>About this book</Text>
+                                    </View>
+                                    <MaterialCommunityIcons name="chevron-right" size={20} style={{ color: '#333' }} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View >
+            </BottomSheet >
+            <SignInBottomSheet isVisible={showSignInBS} onClose={toggleSignInBS} />
+        </View >
+    );
 };
 
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
-        // flexDirection: 'column',
-        // width: '100%',
-        // height: '100%',
-        alignSelf: 'flex-start',
+        flex: 1,
+        alignSelf: 'center',
         justifyContent: 'flex-start',
     },
+    sidebar: {
+        flex: 1,
+        height: '100%',
+        position: 'absolute',
+        width: '65%',
+        backgroundColor: '#F0F0F0', // Adjust background color as needed
+        padding: 10,
+        zIndex: 1,
+    },
     pdf: {
+        position: 'relative',
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
+        zIndex: 0
     },
     loadingContainer: {
         flex: 1,
@@ -382,6 +553,120 @@ const styles = StyleSheet.create({
     textContainer: {
         width: '50%',
         marginLeft: 10,
-    }
+    },
+    drawerStyle: {
+        width: '60%', // Adjust the width as needed
+    },
+    chapterItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#CCCCCC',
+    },
+    chapterTitle: {
+        fontSize: 16,
+        color: '#333333',
+    }, toggleButton: {
+        // position: 'absolute',
+        // top: 10,
+        // left: 10,
+        // padding: 10,
+        // zIndex: 2,
+    },
+
+    // blur view:
+
+    blurContainer: {
+        flex: 1,
+        borderRadius: 10,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#AEAEAE',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '55%', // Adjust the height as needed
+        zIndex: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        backgroundColor: '#eae9ee'
+        // blurRadius: 10,
+        // alignSelf: 'center',
+
+    },
+    blurView: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // width: '100%',
+        // height: 'auto'
+    },
+    blurContent: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    btnUnlock: {
+        marginTop: 10,
+        borderRadius: 10,
+        backgroundColor: 'lime',
+        width: '95%',
+        padding: 10, margin: 5,
+        alignItems: 'center'
+    },
+    btnTopUp: {
+        marginTop: 5,
+        borderRadius: 10,
+        backgroundColor: 'pink',
+        width: '95%',
+        padding: 10, margin: 5
+    },
+    btnTextType1: {
+        textAlign: 'center',
+        color: 'blue',
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    btnTextType2: {
+        textAlign: 'center',
+        color: 'red',
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    nestContainer: {
+        flex: 1,
+        borderRadius: 10,
+        marginTop: 10,
+        borderTopWidth: 1,
+        borderColor: '#AEAEAE',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '40%', // Adjust the height as needed
+        zIndex: 3,
+        flexDirection: 'column',
+        width: '100%',
+        backgroundColor: '#FFFFFF',
+        // alignItems: 'center',
+
+    },
+    nestView: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // width: '100%',
+        // height: 'auto'
+    },
+    nestContent: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
 });
 export default ChapterDetail;

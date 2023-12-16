@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { Bookmarked } from '../../models/Bookmarked';
-import getBookmarkedData from '../../hook/BookmarkedApi';
+import getBookmarkedData, { deleteBookmarkApi } from '../../hook/BookmarkedApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -13,16 +13,18 @@ const BookmarkEdit = ({ navigation }: any) => {
     const { authState, getUserData } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [isGrid, setIsGrid] = useState(true);
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
     // State to manage the checked status of each novel
     const [bookmarkData, setBookmarkData] = useState<Bookmarked[]>([]);
     const user = getUserData();
     const [checkedNovels, setCheckedNovels] = useState<{ [key: string]: boolean }>({});
     const handleCheckboxPress = (novelId: string) => {
         setCheckedNovels((prevCheckedNovels) => ({
-          ...prevCheckedNovels,
-          [novelId]: !prevCheckedNovels[novelId],
+            ...prevCheckedNovels,
+            [novelId]: !prevCheckedNovels[novelId],
         }));
-      };
+    };
 
     useEffect(() => {
         navigation.setOptions({
@@ -62,6 +64,33 @@ const BookmarkEdit = ({ navigation }: any) => {
         }, [authState.authenticated, user])
     );
 
+    const handleSelectAll = () => {
+        bookmarkData.map((bookmark) => {
+            handleCheckboxPress(bookmark.novelId);
+        })
+    }
+    const handleDeleteBookmark = async (novelId: string) => {
+        if (user) {
+            const res = await deleteBookmarkApi(user.id, novelId, authState.accessToken);
+            console.log(res);
+        } else {
+            console.log("Chua dang nhap");
+            bookmarkData.filter((bookmark) => bookmark.novelId !== novelId);
+            const parsedData = JSON.stringify(bookmarkData);
+            await AsyncStorage.setItem('preferList', parsedData);
+            console.log("Da cap nhat")
+        }
+
+    }
+    const deleteBookmark = () => {
+        console.log('delete')
+        Object.keys(checkedNovels).map((novelId) => {
+            handleDeleteBookmark(novelId);
+        })
+        forceUpdate();
+        
+    }
+
     const CustomEditHeader = () => {
         return (
             <View
@@ -78,7 +107,7 @@ const BookmarkEdit = ({ navigation }: any) => {
         );
     };
 
-    
+
     const renderRow = (row: number) => {
         return (
             <View style={styles.row} key={row}>
@@ -102,9 +131,22 @@ const BookmarkEdit = ({ navigation }: any) => {
     };
     return (
         <View style={styles.container}>
-            <ScrollView>
+            <ScrollView style={{ position: 'relative' }}>
                 <View>{Array.from({ length: Math.ceil(bookmarkData.length / 3) }, (_, i) => renderRow(i))}</View>
             </ScrollView>
+            <View style={styles.functionButtons}>
+                <TouchableOpacity style={styles.buttonSelect} onPress={() => {
+                    handleSelectAll();
+                }}>
+                    <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>Select All</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.buttonDelete} onPress={() => {
+                    deleteBookmark();
+                }} >
+                    <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600', textAlign: 'center' }}>Delete</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     )
 }
@@ -133,6 +175,8 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         alignItems: 'stretch',
+        height: '100%',
+        position: 'relative',
     },
     row: {
         flex: 1,
@@ -164,6 +208,34 @@ const styles = StyleSheet.create({
         right: 0,
         top: 0,
         zIndex: 1,
+    },
+    functionButtons: {
+        borderRadius: 10,
+        position: 'absolute',
+        bottom: 30,
+        marginBottom: 'auto',
+        flexDirection: 'row',
+        backgroundColor: '#23F4DC',
+        justifyContent: 'space-around',
+        // alignItems: 'center',
+        alignSelf: 'center',
+        width: '95%',
+        top: 'auto',
+        // padding: 10,
+    },
+    buttonSelect: {
+        padding: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        textAlign: 'center',
+        width: '50%',
+    },
+    buttonDelete: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '50%',
+        borderLeftWidth: 1, borderColor: '#EBEBEB'
     }
 
 })

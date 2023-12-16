@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer, DefaultTheme,
+  DarkTheme,
+  useTheme,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import HomeTabs from './views/home/HomeTabs';
@@ -33,12 +37,15 @@ import EditChapter from './views/writenovel/Chapter/EditChapter';
 import AddReview from './views/novelDetail/Rating/AddReview';
 import PaymentHistory from './views/account/PaymentHistory';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ChapterListDrawer } from './views/novelDetail/ChapterListDrawer';
+import CommentList from './views/novelDetail/CommentList';
 const Stack = createNativeStackNavigator();
 function App() {
+  const scheme = useColorScheme();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <NavigationContainer>
+        <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack.Navigator initialRouteName='Welcome'>
             <Stack.Screen name='Welcome' component={Welcome} options={{ headerShown: false }} />
             <Stack.Screen name="Home" component={HomeTabs} options={{
@@ -49,6 +56,7 @@ function App() {
             }} />
 
             <Stack.Screen name="NovelDetail" component={NovelDetail} options={({ route }: any) => ({ title: route.params.title })} />
+            <Stack.Screen name="CommentList" component={CommentList} options={({ route }: any) => ({ title: 'Comments', headerTitleAlign: 'center' })} />
             <Stack.Screen name="ChapterList" component={ChapterList} options={({ route }: any) => ({ title: 'Content', headerTitleAlign: 'center' })} />
             <Stack.Screen name="ChapterDetail" component={ChapterDetail} />
             {/* Rating  */}

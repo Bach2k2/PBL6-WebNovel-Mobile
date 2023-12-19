@@ -8,3 +8,12 @@ export const axiosInstance = axios.create({
     withCredentials: false,
     baseURL:'https://webnovelapi.azurewebsites.net/api'
 });
+
+export const axiosAuthorizedInstance= axios.create({
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: false,
+    baseURL:'https://webnovelapi.azurewebsites.net/api'
+});
+

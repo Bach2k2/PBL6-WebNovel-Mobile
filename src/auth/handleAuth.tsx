@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import * as Keychain from 'react-native-keychain';
 import { jwtDecode } from 'jwt-decode';
 import GetAccountApi from '../hook/AccountApi';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
 
 export const handleAuth = async ({ authContext, response }: any) => {
     // const authContext = useContext(AuthContext);

@@ -61,7 +61,7 @@ const GetAccountApi = async (accountId: any, accessToken: any) => {
 };
 
 
-export const UpdateAccountApi = (authContext: any) => async (user: User, accessToken: any) => {
+export const UpdateAccountApi = async (user: User, accessToken: any) => {
   console.log('user in update api', user);
   const formData = new FormData();
   formData.append('Id', user.id)
@@ -74,16 +74,14 @@ export const UpdateAccountApi = (authContext: any) => async (user: User, accessT
   formData.append('RoleIds', user.roleIds)
   formData.append('Phone', user.phone)
   formData.append('WalletAmmount', user.walletAmmount)
+  formData.append('WalletAmmount', user.creatorWallet)
   formData.append('IsActive', user.isActive)
-  // formData.append('File', user.imagesURL)
   formData.append('File', {
     uri: user.imagesURL,
     name: 'novelImage.jpg',
     type: 'image/jpeg',
   });
   formData.append('Birthday', user.birthday)
-  // console.log('fd inside api', formData);
-  // console.log(accessToken);
   const axiosConfig = {
     headers: {
       'Content-Type': 'multipart/form-data',

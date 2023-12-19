@@ -28,7 +28,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
     const [isLoading, setIsLoading] = useState(true);
     const [pdfArray, setPdfArray] = useState<JSX.Element[]>([]);
     const { novel, chapterId } = route.params;
-    const { authState, getUserData,setUserData } = useContext(AuthContext);
+    const { authState, getUserData, setUserData } = useContext(AuthContext);
     const [user, setUser] = useState<User | null>();
     const [bookmarkList, setBookmarkList] = useState<Bookmarked[]>([]);
     const [loadingBookmark, setLoadingBookmark] = useState(true);
@@ -68,34 +68,20 @@ const ChapterDetail = ({ navigation, route }: any) => {
     }, []);
 
     useEffect(() => {
-        setUser(getUserData());
-    }, [user])
+        const userData = getUserData()
+        setUser(userData);
+    }, [user, getUserData])
 
-    // Check if is locked chapter:
-    useEffect(() => {
-        if (chapter?.isLocked) {
-            setShowLockBottomSheet(true);
-        } else {
-            setShowLockBottomSheet(false);
-        }
-    }, [])
+
     //------------------- Get chapter list -------------------------------- 
     const fetchChapters = async () => {
         try {
+            console.log('uuu', user)
             const data = await getChapters(user, novel.id, authState.accessToken);
-            setChapters(data);;
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    //------------------- Get this chapter -------------------------------- 
-    const fetchChapterById = async () => {
-        try {
-            const data = await getChapterByChapterId(chapterId);
-            // console.log("chapter Response:", data);
-            setChapter(data);
-
-            if (data) {
+            setChapters(data);
+            const selectedChapter = data.find((ch) => ch.id === chapterId);
+            setChapter(selectedChapter)
+            if (selectedChapter) {
                 navigation.setOptions({
                     title: '',
                     headerStyle: {
@@ -104,40 +90,29 @@ const ChapterDetail = ({ navigation, route }: any) => {
                     headerLeft: () => (
                         <TouchableOpacity style={{ alignItems: 'center', marginRight: 10, flexDirection: 'row' }} onPress={() => { navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title }); }}>
                             <MaterialCommunityIcons name="chevron-left-circle" color='gray' size={20} style={{ marginRight: 5 }} />
-                            <Text style={{ color: 'black', fontSize: 16, }}>{data?.name}</Text>
+                            <Text style={{ color: 'black', fontSize: 16, }}>{selectedChapter?.name}</Text>
                         </TouchableOpacity>
                     ),
                 });
             }
-            if (data.fileContent === undefined) {
-                setIsLoading(false);
-            } else {
+            if (selectedChapter) {
                 setIsLoading(false);
                 setNumOfPages(1); // Assuming the file has only one page initiallys
-                console.log(data.fileContent)
-                setPdfArray([renderPdf(1, data.fileContent)]);
+                console.log(selectedChapter.fileContent)
+                setPdfArray([renderPdf(1, selectedChapter.fileContent)]);
             }
             // Check novel display first chapter{
             // Check if it's the first or last chapter
-            setIsFirstChapter(chapter?.chapIndex === 1);
-            setIsLastChapter(chapter?.chapIndex === novel.numChapter);
+            setIsFirstChapter(selectedChapter?.chapIndex === 1);
+            setIsLastChapter(selectedChapter?.chapIndex === novel.numChapter);
         } catch (error) {
-            console.error(error);
+            console.log(error);
         }
-    };
-
-    useEffect(() => {
-        if (user) {
-            setChapter(chapters.find(ch => ch.id === chapterId))
-        } else {
-            fetchChapterById();
-        }
-
-    }, [user, novel, chapterId]);
-
+    }
+    //------------------- Get this chapter -------------------------------- 
     useEffect(() => {
         fetchChapters();
-    }, [user, novel])
+    }, [user, getUserData]);
 
 
     // Add bookmarked of chapter:
@@ -240,15 +215,23 @@ const ChapterDetail = ({ navigation, route }: any) => {
     };
 
     const renderPages = () => {
+        const scrollViewRef = useRef(null);
+        console.log(chapter?.isLocked)
         return (
             <ScrollView
-                scrollEnabled={!chapter?.isLocked}
+                ref={scrollViewRef}
+                scrollEnabled={false}
                 horizontal
                 pagingEnabled
                 onMomentumScrollEnd={(event) => {
                     const offsetX = event.nativeEvent.contentOffset.x;
                     const page = Math.ceil(offsetX / Dimensions.get('window').width) + 1000;
                     setCurrentPage(page);
+                }}
+                onScroll={() => {
+                    if (chapter?.isLocked && scrollViewRef.current) {
+                        scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
+                    }
                 }}
             >
                 {pdfArray}
@@ -314,7 +297,6 @@ const ChapterDetail = ({ navigation, route }: any) => {
             },
         ]);
         setShowLockBottomSheet(false); // Close the bottom sheet after unlocking
-        fetchChapterById()
         const newUserData = await GetAccountApi(getUserData().id, authState.accessToken);
         setUserData(newUserData);
         console.log(chapter);

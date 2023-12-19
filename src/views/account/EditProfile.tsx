@@ -36,6 +36,7 @@ const EditProfile = ({ navigation }: any) => {
             imagesURL: "https://lh3.googleusercontent.com/a/ACg8ocIB4vOa8zS_5XybONwLtpIOqUftfgKmhtthODMANyBNjw=s96-c",
             phone: "",
             walletAmmount: 0,
+            creatorWallet:0,
             isActive: true
         }
     )
@@ -53,19 +54,22 @@ const EditProfile = ({ navigation }: any) => {
         });
     });
 
+    useEffect(() => {
+        const userData = getUserData()
+        setUpdateUser(userData);
+    }, [getUserData])
     //Hiển thị khi component mount
     useEffect(() => {
-        if (!mounted && updateUser && updateUser.birthday) {
-            // console.log('check')
-            setUpdateUser(getUserData());
+        if (updateUser && updateUser.birthday) {
+            // setUpdateUser(getUserData());
+            console.log("Update date")
+            setDateString(updateUser?.birthday || '0001-01-01');
             setTimeout(() => {
-                setDateString(updateUser?.birthday || '0001-01-01');
                 setLoading(false);
-                setMounted(true);
-            }, 1000)
+            }, 5000)
             setDate(new Date(updateUser?.birthday))
         }
-    }, [mounted, getUserData, updateUser]);
+    }, [updateUser, getUserData]);
 
 
     useEffect(() => {
@@ -73,9 +77,6 @@ const EditProfile = ({ navigation }: any) => {
             setFormReady(updateUser.nickName != "" && updateUser.username != "" && updateUser.email != "" && updateUser.imagesURL != "")
         }
     }, [getUserData, updateUser])
-
-
-
 
     const handleIconPress = () => {
 
@@ -104,7 +105,6 @@ const EditProfile = ({ navigation }: any) => {
             if (Platform.OS === "android") {
                 toggleDatePicker();
             }
-
         }
         else {
             toggleDatePicker();
@@ -113,13 +113,14 @@ const EditProfile = ({ navigation }: any) => {
 
     const handleUpdateUser = async () => {
         if (formReady && updateUser) {
-
-            const updateAccount = UpdateAccountApi(authContext);
-            const res = await updateAccount(updateUser, authState.accessToken)
-            console.log(res)
-            const user = await GetAccountApi(updateUser.id, authState.accessToken)
-            setUserData(user);
-            setUpdateUser(getUserData());
+            await UpdateAccountApi(updateUser, authState.accessToken).then(async (res) => {
+                console.log(res);
+                const user = await GetAccountApi(updateUser.id, authState.accessToken)
+                setUserData(user);
+                setUpdateUser(getUserData());
+            }).catch((e)=>{
+                console.log(e);
+            });
         }
     }
     const onChangeUsername = (username: string) => {

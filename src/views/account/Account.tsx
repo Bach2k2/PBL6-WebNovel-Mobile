@@ -35,32 +35,14 @@ function Account() {
 const AccountMainPage = ({ navigation }: { navigation: any }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<User | null>(null);
-    const { authState, getUserData,setUserData } = useContext(AuthContext);
+    const { authState, getUserData, setUserData } = useContext(AuthContext);
     const [isShownBottomSheet, setShowBottomSheet] = useState(false);
     const toggleBottomSheet = () => {
         setShowBottomSheet(!isShownBottomSheet);
     }
 
-
-    // useEffect(() => {
-    //     setUserData(getUserData());
-    //     console.log('call user when user change in account page:', user)
-    // }, [,getUserData]); // Cập nhật khi có sự thay đổi 
-    //use callback:  khong khac
-
-    // useEffect(() => {
-    //     setIsLoading(true);
-    //     setUserData(prevUserData => {
-    //         const newUserData = getUserData();
-    //         console.log('call user when user changes in account page:', newUserData);
-    //         return newUserData;
-    //     });
-    //     setIsLoading(false);
-    // }, [getUserData]);
-
-
     useEffect(() => {
-        if (getUserData) {
+        if (getUserData()) {
             const fetchUserData = async () => {
                 try {
                     setIsLoading(true);
@@ -81,8 +63,16 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
         }
         else {
             console.log('user is not authorized')
+            setUserData(null);
+            setUser(null);
         }
     }, []);
+
+    useEffect(() => {
+        const userData = getUserData();
+        setUser(userData);
+        console.log('call user when user change', user)
+    }, [user, getUserData]); // Cập nhật khi có sự thay đổi cua
 
     function handleNavigate(path: string) {
         console.log(path);
@@ -160,7 +150,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                                 <View style={styles.infor_column}>
                                     <View style={{ flexDirection: 'row' }}>
                                         <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 25, height: 25 }} />
-                                        <Text style={styles.textItem}>Số dư coins</Text>
+                                        <Text style={styles.textItem}>Coins balance</Text>
                                     </View>
 
                                     <Text style={styles.infor_text}>{user ? user.walletAmmount : '-'}</Text>
@@ -182,15 +172,15 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                             <View style={styles.infor_row}>
                                 <View style={styles.infor_column}>
                                     <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
-                                    <Text style={styles.textItem}>Phiếu đọc sách</Text>
+                                    <Text style={styles.textItem}>Votes</Text>
                                 </View>
                                 <View style={styles.infor_column}>
                                     <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
-                                    <Text style={styles.textItem}>Điểm của tôi</Text>
+                                    <Text style={styles.textItem}>Points</Text>
                                 </View>
                                 <View style={styles.infor_column}>
                                     <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
-                                    <Text style={styles.textItem}>Phiếu</Text>
+                                    <Text style={styles.textItem}>Vouchers</Text>
                                 </View>
                             </View>
 
@@ -200,39 +190,44 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                             <TouchableOpacity onPress={() => handleNavigate('EmailBox')}>
                                 <View style={styles.row4User}>
                                     <Icon style={styles.iconItem} name='email' size={30} />
-                                    <Text style={styles.textItem} >Hộp thư đến</Text>
+                                    <Text style={styles.textItem} >Inbox</Text>
                                 </View>
                             </TouchableOpacity>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='dock' size={30} />
-                                <Text style={styles.textItem} >Thiết bị của tôi</Text>
+                                <Text style={styles.textItem} >My Gear</Text>
                             </View>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='discount' size={30} />
-                                <Text style={styles.textItem} >Ưu đãi</Text>
+                                <Text style={styles.textItem} >Privilege</Text>
                             </View>
-                            <View style={styles.row4User}>
-                                <Icon style={styles.iconItem} name='shopping-cart' size={30} />
-                                <Text style={styles.textItem} >Lịch sử tiêu dùng</Text>
-                            </View>
+                            <TouchableOpacity onPress={() => {
+                                handleNavigate('PaymentHistory')
+                            }}>
+                                <View style={styles.row4User}>
+                                    <Icon style={styles.iconItem} name='shopping-cart' size={30} />
+                                    <Text style={styles.textItem} >Purchase History</Text>
+                                </View>
+                            </TouchableOpacity>
+
                         </View>
                         {/* Row 2 */}
                         <View style={styles.userContainer}>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='try' size={30} />
-                                <Text style={styles.textItem} >Quy đổi</Text>
+                                <Text style={styles.textItem} >Redeem</Text>
                             </View>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='question-answer' size={30} />
-                                <Text style={styles.textItem} >Diễn đàn</Text>
+                                <Text style={styles.textItem} >Forum</Text>
                             </View>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='question-mark' size={30} />
-                                <Text style={styles.textItem} >Câu hỏi thường gặp</Text>
+                                <Text style={styles.textItem} >FAQ</Text>
                             </View>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='quickreply' size={30} />
-                                <Text style={styles.textItem} >Dịch vụ khách hàng trực tuyến</Text>
+                                <Text style={styles.textItem} >Customer online service</Text>
                             </View>
                         </View>
 

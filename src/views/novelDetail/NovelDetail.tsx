@@ -177,7 +177,7 @@ const NovelDetail = ({ navigation, route }: any) => {
         setTimeout(() => {
             setLoading(false);
             console.log('Loading')
-        }, 1000);
+        }, 2000);
 
     }, [novelId, isExistLibrary]); // need only a para to trigger
 

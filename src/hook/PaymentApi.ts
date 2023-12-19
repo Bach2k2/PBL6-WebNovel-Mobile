@@ -6,6 +6,21 @@ export const getBundlesApi = async () => {
     return res.data;
 }
 
+export const getPaymentApi = async (accountId: any, accessToken: any) => {
+    try {
+        const axiosConfig = {
+            headers: {
+                'Authorization': 'Bearer ' + accessToken
+            }
+        }
+        const res = await axiosInstance.get(`/payment/AccountId=${accountId}`, axiosConfig);
+        return res.data;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
 export const createOrderApi = async (accountId: any, bundle: any, accessToken: any) => {
     try {
         // console.log(bundleId);

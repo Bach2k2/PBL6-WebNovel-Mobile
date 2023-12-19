@@ -1,6 +1,6 @@
 import axios from "axios";
-import { axiosInstance } from './AxiosInstance.js'
-import { AuthContext } from "../context/AuthContext";
+import { axiosInstance } from './AxiosInstance'
+import { AuthContext } from "../context/AuthContext.js";
 import { useContext } from "react";
 import { User } from "../models/User.js";
 import { ToastAndroid } from "react-native";

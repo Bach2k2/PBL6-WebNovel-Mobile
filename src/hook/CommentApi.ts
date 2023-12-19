@@ -1,5 +1,5 @@
 import axios from "axios";
-import { axiosInstance } from './AxiosInstance.js'
+import { axiosInstance } from './AxiosInstance'
 
 export const getCommentFromNovelId = async (novelId: string) => {
     try {

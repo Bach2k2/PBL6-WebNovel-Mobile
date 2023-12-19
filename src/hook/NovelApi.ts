@@ -1,6 +1,6 @@
 import axios from "axios";
-import { axiosInstance } from './AxiosInstance.js'
-import { Novel } from "../models/Novel.js";
+import { axiosInstance } from './AxiosInstance'
+import { Novel } from "../models/Novel";
 export const getNovelData = async () => {
     try {
         const response = await axiosInstance.get('/novel');

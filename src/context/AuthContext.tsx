@@ -17,7 +17,7 @@ const AuthContext = createContext({
   setAuthState: (authData: any) => { },
   logout: async () => { },
 });
-const { Provider } = AuthContext;
+// const { Provider } = AuthContext;
 
 const AuthProvider = ({ children }: any) => {
 

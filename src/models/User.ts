@@ -8,6 +8,7 @@ export interface User {
     imagesURL?: string,
     birthday?: string,
     walletAmmount?: number,
+    creatorWallet?:number,
     // status?: 0,
     phone?: string,
     roleIds?: string[],

@@ -85,10 +85,6 @@ const AxiosProvider = ({ children }: any) => {
     "nameidentifier": ""
   }
 
-  const getUserData = () => {
-
-  }
-
   return (
     <Provider
       value={{

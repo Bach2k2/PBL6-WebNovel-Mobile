@@ -7,7 +7,7 @@ import { ActivityIndicator } from 'react-native-paper';
 const Profile = ({ navigation }: any) => {
     const { getUserData } = useContext(AuthContext);
     const [like, setLike] = useState(false);
-    
+
     const handleEditBtn = () => {
         navigation.navigate('EditProfile');
     }
@@ -23,21 +23,20 @@ const Profile = ({ navigation }: any) => {
                     <View style={styles.row}>
                         <View style={styles.avatar_container}>
                             <Image style={styles.avatar} source={{ uri: user.imagesURL }} />
-                            <Text numberOfLines={2} style={styles.username}>{user.nickName||user.username}</Text>
+                            <Text numberOfLines={2} style={styles.username}>{user.nickName || user.username}</Text>
                             <Text style={styles.userid}>ID:{user.id}</Text>
                         </View>
                         <View style={styles.funcBtn}>
 
-                            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setLike(!like) }}>
-                                <View style={styles.likeBtn}>
-                                    <Icon name='heart' style={styles.likeBtnIcon} />
-                                </View>
-                            </TouchableOpacity>
-
+                            <View style={styles.likeBtn}>
+                                <TouchableOpacity onPress={() => { setLike(!like) }}>
+                                    <Icon name='heart' size={20} style={styles.likeBtnIcon} />
+                                </TouchableOpacity>
+                            </View>
 
                             <View style={styles.editBtn}>
                                 <TouchableOpacity onPress={() => { handleEditBtn() }}>
-                                    <Text style={styles.editBtnText}>Chỉnh sửa hồ sơ</Text>
+                                    <Text style={styles.editBtnText}>Edit profile</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -46,14 +45,14 @@ const Profile = ({ navigation }: any) => {
                         <TouchableOpacity onPress={() => { }}>
                             <View style={{ marginTop: 5, flexDirection: 'row' }}>
                                 <Icon name='pencil' size={20} />
-                                <Text>Nói cho chúng tôi thêm về sở thích của bạn</Text>
+                                <Text>Tell us more about yourself</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.lastRow}>
                         <View style={{ marginTop: 5, flexDirection: 'row' }}>
                             <Icon name='calendar' size={20} />
-                            <Text>Đã tham gia vào 2023-11-07 </Text>
+                            <Text>2023-11-07 Joined</Text>
                         </View>
                         <View style={{ marginTop: 5, flexDirection: 'row' }}>
                             <Icon name='account-wrench' size={20} />
@@ -146,39 +145,39 @@ const styles = StyleSheet.create({
     funcBtn: {
         flexDirection: 'row',
         width: '50%',
-        height: '50%',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-start',
     },
     likeBtn: {
         margin: 10,
-        width: 40,
-        height: 30,
+        width: 50,
+        // paddingBottom: 5,
+        // paddingTop: 5,
+        padding:10,
         backgroundColor: 'blue',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 5,
+        borderRadius: 10,
         flexDirection: 'row',
     },
     likeBtnIcon: {
-        marginTop: 10,
-        width: 25,
-        height: 25,
         color: 'white',
-        justifyContent: 'center',
-        alignContent: 'center',
         textAlign: 'center',
-        alignSelf: 'center',
+        textAlignVertical:'center',
     },
     editBtn: {
         margin: 10,
-        height: 30,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'white',
-        borderRadius: 3,
+        borderRadius: 10,
+        padding: 10,
     },
     editBtnText: {
         margin: 1,
         color: 'black',
+        fontSize: 14,
+        fontWeight: 'bold',
     }
     , lastRow: {
         backgroundColor: 'lightGray',
@@ -196,8 +195,6 @@ const styles = StyleSheet.create({
         width: '97%',
         height: 70,
 
-
-        // alignItems: 'center',
     },
     boxRow: {
         flex: 1,

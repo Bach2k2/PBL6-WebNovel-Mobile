@@ -1,5 +1,5 @@
 import axios from "axios";
-import { axiosInstance } from './AxiosInstance.js'
+import { axiosInstance } from './AxiosInstance'
 var RNFS = require('react-native-fs');
 // export const getChaptersByNovelId = async (novelId: any) => {
 

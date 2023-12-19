@@ -1,7 +1,5 @@
 import axios from "axios";
-// import serverURL from './AxiosInstance.js'
-// import axiosInstance from './AxiosInstance.js'
-import { axiosInstance } from './AxiosInstance.js'
+import { axiosInstance } from './AxiosInstance'
 const subpath = '/genres'
 const getGenreData = async () => {
     try {

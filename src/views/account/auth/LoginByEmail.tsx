@@ -9,11 +9,10 @@ import * as Keychain from 'react-native-keychain';
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import GetAccountApi from '../../../hook/AccountApi';
 import Toast from 'react-native-toast-message';
-// import jwt from 'jsonwebtoken';
 
-const HeigthWindow = Dimensions.get('window').height;
+const HeightWindow = Dimensions.get('window').height;
 const WidthWindow = Dimensions.get('window').width;
-// const accountApi = AccountApi();
+
 
 const LoginByEmail = ({ navigation }: { navigation: any }) => {
     const authContext = useContext(AuthContext);
@@ -26,7 +25,7 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
     const passwordRef = useRef<TextInput | null>(null);
     const [isTouchableEnabled, setIsTouchableEnabled] = useState(false);
     const [showPasswordStatus, SetShowPasswordStatus] = useState(false);
-    const [contentHeight, setContentHeight] = useState(HeigthWindow);
+    const [contentHeight, setContentHeight] = useState(HeightWindow);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
@@ -51,11 +50,11 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
 
     const updateContentHeight = () => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-            setContentHeight(HeigthWindow / 2); // You can adjust the height as needed
+            setContentHeight(HeightWindow / 2); // You can adjust the height as needed
         });
 
         const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setContentHeight(HeigthWindow);
+            setContentHeight(HeightWindow);
         });
 
         return () => {
@@ -118,16 +117,17 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
             const userId = decoded.nameidentifier;
 
             console.log(userId);
-            const accountApi = GetAccountApi(authContext);
-            const userData = await accountApi(userId, accessToken);
-          //  console.log(userData);
-            await authContext.setUserData(userData); // thành công, đã check
-            Toast.show({
-                type: 'success',
-                text1: 'Login Notification!',
-                text2: 'Login successfully👋'
-            });
-            navigation.navigate('Account', userData);
+            await GetAccountApi(userId, accessToken).then((userData) => {
+                authContext.setUserData(userData); // thành công, đã check
+                Toast.show({
+                    type: 'success',
+                    text1: 'Login Notification!',
+                    text2: 'Login successfully👋'
+                });
+                navigation.navigate('Account', userData);
+            }).catch((e) => console.log(e));
+            //  console.log(userData);
+
 
         } catch (error: any) {
             console.log(error);

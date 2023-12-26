@@ -1,19 +1,21 @@
 // screens/CategoryDetailScreen.js
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 import { Novel } from '../../models/Novel';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getNovelByGenre } from '../../hook/NovelApi';
 import { useNavigation } from '@react-navigation/native';
+import { AxiosContext } from '../../context/AxiosContext';
 
 function NovelByGenre({ navigation, route }: any) {
   const { genre } = route.params;
   const [novelByGenre, setNovellByGenre] = useState<Array<Novel>>([]);
+  const {publicAxios} = useContext(AxiosContext)
   // const navigation = useNavigation();
 
   useEffect(() => {
     const fetchData = async () => {
-      getNovelByGenre(genre.id).then((data) => {
+      getNovelByGenre(publicAxios,genre.id).then((data) => {
         console.log(data);
         setNovellByGenre(data);
       }).catch((err) => {

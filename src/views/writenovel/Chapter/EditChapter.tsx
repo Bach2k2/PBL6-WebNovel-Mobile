@@ -6,7 +6,7 @@ import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import { Keyboard, KeyboardEvent } from 'react-native';
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../../context/AuthContext";
-import { postChapter } from "../../../hook/ChapterApi";
+import { editChapterApi, postChapter } from "../../../hook/ChapterApi";
 import Pdf from "react-native-pdf";
 import { convertPdfToHtml } from "../../../hook/ConvertPdfToHtmlApi";
 import { ActivityIndicator } from "react-native-paper";
@@ -37,54 +37,61 @@ const EditChapter = ({ route, navigation }: any) => {
     //     }
     //     getContent();
     // }, []);
-    useEffect(() => {
-        // Fetch HTML file
-        const fecthHTMLFromPdf = async () => {
-            const formData = new FormData();
-            formData.append('File', chapter.fileContent)
-            formData.append('StoreFile', true);
-            const resData = await convertPdfToHtml(formData);
+    // useEffect(() => {
+    //     // Fetch HTML file
+    //     const fecthHTMLFromPdf = async () => {
+    //         const formData = new FormData();
+    //         formData.append('File', chapter.fileContent)
+    //         formData.append('StoreFile', true);
+    //         const resData = await convertPdfToHtml(formData);
 
-            if (resData && resData.Files && resData.Files.length > 0) {
-                const firstFile = resData.Files[0];
+    //         if (resData && resData.Files && resData.Files.length > 0) {
+    //             const firstFile = resData.Files[0];
 
-                if (firstFile && firstFile.Url) {
-                    const url = firstFile.Url;
-                    console.log('URL:', url);
+    //             if (firstFile && firstFile.Url) {
+    //                 const url = firstFile.Url;
+    //                 console.log('URL:', url);
 
-                    // Now you can fetch the content using the obtained URL
-                    fetch(url)
-                        .then(response => response.text())
-                        .then(data => {
-                            // Update state with HTML content
-                            const bodyContentMatch = data.match(/<body.*?>([\s\S]*?)<\/body>/i);
+    //                 // Now you can fetch the content using the obtained URL
+    //                 fetch(url)
+    //                     .then(response => response.text())
+    //                     .then(data => {
+    //                         // Update state with HTML content
+    //                         // const bodyContentMatch = data.match(/<body.*?>([\s\S]*?)<\/body>/i);
 
-                            // Check if there's a match
-                            if (bodyContentMatch && bodyContentMatch.length > 1) {
-                                data = bodyContentMatch[1];
-                                console.log(data);
-                            } else {
-                                console.log('No <body> tag found or empty content.');
-                            }
-                            setContent(data);
-                            console.log(data);
-                            setHtmlContent(`<html><body style="fontSize:5">${data}</body></html>`);
-                            setIsLoading(false);
-                            // console.log(data);
-                        })
-                        .catch(error => console.error('Error fetching HTML:', error));
-                } else {
-                    console.error('Error: No URL found in the response');
-                }
-            } else {
-                console.error('Error: No files found in the response');
-            }
+    //                         // // Check if there's a match
+    //                         // if (bodyContentMatch && bodyContentMatch.length > 1) {
+    //                         //     data = bodyContentMatch[1];
+    //                         //     // Remove style attribute from all elements
+    //                         //     // data = data.replace(/class="[^"]*"/gi, '');
+    //                         //     // data = data.replace(/style="[^"]*"/gi, '');
+    //                         //     console.log(data);
+    //                         // } else {
+    //                         //     console.log('No <body> tag found or empty content.');
+    //                         // }
+    //                         setContent(data);
+    //                         console.log(data);
+    //                         setHtmlContent(`${data}`);
+    //                         setIsLoading(false);
+    //                     })
+    //                     .catch(error => console.error('Error fetching HTML:', error));
+    //             } else {
+    //                 console.error('Error: No URL found in the response');
+    //             }
+    //         } else {
+    //             console.error('Error: No files found in the response');
+    //         }
 
-        }
-        fecthHTMLFromPdf();
-    }, []);
+    //     }
+    //     fecthHTMLFromPdf();
+    // }, []);
+    useEffect(()=>{
+        setTimeout(()=>{
+            setIsLoading(false);
+        },2000)
+    },[])
 
-    const handleCreateChapter = async () => {
+    const handleEditChapter = async () => {
         console.log('Title', title, 'content', content)
 
         if (title === '' || content === '') {
@@ -116,10 +123,16 @@ const EditChapter = ({ route, navigation }: any) => {
                 const data = {
                     name: 'title',
                     novelId: novel.id,
+                    Discount: chapter.discount,// Add your form fields with appropriate values
+                    FeeId: chapter.feeId,
+                    IsPublished: chapter.isPublished,
+                    Views: chapter.views,
+                    IsLocked: chapter.isLocked,
+                    ApprovalStatus: chapter.approvalStatus,
                     file: file,
                     accessToken: authState.accessToken,
                 }
-                const response = await postChapter(data);
+                const response = await editChapterApi(data);
 
                 console.log(response);
             }
@@ -159,13 +172,13 @@ const EditChapter = ({ route, navigation }: any) => {
 
     useEffect(() => {
         navigation.setOptions({
-            title: novel.name,
+            title: chapter.name,
             headerRight: () => (
                 <Button
                     onPress={() => {
-                        handleCreateChapter()
+                        handleEditChapter()
                     }}
-                    title="Publish this chapter"
+                    title="Edit"
                 />
             ),
         });
@@ -217,15 +230,8 @@ const EditChapter = ({ route, navigation }: any) => {
                             handleSetContent(descriptionText);
                         }}
                         // initialContentHTML={content}
-                        initialContentHTML={htmlContent}
+                        initialContentHTML={content}
                     />
-                    {pdfFilePath && (<Pdf
-                        trustAllCerts={false}
-                        source={{ uri: pdfFilePath }}
-                        style={styles.pdf} />)
-
-                    }
-
                 </KeyboardAvoidingView>
             </ScrollView>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Dimensions, View, Keyboard } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -6,6 +6,7 @@ import RegisterApi from '../../../hook/RegisterApi';
 const HeigthWindow = Dimensions.get('window').height;
 const WidthWindow = Dimensions.get('window').width;
 import Toast from 'react-native-toast-message';
+import { AxiosContext } from '../../../context/AxiosContext';
 const Register = ({ navigation }: { navigation: any }) => {
     const [isTouchableEnabled, setIsTouchableEnabled] = useState(false);
     const [showPasswordStatus, SetShowPasswordStatus] = useState(false);
@@ -16,6 +17,7 @@ const Register = ({ navigation }: { navigation: any }) => {
     const [validPassword, setValidPassword] = useState(false);
     const [emailMessage, setEmailMessage] = useState('');
     const [message, setMessage] = useState('');
+    const { publicAxios } = useContext(AxiosContext)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const updateContentHeight = () => {
@@ -45,7 +47,7 @@ const Register = ({ navigation }: { navigation: any }) => {
             return;
         }
 
-        await RegisterApi(email, password).then((response) => {
+        await RegisterApi(publicAxios, email, password).then((response) => {
             console.log(response.code);
             const code = response.code
             if (code == 202) {

@@ -6,25 +6,25 @@ import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
 import { getPaymentApi } from '../../hook/PaymentApi';
 
-const Tab = createMaterialTopTabNavigator();
+// const Tab = createMaterialTopTabNavigator();
+
+// const PaymentHistory = () => {
+//   return (
+//     <Tab.Navigator
+//       tabBarOptions={{
+//         activeTintColor: '#3498db',
+//         inactiveTintColor: '#555',
+//         labelStyle: { fontSize: 16, fontWeight: 'bold' },
+//         style: { backgroundColor: '#f2f2f2' },
+//       }}>
+//       <Tab.Screen name="All" component={PaymentHistoryTab} />
+//       <Tab.Screen name="Success" component={PaymentHistoryTab} />
+//       <Tab.Screen name="Fail" component={PaymentHistoryTab} />
+//     </Tab.Navigator>
+//   );
+// };
 
 const PaymentHistory = () => {
-  return (
-    <Tab.Navigator
-      tabBarOptions={{
-        activeTintColor: '#3498db',
-        inactiveTintColor: '#555',
-        labelStyle: { fontSize: 16, fontWeight: 'bold' },
-        style: { backgroundColor: '#f2f2f2' },
-      }}>
-      <Tab.Screen name="All" component={PaymentHistoryTab} />
-      <Tab.Screen name="Success" component={PaymentHistoryTab} />
-      <Tab.Screen name="Fail" component={PaymentHistoryTab} />
-    </Tab.Navigator>
-  );
-};
-
-const PaymentHistoryTab = () => {
   const [paymentData, setPaymentData] = useState<Payment[]>([])
   const [user, setUser] = useState<User | null>();
   const { authState, getUserData } = useContext(AuthContext);
@@ -57,12 +57,12 @@ const PaymentHistoryTab = () => {
       <ScrollView style={styles.container}>
 
         {paymentData.map((item, index) => (
-          <>
+          <View key={index}>
             <View style={styles.header}>
               <Text style={styles.headerText}>{item.paymentDate.slice(0,10)}</Text>
             </View>
             <PaymentItem key={index} {...item} />
-          </>
+          </View>
         ))}
       </ScrollView>
     );

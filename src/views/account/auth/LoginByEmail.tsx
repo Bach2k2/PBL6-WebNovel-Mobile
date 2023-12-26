@@ -9,6 +9,7 @@ import * as Keychain from 'react-native-keychain';
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import GetAccountApi from '../../../hook/AccountApi';
 import Toast from 'react-native-toast-message';
+import { handleAuth } from '../../../auth/handleAuth';
 
 const HeightWindow = Dimensions.get('window').height;
 const WidthWindow = Dimensions.get('window').width;
@@ -16,7 +17,7 @@ const WidthWindow = Dimensions.get('window').width;
 
 const LoginByEmail = ({ navigation }: { navigation: any }) => {
     const authContext = useContext(AuthContext);
-    const { publicAxios } = useContext(AxiosContext);
+    const { authAxios, publicAxios } = useContext(AxiosContext);
     const [emailMessage, setEmailMessage] = useState('');
     const [message, setMessage] = useState('');
     const [email, setEmail] = useState('');
@@ -84,50 +85,17 @@ const LoginByEmail = ({ navigation }: { navigation: any }) => {
         }
         try {
 
-            const response = await LoginApi(
+            const response = await LoginApi(publicAxios,
                 email, password
             );
 
-            const accessToken = response.token;
-            const refreshToken = response.refreshToken
-
-            authContext.setAuthState({
-                accessToken,
-                refreshToken,
-                authenticated: true,
+            const userData = handleAuth({ authAxios, authContext, response });
+            Toast.show({
+                type: 'success',
+                text1: 'Login Notification!',
+                text2: 'Login successfully👋'
             });
-
-            await Keychain.setGenericPassword(
-                'accessToken',
-                JSON.stringify({
-                    accessToken,
-                    refreshToken,
-                }),
-            );
-            // console.log("Access Token:" + accessToken);
-            type jwtpayload = {
-                "aud": string,
-                "emailaddress": string,
-                "exp": number,
-                "iss": number,
-                "nameidentifier": string
-            }
-            const decoded = jwtDecode<jwtpayload>(accessToken)
-
-            const userId = decoded.nameidentifier;
-
-            console.log(userId);
-            await GetAccountApi(userId, accessToken).then((userData) => {
-                authContext.setUserData(userData); // thành công, đã check
-                Toast.show({
-                    type: 'success',
-                    text1: 'Login Notification!',
-                    text2: 'Login successfully👋'
-                });
-                navigation.navigate('Account', userData);
-            }).catch((e) => console.log(e));
-            //  console.log(userData);
-
+            navigation.navigate('Account', userData);
 
         } catch (error: any) {
             console.log(error);

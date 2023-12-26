@@ -77,13 +77,13 @@ const AxiosProvider = ({ children }: any) => {
 
   createAuthRefreshInterceptor(authAxios, refreshAuthLogic, {});
 
-  const jwt_payload = {
-    "aud": "",
-    "emailaddress": "",
-    "exp": null,
-    "iss": null,
-    "nameidentifier": ""
-  }
+  // const jwt_payload = {
+  //   "nameidentifier": "",
+  //   "emailaddress": "",
+  //   "exp": null,
+  //   "iss": null,
+  //   "aud": "",
+  // }
 
   return (
     <Provider

@@ -12,12 +12,13 @@ import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
 import Skeleton from '../../components/Loading/Skeleton';
 import { AuthContext } from '../../context/AuthContext';
-import getPreferenceData, { postPreferenceData } from '../../hook/PreferenceApi';
+import getPreferenceData, { getPreferenceByUANApi, postPreferenceData } from '../../hook/PreferenceApi';
 import NovelGridSkeleton from '../../components/Loading/NovelGridSkeleton';
 import NovelRowSkeleton from '../../components/Loading/NovelRowSkeleton';
 import { Preference } from '../../models/Preference';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../models/User';
+import { AxiosContext } from '../../context/AxiosContext';
 
 
 function HotNovels() {
@@ -29,6 +30,7 @@ function HotNovels() {
   const [user, setUser] = useState<User | null>()
   const { getUserData } = useContext(AuthContext)
   const [checkedNovels, setCheckedNovels] = useState<{ [key: string]: boolean }>({});
+  const { authAxios } = useContext(AxiosContext)
 
   useEffect(() => {
     setUser(getUserData());
@@ -40,7 +42,7 @@ function HotNovels() {
       if (user) {
 
       } else {
-        await getNovelData().then((data) => { // thêm await sẽ tạo 
+        await getNovelData(authAxios).then((data) => { // thêm await sẽ tạo 
           setNovels(data);
           setLoading(false); // Đã tải xong dữ liệu
         }).catch((err) => {
@@ -119,6 +121,8 @@ function NovelsList({ navigation }: any) {
   const authState = useContext(AuthContext);
   const user = getUserData();
   const [preferList, setPreferList] = useState<Preference[]>([]);
+  const { authAxios } = useContext(AxiosContext)
+  const [isExistInLib, setExistInLib] = useState([])
 
   const handleAddToLib = async (novel: Novel) => {
     console.log('add novel into lib', novel.id);
@@ -199,7 +203,7 @@ function NovelsList({ navigation }: any) {
 
   useEffect(() => {
     const fetchNovelData = async () => {
-      await getNovelData().then((data) => {
+      await getNovelData(authAxios).then((data) => {
         setNovels(data);
         setLoading(false);
       }).catch((err) => {
@@ -207,6 +211,21 @@ function NovelsList({ navigation }: any) {
       })
     }
     fetchNovelData();
+    if(user){
+      const checkIsExistInLib = (novels:Novel[])=>{
+        novels.map(async(novel) => {
+          const data = await getPreferenceByUANApi(user,novel.id,authState.getAccessToken());
+          if(data){
+            novel.isExistLib=true
+            // setExistInLib
+          }else{
+            novel.isExistLib=false
+          }
+        })
+       
+      }
+      checkIsExistInLib(novels)
+    }
   }, []);
 
   // get preference data
@@ -243,7 +262,7 @@ function NovelsList({ navigation }: any) {
               <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
               <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
               <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
-              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0,2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
+              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
             </View>
             <TouchableOpacity onPress={() => {
               handleAddToLib(novel)

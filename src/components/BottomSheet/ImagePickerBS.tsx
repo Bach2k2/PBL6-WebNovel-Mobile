@@ -9,24 +9,34 @@ export const ImagePickerBS = ({ isVisible, onClose, onImageSelect }: any) => {
             compressImageMaxWidth: 300,
             compressImageMaxHeight: 300,
             cropping: false,
-            compressImageQuality: 0.7
-        }).then(image => {
-            onImageSelect(image.path);
-            isVisible = !isVisible;
-        });
-    }
+            compressImageQuality: 0.7,
+        })
+            .then((image) => {
+                onImageSelect(image.path);
+                onClose(); // Close the modal
+            })
+            .catch((error) => {
+                console.log('User cancelled image selection');
+                onClose(); // Close the modal on cancellation
+            });
+    };
 
     const choosePhotoFromLibrary = () => {
         ImagePicker.openPicker({
             width: 300,
             height: 300,
             cropping: false,
-            compressImageQuality: 0.7
-        }).then(image => {
-            onImageSelect(image.path);
-            isVisible = !isVisible;
-        });
-    }
+            compressImageQuality: 0.7,
+        })
+            .then((image) => {
+                onImageSelect(image.path);
+                onClose(); // Close the modal
+            })
+            .catch((error) => {
+                console.log('User cancelled image selection');
+                onClose(); // Close the modal on cancellation
+            });
+    };
 
     const renderInner = (
         <View style={styles.panel}>

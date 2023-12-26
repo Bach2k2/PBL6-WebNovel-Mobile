@@ -10,11 +10,15 @@ import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
 import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
 import GetAccountApi from '../../hook/AccountApi';
+import { AxiosContext } from '../../context/AxiosContext';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
 const AccountNavigator = createNativeStackNavigator();
 
 function Account() {
-
-    const navigation = useNavigation();
 
     return (
         <AccountNavigator.Navigator initialRouteName='MainScreen'>
@@ -36,6 +40,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<User | null>(null);
     const { authState, getUserData, setUserData } = useContext(AuthContext);
+    const { authAxios } = useContext(AxiosContext);
     const [isShownBottomSheet, setShowBottomSheet] = useState(false);
     const toggleBottomSheet = () => {
         setShowBottomSheet(!isShownBottomSheet);
@@ -47,7 +52,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                 try {
                     setIsLoading(true);
                     //const newUserData = await getUserData();
-                    const newUserData = await GetAccountApi(getUserData().id, authState.accessToken);
+                    const newUserData = await GetAccountApi(authAxios, getUserData().id, authState.accessToken);
                     setUser(newUserData);
                     setUserData(newUserData);
                     console.log('call user when user changes in account page:', newUserData);

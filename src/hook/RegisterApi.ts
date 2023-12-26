@@ -3,9 +3,9 @@ import axios from 'axios';
 import { axiosInstance } from './AxiosInstance';
 import { RandomString } from '../utils/RandomString';
 
-const RegisterApi = async (email: any, password: any) => {
+const RegisterApi = async (publicAxios:any,email: any, password: any) => {
     try {
-        const response = await axios.post('https://webnovelapi.azurewebsites.net/api/accounts', {
+        const response = await publicAxios.post('/accounts', {
             id:null,
             username: email,
             password: password,

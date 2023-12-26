@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import GetAccountApi from '../hook/AccountApi';
 
 
-export const handleAuth = async ({ authContext, response }: any) => {
+export const handleAuth = async ({ authAxios, authContext, response }: any) => {
     // const authContext = useContext(AuthContext);
     console.log(response);
     const accessToken = response.token;
@@ -37,7 +37,7 @@ export const handleAuth = async ({ authContext, response }: any) => {
 
     const userId = decoded.nameidentifier;
 
-    const userData = await GetAccountApi(userId, accessToken);
+    const userData = await GetAccountApi(authAxios, userId, accessToken);
     // userData.birthday= new Date(userData.birthday);// Đổi là hợp lý
     await authContext.setUserData(userData); // thành công, đã check
     return userData;

@@ -1,27 +1,27 @@
 import axios from "axios";
 import { axiosInstance } from './AxiosInstance'
 import { Novel } from "../models/Novel";
-export const getNovelData = async () => {
+export const getNovelData = async (publicAxios:any) => {
     try {
-        const response = await axiosInstance.get('/novel');
+        const response = await publicAxios.get('/novel');
         return response.data;
     } catch (error) {
         console.error(error);
         throw new Error("Failed to fetch novel data");
     }
 };
-export const getNovelDataExcept = async (novelId: string) => {
+export const getNovelDataExcept = async (publicAxios:any,novelId: string) => {
     try {
-        const response = await axiosInstance.get('/novel');
+        const response = await publicAxios.get('/novel');
         return response.data.filter((novel: Novel) => novel.id !== novelId);
     } catch (error) {
         console.error(error);
         throw new Error("Failed to fetch novel data");
     }
 };
-export const getNovelById = async (novelId: any) => {
+export const getNovelById = async (publicAxios:any,novelId: any) => {
     try {
-        const response = await axiosInstance.get(`/novel/${novelId}`);
+        const response = await publicAxios.get(`/novel/${novelId}`);
         return response.data;
     } catch (error) {
         console.error(error);
@@ -29,18 +29,18 @@ export const getNovelById = async (novelId: any) => {
     }
 }
 
-export const getNovelByGenre = async (genreId: any) => {
+export const getNovelByGenre = async (publicAxios:any,genreId: any) => {
     try {
-        const response = await axiosInstance.get(`/novel/GenreId=${genreId}`);
+        const response = await publicAxios.get(`/novel/GenreId=${genreId}`);
         return response.data;
     } catch (error) {
         console.error(error);
         throw new Error("Failed to fetch novel data by genre");
     }
 }
-export const getRelatedNovelByGenre = async (novelId: string, genreId: any) => {
+export const getRelatedNovelByGenre = async (publicAxios:any,novelId: string, genreId: any) => {
     try {
-        const response = await axiosInstance.get(`/novel/GenreId=${genreId}`);
+        const response = await publicAxios.get(`/novel/GenreId=${genreId}`);
         return response.data.filter((novel: Novel) => novel.id !== novelId);
     } catch (error) {
         console.error(error);
@@ -48,9 +48,10 @@ export const getRelatedNovelByGenre = async (novelId: string, genreId: any) => {
     }
 }
 
-export const getNovelByAccount = async (accountId: any) => {
+//API lay danh sach truyen cua nguoi dung
+export const getNovelByAccount = async (publicAxios:any,accountId: any) => {
     try {
-        const response = await axiosInstance.get(`/novel/AccountId=${accountId}`);
+        const response = await publicAxios.get(`/novel/AccountId=${accountId}`);
         return response.data;
     } catch (error) {
         console.error(error);
@@ -74,6 +75,11 @@ export const createNovel = async (novel: any, GenreIds: any, accessToken: any) =
         name: 'novelImage.jpg',
         type: 'image/jpeg',
     });
+    formData.append('BackgroundFile', {
+        uri: novel.File,
+        name: 'novelImage.jpg',
+        type: 'image/jpeg',
+    });
     console.log(formData);
     const axiosConfig = {
         headers: {
@@ -92,19 +98,25 @@ export const createNovel = async (novel: any, GenreIds: any, accessToken: any) =
     }
 }
 export const EditNovel = async (novel: Novel, accessToken: any) => {
+    console.log('edit novel',novel)
     const formData = new FormData();
     formData.append('Id', novel.id)
     formData.append('Name', novel.name);
     formData.append('Title', novel.title);
     formData.append('Views', novel.views);
     formData.append('Description', novel.description);
+    formData.append('Status', novel.status);
     formData.append('ApprovalStatus', novel.approvalStatus);
-    formData.append('GenreIds', novel.genreIds);
+    novel.genreIds.forEach((genreId: any) => {
+        formData.append('GenreIds', genreId);
+    });
+    // formData.append('GenreIds', novel.genreIds);
     formData.append('File', {
         uri: novel.imagesURL,
         name: 'novelImage.jpg',
         type: 'image/jpeg',
     });
+    // console.log(formData);
     const axiosConfig = {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -114,11 +126,10 @@ export const EditNovel = async (novel: Novel, accessToken: any) => {
     };
     try {
         const response = await axiosInstance.put('/novel/', formData, axiosConfig);
-        console.log(response);
         return response.data;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to post novel data by this account");
+        throw new Error("Failed to put novel data by this account");
     }
 }
 export const DeleteNovel = async (novel: Novel, accessToken: any) => {

@@ -37,7 +37,7 @@ import EditChapter from './views/writenovel/Chapter/EditChapter';
 import AddReview from './views/novelDetail/Rating/AddReview';
 import PaymentHistory from './views/account/PaymentHistory';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ChapterListDrawer } from './views/novelDetail/ChapterListDrawer';
+// import { ChapterListDrawer } from './views/novelDetail/ChapterListDrawer';
 import CommentList from './views/novelDetail/CommentList';
 import { AxiosProvider } from './context/AxiosContext';
 const Stack = createNativeStackNavigator();

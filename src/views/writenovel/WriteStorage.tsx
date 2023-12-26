@@ -8,6 +8,7 @@ import { Novel } from '../../models/Novel';
 import { getNovelByAccount } from '../../hook/NovelApi';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import WriteDashboard from './WriteDashboard';
+import { AxiosContext } from '../../context/AxiosContext';
 function WriteStorage({ navigation }: any) {
 
   const [userNovel, setNovelByUser] = useState<Novel[]>([]);
@@ -15,18 +16,18 @@ function WriteStorage({ navigation }: any) {
   const { getUserData } = useContext(AuthContext);
   const { authState } = useContext(AuthContext);
   // const navigation = useNavigation();
+  const { publicAxios } = useContext(AxiosContext);
   const user = getUserData();
   useEffect(() => {
-
-    const fetchNovelByAccount = async () => {
-      await getNovelByAccount(user.id).then((data) => {
-
-        setNovelByUser(data);
-        setLoading(false);
-        console.log("userLength", userNovel.length)
-      })
-    }
     if (user) {
+      const fetchNovelByAccount = async () => {
+        await getNovelByAccount(publicAxios, user.id).then((data) => {
+
+          setNovelByUser(data);
+          setLoading(false);
+          console.log("userLength", userNovel.length)
+        })
+      }
       console.log("run fetch novel by account", user.id);
       fetchNovelByAccount();
     }
@@ -34,15 +35,15 @@ function WriteStorage({ navigation }: any) {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchNovelByAccount = async () => {
-        await getNovelByAccount(user.id).then((data) => {
-
-          setNovelByUser(data);
-          setLoading(false);
-          console.log("userLength", userNovel.length)
-        })
-      }
       if (user) {
+        const fetchNovelByAccount = async () => {
+          await getNovelByAccount(publicAxios, user.id).then((data) => {
+
+            setNovelByUser(data);
+            setLoading(false);
+            console.log("userLength", userNovel.length)
+          })
+        }
         fetchNovelByAccount();
       }
 

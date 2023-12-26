@@ -11,5 +11,6 @@ export interface Chapter {
     discount: number,
     approvalStatus: boolean,
     novelId: string,
-    chapIndex: number
+    chapIndex: number,
+    isPublished:boolean,
 }

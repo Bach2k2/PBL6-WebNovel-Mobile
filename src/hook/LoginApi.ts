@@ -2,9 +2,9 @@
 import axios from 'axios';
 import { axiosInstance } from './AxiosInstance';
 
-export const LoginApi = async (email:any, password:any) => {
+export const LoginApi = async (publicAxios:any,email:any, password:any) => {
     try {
-        const response = await axios.post('https://webnovelapi.azurewebsites.net/api/auth/login', {
+        const response = await publicAxios.post('https://webnovelapi.azurewebsites.net/api/auth/login', {
             username: email,
             password: password
         }, {

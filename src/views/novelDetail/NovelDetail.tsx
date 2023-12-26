@@ -25,6 +25,7 @@ import Stars from '../../components/StarRating/Stars';
 import { User } from '../../models/User';
 import { getTimeDiff } from '../../utils/getTimeDiff';
 import ShowStars from '../../components/StarRating/ShowStars';
+import { AxiosContext } from '../../context/AxiosContext';
 
 const NovelDetail = ({ navigation, route }: any) => {
     // const navigation = useNavigation();
@@ -46,6 +47,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     const [isExistLibrary, setIsExistLibrary] = useState(false);
 
     const { authState, getUserData } = useContext(AuthContext);
+    const { publicAxios } = useContext(AxiosContext)
     const [user, setUser] = useState<User | null>()
 
     const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     // Call api get rating before if it is exist
 
     const fetchNovelDetailData = async () => {
-        await getNovelById(novelId).then((data) => {
+        await getNovelById(publicAxios, novelId).then((data) => {
             setNovel(data);
         }).catch((error) => {
             console.log('Lay thong tin chi tiet cua novel that bai')
@@ -87,7 +89,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     // ---------------Display the chapter by novels -------------
     const fetchChapterByNovelId = async () => {
         // If user is not logged in:
-        await getChapters(user, novelId,authState.accessToken).then((data) => {
+        await getChapters(user, novelId, authState.accessToken).then((data) => {
             setChapters(data);
         }).catch((error) => {
             console.log('Lay thong tin chi tiet cua chapter that bai')
@@ -96,7 +98,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     }
     // ----------------------------------------------------------------
     const fetchRcmData = async () => {
-        await getNovelDataExcept(novelId).then((data) => {
+        await getNovelDataExcept(publicAxios, novelId).then((data) => {
             setRcmNovels(data);
         }).catch((err) => {
             console.error(err);
@@ -106,7 +108,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     // ----------------------------------------------------------------
     const fetchRelatedData = async () => {
         console.log("nv genre", novel?.genreIds[0])
-        getRelatedNovelByGenre(novelId, novel?.genreIds[0]).then((data) => {
+        getRelatedNovelByGenre(publicAxios, novelId, novel?.genreIds[0]).then((data) => {
             setRelatedNovels(data);
         }).catch((err) => {
             console.log(err);
@@ -380,23 +382,25 @@ const NovelDetail = ({ navigation, route }: any) => {
 
     // Recommend System
     const renderRCMRow = (row: number) => {
-        return (
-            <View style={styles.row} key={row}>
-                {rcmNovel.slice(row * 4, (row + 1) * 4).map((item, index) => (
-                    <View style={styles.column} key={index}>
-                        <TouchableOpacity style={styles.itemWrapper} onPress={() => {
-                            console.log('Navigating to NovelDetail with novelId:', item.id);
-                            navigation.push('NovelDetail', { novelId: item.id, title: item.name });
-                        }}>
-                            <View style={styles.itemWrapper}>
-                                <Image source={{ uri: item.imagesURL }} style={styles.image} />
-                                <Text numberOfLines={1} style={styles.text}>{item.name}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </View>
-        );
+        if (rcmNovel.length > 0) {
+            return (
+                <View style={styles.row} key={row}>
+                    {rcmNovel.slice(row * 4, (row + 1) * 4).map((item, index) => (
+                        <View style={styles.column} key={index}>
+                            <TouchableOpacity style={styles.itemWrapper} onPress={() => {
+                                console.log('Navigating to NovelDetail with novelId:', item.id);
+                                navigation.push('NovelDetail', { novelId: item.id, title: item.name });
+                            }}>
+                                <View style={styles.itemWrapper}>
+                                    <Image source={{ uri: item.imagesURL }} style={styles.image} />
+                                    <Text numberOfLines={1} style={styles.text}>{item.name}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                </View>
+            );
+        }
     };
 
     // Related story
@@ -444,7 +448,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                             <Text numberOfLines={4} style={styles.nameInfor}>{novel?.name}</Text>
                             <Text style={styles.authorInfor}>by {novel?.author}</Text>
                             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                                <Text style={styles.genreInfor}>Novel . {novel?.genreName.slice(0, 1).join(' ')}</Text>
+                                {novel?.genreName ? (<Text style={styles.genreInfor}>Novel . {novel?.genreName.slice(0, 1).join(' ')}</Text>) : (null)}
                                 <Icon name={'chevron-right'} size={18} />
                             </View>
 
@@ -507,6 +511,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                             }
                         </View>
                         {
+                            comments.length > 0 &&
                             comments.slice(0, 5).map((comment, index) => (
                                 <React.Fragment key={index}>
                                     <View style={[styles.row, { marginTop: 10 }]}>
@@ -646,7 +651,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                         {isDownload ? <Icon name="check" size={25} color={'black'} /> : <Icon name="download" size={25} color={'black'} />}
                     </TouchableOpacity>
                     {
-                        (novel?.numChapter > 0) ? (
+                        (novel && novel?.numChapter > 0) ? (
                             <TouchableOpacity style={styles.readingButton} onPress={() => handleReadingBtnPress()}>
                                 <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Read now</Text>
                             </TouchableOpacity>

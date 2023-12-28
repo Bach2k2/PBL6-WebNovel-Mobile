@@ -11,6 +11,7 @@ import { createNovel } from '../../hook/NovelApi';
 import { AuthContext } from '../../context/AuthContext';
 import { MultipleSelectList } from 'react-native-dropdown-select-list'
 import Toast from 'react-native-toast-message';
+import Spinner from '../../components/Spinner/Spinner';
 
 // type NovelDetailProps = AppNavigatorProps<'CreateNovel'>;
 type genreType = {
@@ -25,6 +26,7 @@ const CreateNovel = ({ route, navigation }: any) => {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectGenres, setSelectedGenres] = useState([]);
   const [isDisableBtn, setDisableCreateBtn] = useState(true);
+  const [isCreateLoading, setIsCreateLoading] = useState(false)
 
   const handleConfirm = (pItems: any) => {
     console.log('pItems =>', pItems);
@@ -34,14 +36,13 @@ const CreateNovel = ({ route, navigation }: any) => {
     Name: '',
     Title: '',
     Description: '',
-    AccountId: '',
+    AccountId: null,
     GenreIds: [1],
     File: null,
   });
 
   const authState = useContext(AuthContext);
   const { getUserData } = useContext(AuthContext);
-  // const navigation = useNavigation<AppNavigatorProps<'CreateNovel'>>();
 
   const { colors } = useTheme();
   const user = getUserData();
@@ -106,14 +107,11 @@ const CreateNovel = ({ route, navigation }: any) => {
   useEffect(() => {
     const fetchGenreData = async () => {
       getGenreData().then((data) => {
-        console.log(data)
         var temp: { key: string; value: string }[] = data.map((d: Genre) => ({
           key: d.id,
           value: d.name,
         }));
-
         setGenreList(temp);
-        console.log('here ' + genreList)
       }).catch((err) => {
         throw err;
       });
@@ -151,24 +149,17 @@ const CreateNovel = ({ route, navigation }: any) => {
     setPostNovel({ ...postNovel, Description: text });
   };
 
-  const onChangeGenres = (genres: any) => {
+  // const onChangeGenres = (genres: any) => {
 
-    console.log(genres);
-    setSelectedGenres(genres);
-    // console.log('s', selectGenres)
-    // // console.log(genreList);
-    // const selectedGenreKeys = selectGenres.map(genre => {
-    //   const foundGenre = genreList.find(item => item.value === genre);
-    //   return foundGenre ? Number.parseInt(foundGenre.key) : null;
-    // }) as number[];
-    // console.log(selectedGenreKeys)
-    setPostNovel({ ...postNovel, GenreIds: selectGenres });
-  };
+  //   console.log(genres);
+  //   setSelectedGenres(genres);
+  //   setPostNovel({ ...postNovel, GenreIds: selectGenres });
+  // };
 
-  const onChangeImage = (selectedImage: any) => {
-    setImage(selectedImage.path);
-    setPostNovel({ ...postNovel, File: selectedImage.path });
-  };
+  // const onChangeImage = (selectedImage: any) => {
+  //   setImage(selectedImage.path);
+  //   setPostNovel({ ...postNovel, File: selectedImage.path });
+  // };
 
   const ImagePickerBS = ({ isVisible, onClose }: any) => {
 
@@ -191,14 +182,14 @@ const CreateNovel = ({ route, navigation }: any) => {
   };
 
   const handleCreate = () => {
-
-    console.log(selectGenres);
     if (user) {
       if (postNovel.Name && postNovel.Description && postNovel.AccountId && selectGenres.length > 0 && postNovel.File) {
         createNovel(postNovel, selectGenres, authState.getAccessToken())
           .then((data) => {
-            // console.log("check novel, it's okay");
-            // console.log(data);Toast.show({
+            setTimeout(() => {
+              setIsCreateLoading(true)
+            }, 2000)
+            setIsCreateLoading(false)
             Toast.show({
               type: 'success',
               text1: 'Create your novel successfully 👋',
@@ -222,7 +213,9 @@ const CreateNovel = ({ route, navigation }: any) => {
 
 
   return (
+
     <SafeAreaView style={styles.container}>
+      <Spinner visible={isCreateLoading}></Spinner>
       <ScrollView>
         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 5 }}>
           <TouchableOpacity onPress={() => toggleBottomSheet()} style={styles.imageContainer}>
@@ -279,6 +272,7 @@ const CreateNovel = ({ route, navigation }: any) => {
         </TouchableOpacity>
         <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
       </ScrollView>
+
     </SafeAreaView>
   );
 

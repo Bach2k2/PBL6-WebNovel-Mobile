@@ -14,7 +14,7 @@ import { AxiosContext } from '../../context/AxiosContext';
 import { LogBox } from 'react-native';
 
 LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
+    'Non-serializable values were found in the navigation state',
 ]);
 const AccountNavigator = createNativeStackNavigator();
 
@@ -90,6 +90,11 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
             case 'PaymentHistory':
                 {
                     navigation.navigate('PaymentHistory');
+                    break;
+                }
+            case 'FAQ':
+                {
+                    navigation.navigate('FAQ');
                     break;
                 }
 
@@ -168,7 +173,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                                         <LinearGradient colors={['#EADEDB', '#BC70A4', '#BFD641']} start={{ x: 0.0, y: 0.0 }}
                                             end={{ x: 1.0, y: 1.0 }}
                                             locations={[0.0, 0.5, 0.75]} style={styles.CoinExBtn}>
-                                            <Text style={{ color: 'black', fontSize: 17 }}>Nạp tiền</Text>
+                                            <Text style={{ color: 'black', fontSize: 17 }}>Top Up</Text>
                                         </LinearGradient>
                                     </TouchableOpacity>
 
@@ -198,38 +203,34 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                                     <Text style={styles.textItem} >Inbox</Text>
                                 </View>
                             </TouchableOpacity>
-                            <View style={styles.row4User}>
-                                <Icon style={styles.iconItem} name='dock' size={30} />
-                                <Text style={styles.textItem} >My Gear</Text>
-                            </View>
-                            <View style={styles.row4User}>
-                                <Icon style={styles.iconItem} name='discount' size={30} />
-                                <Text style={styles.textItem} >Privilege</Text>
-                            </View>
                             <TouchableOpacity onPress={() => {
                                 handleNavigate('PaymentHistory')
                             }}>
                                 <View style={styles.row4User}>
                                     <Icon style={styles.iconItem} name='shopping-cart' size={30} />
-                                    <Text style={styles.textItem} >Purchase History</Text>
+                                    <Text style={styles.textItem}>Purchase History</Text>
                                 </View>
                             </TouchableOpacity>
-
-                        </View>
-                        {/* Row 2 */}
-                        <View style={styles.userContainer}>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='try' size={30} />
                                 <Text style={styles.textItem} >Redeem</Text>
                             </View>
+                        </View>
+                        {/* Row 2 */}
+                        <View style={styles.userContainer}>
+
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='question-answer' size={30} />
                                 <Text style={styles.textItem} >Forum</Text>
                             </View>
-                            <View style={styles.row4User}>
-                                <Icon style={styles.iconItem} name='question-mark' size={30} />
-                                <Text style={styles.textItem} >FAQ</Text>
-                            </View>
+                            <TouchableOpacity onPress={() => {
+                                handleNavigate('FAQ')
+                            }}>
+                                <View style={styles.row4User}>
+                                    <Icon style={styles.iconItem} name='question-mark' size={30} />
+                                    <Text style={styles.textItem} >FAQ</Text>
+                                </View>
+                            </TouchableOpacity>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='quickreply' size={30} />
                                 <Text style={styles.textItem} >Customer online service</Text>

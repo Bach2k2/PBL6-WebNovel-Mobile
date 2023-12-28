@@ -16,5 +16,6 @@ export interface Novel {
     genreIds: Array<string>
     genreName: Array<string>
     numChapter: number,
-    isExistLib:boolean
+    isExistLib:boolean,
+    createAt:string
 }

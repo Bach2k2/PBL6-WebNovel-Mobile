@@ -10,6 +10,15 @@ export const getNovelData = async (publicAxios:any) => {
         throw new Error("Failed to fetch novel data");
     }
 };
+export const getTopTrendingNovelApi = async (publicAxios:any) => {
+    try {
+        const response = await publicAxios.get('/novel/top-trending-novels');
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to fetch top-trending-novels data");
+    }
+};
 export const getNovelDataExcept = async (publicAxios:any,novelId: string) => {
     try {
         const response = await publicAxios.get('/novel');

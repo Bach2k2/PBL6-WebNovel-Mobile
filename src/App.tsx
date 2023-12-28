@@ -40,6 +40,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // import { ChapterListDrawer } from './views/novelDetail/ChapterListDrawer';
 import CommentList from './views/novelDetail/CommentList';
 import { AxiosProvider } from './context/AxiosContext';
+import FAQ from './views/account/FAQ';
 const Stack = createNativeStackNavigator();
 function App() {
   const scheme = useColorScheme();
@@ -80,8 +81,8 @@ function App() {
               <Stack.Screen name="EditProfile" component={EditProfile} />
               <Stack.Screen name="SettingAccount" component={SettingAccount} />
               <Stack.Screen name="EmailBox" component={MailBox} options={{ headerTitle: 'Inbox' }} />
-              <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ headerTitle: 'Payment History' }} />
-
+              <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ headerTitle: 'Payment History', headerTitleAlign: 'center' }} />
+              <Stack.Screen name="FAQ" component={FAQ} options={{ headerTitle: 'FAQ',headerTitleAlign: 'center'  }} />
               <Stack.Screen name="PreferenceEdit" component={PreferenceEdit} options={
                 ({ route }: any) => ({
                   title: 'Edit library',

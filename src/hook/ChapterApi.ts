@@ -1,5 +1,6 @@
 import axios from "axios";
 import { axiosInstance } from './AxiosInstance'
+import { Alert } from 'react-native';
 var RNFS = require('react-native-fs');
 // export const getChaptersByNovelId = async (novelId: any) => {
 
@@ -124,29 +125,20 @@ export const postChapter = async (data: any) => {
 }
 
 export const editChapterApi = async (data: any) => {
-
-    const config = {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': '*',
-            'Authorization': `Bearer ${data.accessToken}`
-        }
-    }
+    console.log('data',data)
     try {
-        console.log(`${data.file.filePath}`);
         const formData = new FormData();
-
-        formData.append('Name', data.name);
-        formData.append('Id', data.novelId);
-        formData.append('Discount', data.discount); // Add your form fields with appropriate values
-        formData.append('FeeId', data.feeId);
-        formData.append('IsPublished', data.isPublished);
-        formData.append('Views', data.views);
-        formData.append('IsLocked', data.isLocked);
-        formData.append('ApprovalStatus', data.approvalStatus);
+        formData.append('Name', data.Name);
+        formData.append('Id', data.Id);
+        formData.append('Discount', data.Discount); // Add your form fields with appropriate values
+        formData.append('FeeId', data.FeeId);
+        formData.append('IsPublished', data.IsPublished);
+        formData.append('Views', data.Views);
+        formData.append('IsLocked', data.IsLocked);
+        formData.append('ApprovalStatus', data.ApprovalStatus);
 
         formData.append('File', {
-            uri: 'file://' + data.file.filePath,
+            uri: data.File,
             name: 'newChapter.pdf',
             type: 'application/pdf',
         });
@@ -155,12 +147,13 @@ export const editChapterApi = async (data: any) => {
             headers: {
                 'Authorization': `Bearer ${data.accessToken}`,
                 'Content-Type': "multipart/form-data",
+                'Accept': '*',
 
             },
         });
         return response.data;
     } catch (error: any) {
-        console.error("Error in postChapter:", error);
+        console.error("Error in edit chapter:", error);
         // Log more details about the error
         if (error.response) {
             console.error("Response data:", error.response.data);
@@ -173,6 +166,27 @@ export const editChapterApi = async (data: any) => {
         }
         // throw new Error("Failed to fetch chapter list by chapter id");
     }
+}
+
+export const deleteChapterApi = async (chapterId: string, accessToken: any) => {
+    const config = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': '*',
+            'Authorization': `Bearer ${accessToken}`
+        }, data: {
+            id: chapterId
+        }
+    }
+    try {
+        const res = await axiosInstance.delete('/chapter', config)
+        return res;
+    } catch (error) {
+        console.error("Error deleting chapter:", error);
+        Alert.alert("Error", "Failed to delete chapter. Please try again."); // Show an alert to the user
+        throw error;
+    }
+
 }
 
 export const unlockChapterApi = async (data: any) => {

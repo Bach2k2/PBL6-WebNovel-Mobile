@@ -5,14 +5,14 @@ import { useNavigation } from '@react-navigation/native';
 
 
 import useFetch from '../../hook/useFetch';
-import { getNovelData } from '../../hook/NovelApi';
+import { getNovelData, getTopTrendingNovelApi } from '../../hook/NovelApi';
 import { Novel } from '../../models/Novel';
 import NovelRow from '../../components/Home/NovelRow';
 import Header from '../../components/Header/Header'
 import NovelGrid from '../../components/Home/NovelGrid'
 import Skeleton from '../../components/Loading/Skeleton';
 import { AuthContext } from '../../context/AuthContext';
-import getPreferenceData, { getPreferenceByUANApi, postPreferenceData } from '../../hook/PreferenceApi';
+import getPreferenceData, { deletePreferenceApi, getPreferenceByUANApi, postPreferenceData } from '../../hook/PreferenceApi';
 import NovelGridSkeleton from '../../components/Loading/NovelGridSkeleton';
 import NovelRowSkeleton from '../../components/Loading/NovelRowSkeleton';
 import { Preference } from '../../models/Preference';
@@ -111,7 +111,68 @@ function HotNovels() {
     </SafeAreaView >
   );
 }
+function RankingList({ navigation }: any) {
 
+  const [loading, setLoading] = useState(true);
+  const [novels, setNovels] = useState(Array<Novel>());
+  const [error, setError] = useState(null);
+  const { getUserData } = useContext(AuthContext);
+  const authState = useContext(AuthContext);
+  const user = getUserData();
+  const [preferList, setPreferList] = useState<Preference[]>([]);
+  const { authAxios } = useContext(AxiosContext)
+  const [isExistInLib, setExistInLib] = useState<boolean[]>([])
+
+
+  const fetchNovelData = async () => {
+    await getTopTrendingNovelApi(authAxios).then((data) => {
+      setNovels(data);
+      setLoading(false);
+    }).catch((err) => {
+      console.error(err);
+    })
+  }
+
+  // render 
+  if (loading) {
+    return (
+      <Skeleton height={30} width={500} style={{ borderRadius: 5, marginBottom: 5 }} />
+    );
+  }
+  return (
+    <View style={styles.container}>
+      <View style={{
+        margin: 10,
+      }}>
+        <Text style={{ color: "black", fontSize: 24, }}>You may also like:</Text>
+      </View>
+      {novels.map((novel, index) => (
+        <View key={index}>
+          <TouchableOpacity style={styles.novelContainer} onPress={() => {
+            navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title });
+          }}>
+            <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
+            <View style={styles.novelContent}>
+              <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
+              <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
+              <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
+              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
+            </View>
+            <TouchableOpacity onPress={() => {
+              handleAddToLib(novel, index)
+              novel.isExistLib = !novel.isExistLib;
+            }}>
+              {isExistInLib[index] ?
+                (<Icon name='check' size={24} color="black" />) :
+                (<Icon name='plus-box' size={24} color="black" />)}
+
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  );
+}
 function NovelsList({ navigation }: any) {
 
   const [loading, setLoading] = useState(true);
@@ -122,9 +183,9 @@ function NovelsList({ navigation }: any) {
   const user = getUserData();
   const [preferList, setPreferList] = useState<Preference[]>([]);
   const { authAxios } = useContext(AxiosContext)
-  const [isExistInLib, setExistInLib] = useState([])
+  const [isExistInLib, setExistInLib] = useState<boolean[]>([])
 
-  const handleAddToLib = async (novel: Novel) => {
+  const handleAddToLib = async (novel: Novel, index: number) => {
     console.log('add novel into lib', novel.id);
 
     if (user) {
@@ -132,18 +193,32 @@ function NovelsList({ navigation }: any) {
         preferList &&
         preferList.some(item => item.novelId === novel.id && item.accountId === user.id)
       ) {
-        novel.isExistLib = true;
-        console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
-      } else {
-        novel.isExistLib = false;
-        console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
-      }
-      await postPreferenceData(user.id, novel.id, authState.getAccessToken()).then((response) => {
-        console.log(response)
+        setExistInLib((prevIsExistInLib) => {
+          const updatedArray = [...prevIsExistInLib];
+          updatedArray[index] = true;
+          return updatedArray;
+        });
+        await deletePreferenceApi(user.id, novel.id, authState.getAccessToken()).then((response) => {
+          console.log(response)
 
-      }).catch((err) => {
-        ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
-      })
+        }).catch((err) => {
+          ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
+        })
+
+      } else {
+        setExistInLib((prevIsExistInLib) => {
+          const updatedArray = [...prevIsExistInLib];
+          updatedArray[index] = false;
+          return updatedArray;
+        });
+        await postPreferenceData(user.id, novel.id, authState.getAccessToken()).then((response) => {
+          console.log(response)
+
+        }).catch((err) => {
+          ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
+        })
+      }
+
     } else {
       const newPreferList = {
         novelId: novel.id,
@@ -166,9 +241,20 @@ function NovelsList({ navigation }: any) {
         preferList &&
         preferList.some(item => item.novelId === novel.id)
       ) {
+        setExistInLib((prevIsExistInLib) => {
+          const updatedArray = [...prevIsExistInLib];
+          updatedArray[index] = true;
+          return updatedArray;
+        });
         novel.isExistLib = true;
         console.log("Mảng chứa phần tử có cả novelId và accountId đều bằng với giá trị cần kiểm tra");
+
       } else {
+        setExistInLib((prevIsExistInLib) => {
+          const updatedArray = [...prevIsExistInLib];
+          updatedArray[index] = false;
+          return updatedArray;
+        });
         novel.isExistLib = false;
         console.log("Mảng không chứa phần tử thỏa mãn điều kiện hoặc preferList không tồn tại");
       }
@@ -177,56 +263,61 @@ function NovelsList({ navigation }: any) {
       try {
         setPreferList([...preferList, newPreferList]);
         await AsyncStorage.setItem('preferList', JSON.stringify(preferList));
-        // console.log('Danh sách đã lưu vào AsyncStorage:', newPreferList);
-        // setPreferList([...preferList, newPreferList]);
       } catch (error) {
         ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
-        // console.error('Lỗi khi lưu danh sách vào AsyncStorage:', error);
       }
-      // console.log('chua dang nhap');
     }
+    fetchNovelData()
   }
 
-  // useEffect(() => {
-  //   const clearAsyncStorage = async () => {
-  //     try {
-  //       await AsyncStorage.clear();
-  //       console.log('AsyncStorage cleared successfully.');
-  //     } catch (error) {
-  //       console.error('Error clearing AsyncStorage:', error);
-  //     }
-  //   };
 
-  //   // Gọi hàm để xóa tất cả dữ liệu
-  //   clearAsyncStorage();
-  // },[])
+  const fetchNovelData = async () => {
+    await getNovelData(authAxios).then((data) => {
+      setNovels(data);
+      setLoading(false);
+    }).catch((err) => {
+      console.error(err);
+    })
+  }
 
   useEffect(() => {
-    const fetchNovelData = async () => {
-      await getNovelData(authAxios).then((data) => {
-        setNovels(data);
-        setLoading(false);
-      }).catch((err) => {
-        console.error(err);
-      })
-    }
-    fetchNovelData();
-    if(user){
-      const checkIsExistInLib = (novels:Novel[])=>{
-        novels.map(async(novel) => {
-          const data = await getPreferenceByUANApi(user,novel.id,authState.getAccessToken());
-          if(data){
-            novel.isExistLib=true
-            // setExistInLib
-          }else{
-            novel.isExistLib=false
+
+    const checkIsExistInLib = async (novels: Novel[]) => {
+      if (user) {
+        console.log('Im come to here')
+        novels.map(async (novel, index) => {
+          const data = await getPreferenceByUANApi(user, novel.id, authState.getAccessToken());
+          if (data) {
+            console.log('novel', data)
+            novel.isExistLib = true
+            // set 
+            setExistInLib((prevIsExistInLib) => {
+              const updatedArray = [...prevIsExistInLib];
+              updatedArray[index] = true;
+              return updatedArray;
+            });
+          } else {
+            setExistInLib((prevIsExistInLib) => {
+              const updatedArray = [...prevIsExistInLib];
+              updatedArray[index] = false;
+              return updatedArray;
+            });
+            novel.isExistLib = false
           }
         })
-       
       }
-      checkIsExistInLib(novels)
+      else {
+        console.log('Im not come to here')
+        const data = await AsyncStorage.setItem('preferList', JSON.stringify(preferList));
+        console.log('prefer data', data);
+      }
     }
-  }, []);
+    fetchNovelData();
+    checkIsExistInLib(novels)
+    // return () => {
+    //   // Code to run when component is unmounted or updated
+    // };
+  }, [user]);
 
   // get preference data
   useEffect(() => {
@@ -265,10 +356,10 @@ function NovelsList({ navigation }: any) {
               <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
             </View>
             <TouchableOpacity onPress={() => {
-              handleAddToLib(novel)
+              handleAddToLib(novel, index)
               novel.isExistLib = !novel.isExistLib;
             }}>
-              {novel.isExistLib ?
+              {isExistInLib[index] ?
                 (<Icon name='check' size={24} color="black" />) :
                 (<Icon name='plus-box' size={24} color="black" />)}
 

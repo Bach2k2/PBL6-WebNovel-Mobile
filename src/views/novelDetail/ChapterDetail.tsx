@@ -18,9 +18,14 @@ import { BlurView } from '@react-native-community/blur';
 import { User } from "../../models/User";
 import SignInBottomSheet from "../../components/BottomSheet/SignInBottomSheet";
 import GetAccountApi from "../../hook/AccountApi";
+import { AxiosContext } from "../../context/AxiosContext";
 
 
 const ChapterDetail = ({ navigation, route }: any) => {
+    const { authState, getUserData, setUserData } = useContext(AuthContext);
+    const { authAxios } = useContext(AxiosContext)
+    const [user, setUser] = useState<User | null>();
+
     const [chapter, setChapter] = useState<Chapter>();
     const [chapters, setChapters] = useState<Chapter[]>([])
     const [currentPage, setCurrentPage] = useState(1);
@@ -28,8 +33,8 @@ const ChapterDetail = ({ navigation, route }: any) => {
     const [isLoading, setIsLoading] = useState(true);
     const [pdfArray, setPdfArray] = useState<JSX.Element[]>([]);
     const { novel, chapterId } = route.params;
-    const { authState, getUserData, setUserData } = useContext(AuthContext);
-    const [user, setUser] = useState<User | null>();
+
+
     const [bookmarkList, setBookmarkList] = useState<Bookmarked[]>([]);
     const [loadingBookmark, setLoadingBookmark] = useState(true);
 
@@ -41,6 +46,9 @@ const ChapterDetail = ({ navigation, route }: any) => {
     const [showSidebar, setShowSidebar] = useState(false);
     const [showLockBottomSheet, setShowLockBottomSheet] = useState(false);
     const [showSignInBS, setShowSignInBS] = useState(false);
+
+
+
 
     const toggleSidebar = () => {
         console.log("Toggle sidebar")
@@ -216,7 +224,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
 
     const renderPages = () => {
         const scrollViewRef = useRef(null);
-        console.log(chapter?.isLocked)
+        console.log('locked',chapter?.isLocked)
         return (
             <ScrollView
                 ref={scrollViewRef}
@@ -297,7 +305,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
             },
         ]);
         setShowLockBottomSheet(false); // Close the bottom sheet after unlocking
-        const newUserData = await GetAccountApi(getUserData().id, authState.accessToken);
+        const newUserData = await GetAccountApi(authAxios, getUserData().id, authState.accessToken);
         setUserData(newUserData);
         console.log(chapter);
     };

@@ -8,7 +8,7 @@ import {
     Button,
 } from 'react-native';
 import { TabView } from 'react-native-tab-view';
-import UserChaptersDetail from './Chapter/UserChaptersList';
+import UserChaptersDetail from './Chapter/UserChaptersDetail';
 import NovelInforSettings from './NovelInforSettings';
 import { Novel } from '../../models/Novel';
 

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions } from "react-native";
+import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, TouchableOpacity, Alert } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
@@ -10,6 +10,7 @@ import { editChapterApi, postChapter } from "../../../hook/ChapterApi";
 import Pdf from "react-native-pdf";
 import { convertPdfToHtml } from "../../../hook/ConvertPdfToHtmlApi";
 import { ActivityIndicator } from "react-native-paper";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 var RNFS = require('react-native-fs');
 const handleHead = ({ tintColor }: any) => <Text style={{ color: tintColor }}>H1</Text>;
 
@@ -28,6 +29,11 @@ const EditChapter = ({ route, navigation }: any) => {
     // const [fileChapter, setFileChapter] = useState<string | null>(null);
     var fileChapter = null;
     const { authState } = useContext(AuthContext)
+
+    // TH truyện đang cập nhật nội dung hoặc để trống nhưng creator bấm thoát ra
+    useEffect(() => {
+
+    })
 
     // useEffect(() => {
     //     const getContent = async () => {
@@ -85,11 +91,11 @@ const EditChapter = ({ route, navigation }: any) => {
     //     }
     //     fecthHTMLFromPdf();
     // }, []);
-    useEffect(()=>{
-        setTimeout(()=>{
+    useEffect(() => {
+        setTimeout(() => {
             setIsLoading(false);
-        },2000)
-    },[])
+        }, 2000)
+    }, [])
 
     const handleEditChapter = async () => {
         console.log('Title', title, 'content', content)
@@ -117,20 +123,17 @@ const EditChapter = ({ route, navigation }: any) => {
             const file = await RNHTMLtoPDF.convert(options);
             console.log(file);
             if (file.filePath) {
-
-                // console.log(pdfContent);
-                // const fileBlob = await fetch(file.filePath).then(response => response.blob());//type network error
                 const data = {
-                    name: 'title',
-                    novelId: novel.id,
-                    Discount: chapter.discount,// Add your form fields with appropriate values
+                    Id: novel.id,
+                    Name: chapter.name,
+                    Discount: chapter.discount,
                     FeeId: chapter.feeId,
                     IsPublished: chapter.isPublished,
-                    Views: chapter.views,
-                    IsLocked: chapter.isLocked,
+                    Views: novel.views,
+                    IsLocked: true,
                     ApprovalStatus: chapter.approvalStatus,
-                    file: file,
-                    accessToken: authState.accessToken,
+                    File: file.filePath,
+                    accessToken: authState.accessToken
                 }
                 const response = await editChapterApi(data);
 
@@ -172,6 +175,29 @@ const EditChapter = ({ route, navigation }: any) => {
 
     useEffect(() => {
         navigation.setOptions({
+            headerLeft: () => (
+                <TouchableOpacity onPress={() => {
+                    if (content == '') {
+                        Alert.alert('You are editing your chapter', 'Do you want to save your change', [
+                            {
+                                text: 'Cancel',
+                                onPress: () => {
+                                    navigation.goBack();
+                                },
+                                style: 'cancel',
+                            },
+                            {
+                                text: 'OK', onPress: () => {
+
+                                },
+                                style: 'cancel',
+                            }
+                        ]);
+                    }
+                }}>
+                    <Icon style={{ marginRight: 10 }} name="arrow-left" size={24} />
+                </TouchableOpacity>
+            ),
             title: chapter.name,
             headerRight: () => (
                 <Button
@@ -208,7 +234,7 @@ const EditChapter = ({ route, navigation }: any) => {
 
     return (
         <SafeAreaView style={{ backgroundColor: '#333' }}>
-            <ScrollView>
+            <ScrollView style={{ height: '100%' }}>
                 <KeyboardAvoidingView behavior={Platform.OS === "android" ? "padding" : "height"} style={styles.container}>
                     <TextInput
                         placeholder="Nhập tiêu đề chương"
@@ -239,7 +265,7 @@ const EditChapter = ({ route, navigation }: any) => {
                 editor={richText}
                 actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.heading1, actions.keyboard, actions.undo, actions.redo]}
                 iconMap={{ [actions.heading1]: handleHead }}
-                style={[styles.toolbar]}
+                style={[styles.toolbar, !keyboardShow && { height: 50 }]}
             />
 
 

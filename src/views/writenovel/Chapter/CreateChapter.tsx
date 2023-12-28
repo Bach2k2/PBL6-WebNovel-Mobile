@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, TouchableOpacity } from "react-native";
+import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, TouchableOpacity, Pressable } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
@@ -9,7 +9,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { postChapter } from "../../../hook/ChapterApi";
 import Pdf from "react-native-pdf";
 var RNFS = require('react-native-fs');
-const handleHead = ({ tintColor }: any) => <Text style={{ color: tintColor }}>H1</Text>;
+
 
 const CreateChapter = ({ route, navigation }: any) => {
     const { novel } = route.params
@@ -25,14 +25,15 @@ const CreateChapter = ({ route, navigation }: any) => {
     var fileChapter = null;
     const { authState } = useContext(AuthContext)
 
+    const [heading1Color, setHeading1Color] = useState('black');
+    const handleHead = ({ tintColor }: any) => <Text style={{ color: tintColor }}>H1</Text>;
+    // const handleBold = ({ tintColor }: any) => <Pressable onPress={()=>{tintColor=='black'?tintColor='#F0F0F0':tintColor='black'}}><Text style={{ color: tintColor }}>B</Text></Pressable>;
 
     useEffect(() => {
         console.log('Title', chapterTitle, 'content', chapterContent);
     }, [chapterTitle, chapterContent]);
     const handleCreateChapter = async () => {
-        // const { htmlContent } = content;
-        console.log('Title', chapterTitle, 'content', chapterContent)
-
+    
         if (chapterTitle == "" || chapterContent == "") {
             console.log("Thieu thong tin")
             return;
@@ -48,7 +49,6 @@ const CreateChapter = ({ route, navigation }: any) => {
 
         try {
             const file = await RNHTMLtoPDF.convert(options);
-            console.log(file);
             if (file.filePath) {
                 //  const pdfContent = await RNFS.readFile(file.filePath, 'base64');
                 // console.log(pdfContent);
@@ -61,9 +61,14 @@ const CreateChapter = ({ route, navigation }: any) => {
                 }
                 const response = await postChapter(data);
                 if (response.code == 200) {
+
                     navigation.goBack();
                 }
                 console.log(response);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Create new chapter successfully👌'
+                });
             }
         } catch (error) {
             console.error('Error creating PDF:', error);
@@ -149,12 +154,25 @@ const CreateChapter = ({ route, navigation }: any) => {
 
             <RichToolbar
                 editor={richText}
-                actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.heading1, actions.keyboard, actions.undo, actions.redo]}
-                iconMap={{ [actions.heading1]: handleHead }}
+                actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.heading1,
+                     actions.keyboard, actions.undo, actions.redo,
+                     'customAction',
+                    ]}
+                iconMap={{ [actions.heading1]: handleHead,
+                    // [actions.setBold]: handleBold,
+                }}
+                // iconMap={{
+                //     [actions.heading1]: () => (
+                //       <IconComponent color={heading1Color} />
+                //     ),
+                //   }}
                 style={[styles.toolbar, !keyboardShow && { height: 50 }]}
+                // onPressHeading1={() => {
+                //     // Get the current selected text
+                //     console.log(richText.current)
+                // }}
+                selectedButtonStyle={{fontWeight:'bold'}}
             />
-
-
         </SafeAreaView >
     );
 };
@@ -190,7 +208,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        //zIndex: 1,
     },
     pdf: {
         // flex: 1,

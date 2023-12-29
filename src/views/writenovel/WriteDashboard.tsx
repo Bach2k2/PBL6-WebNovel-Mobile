@@ -31,6 +31,7 @@ function WriteDashboard() {
       <>
         <View style={styles.container}>
           <Text numberOfLines={1} style={styles.title}>Become a writer</Text>
+          <Text>You haven't write any novel, let try to write your first novel</Text>
           <View style={styles.boxNovelContainer}>
             <TouchableOpacity onPress={handleNavigate}>
               <View style={styles.box}>

@@ -21,7 +21,9 @@ export const handleLoginByGG = async (authContext: any) => {
         const userInfo = await GoogleSignin.signIn();
         const response = await LoginWithGoogleApi(userInfo);
         const userData = await handleAuth({ authContext, response });
-        userData.imagesURL = userInfo.user.photo;
+        if (!userData.imagesURL) {
+            userData.imagesURL = userInfo.user.photo;
+        }
         userData.nickName = userInfo.user.name
         Toast.show({
             type: 'success',

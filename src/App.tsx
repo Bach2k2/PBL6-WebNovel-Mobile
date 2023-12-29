@@ -41,6 +41,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import CommentList from './views/novelDetail/CommentList';
 import { AxiosProvider } from './context/AxiosContext';
 import FAQ from './views/account/FAQ';
+import linking from './linking';
 const Stack = createNativeStackNavigator();
 function App() {
   const scheme = useColorScheme();
@@ -48,7 +49,7 @@ function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
         <AxiosProvider>
-          <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme} linking={linking}>
             <Stack.Navigator initialRouteName='Welcome'>
               <Stack.Screen name='Welcome' component={Welcome} options={{ headerShown: false }} />
               <Stack.Screen name="Home" component={HomeTabs} options={{

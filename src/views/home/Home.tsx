@@ -19,6 +19,7 @@ import { Preference } from '../../models/Preference';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../models/User';
 import { AxiosContext } from '../../context/AxiosContext';
+import QuizMedal from '../../components/QuizMedal/QuizMedal';
 
 
 function HotNovels() {
@@ -98,7 +99,8 @@ function HotNovels() {
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
                 <NovelRow novelData={novels} />
               </View>
-              <NovelsList navigation={navigation}></NovelsList>
+              <RankingList navigation={navigation} />
+              <NovelsList navigation={navigation} />
             </ScrollView>
           </>
         ) :
@@ -118,11 +120,7 @@ function RankingList({ navigation }: any) {
   const [error, setError] = useState(null);
   const { getUserData } = useContext(AuthContext);
   const authState = useContext(AuthContext);
-  const user = getUserData();
-  const [preferList, setPreferList] = useState<Preference[]>([]);
   const { authAxios } = useContext(AxiosContext)
-  const [isExistInLib, setExistInLib] = useState<boolean[]>([])
-
 
   const fetchNovelData = async () => {
     await getTopTrendingNovelApi(authAxios).then((data) => {
@@ -133,6 +131,33 @@ function RankingList({ navigation }: any) {
     })
   }
 
+  useEffect(() => {
+    fetchNovelData();
+  }, [])
+
+  const renderColumn = (row: number) => {
+    return (
+      <View style={{ flexDirection: 'column', width: 350, marginRight: 10, minHeight: 400 }} key={row}>
+        {novels.slice(row * 5, (row + 1) * 5).map((novel, index) =>
+        (
+          <View key={index} style={{ flexDirection: 'row'}}>
+            <TouchableOpacity style={styles.novelContainer} onPress={() => {
+              navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title });
+            }}>
+              <View>
+                <QuizMedal rank={row * 5 + index + 1} />
+              </View>
+              <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
+              <View style={styles.novelContent}>
+                <Text numberOfLines={2} style={styles.novelTitle}>{novel.name}</Text>
+                <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')}</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
+    )
+  }
   // render 
   if (loading) {
     return (
@@ -144,32 +169,17 @@ function RankingList({ navigation }: any) {
       <View style={{
         margin: 10,
       }}>
-        <Text style={{ color: "black", fontSize: 24, }}>You may also like:</Text>
+        <Text style={{ color: "black", fontSize: 24, }}>Rankings</Text>
       </View>
-      {novels.map((novel, index) => (
-        <View key={index}>
-          <TouchableOpacity style={styles.novelContainer} onPress={() => {
-            navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title });
-          }}>
-            <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
-            <View style={styles.novelContent}>
-              <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
-              <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
-              <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
-              <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
-            </View>
-            <TouchableOpacity onPress={() => {
-              handleAddToLib(novel, index)
-              novel.isExistLib = !novel.isExistLib;
-            }}>
-              {isExistInLib[index] ?
-                (<Icon name='check' size={24} color="black" />) :
-                (<Icon name='plus-box' size={24} color="black" />)}
-
-            </TouchableOpacity>
-          </TouchableOpacity>
+      <ScrollView horizontal={true}>
+        <View style={{ flex: 1, flexDirection: 'row' }}>
+          {Array.from({ length: Math.ceil(novels.length / 5) }, (_, index) => renderColumn(index))}
         </View>
-      ))}
+
+
+
+      </ScrollView>
+
     </View>
   );
 }
@@ -464,14 +474,20 @@ const styles = StyleSheet.create({
   novelImage: {
     width: 100,
     height: 120,
-    marginRight: 10,
+    marginRight: 10,  
   },
   novelContent: {
-    flex: 1,
+    // width: 350,
+    maxWidth: 200, // Điều chỉnh độ rộng tối đa của novelTitle
+    overflow: 'hidden', // Ẩn phần vượt quá độ rộng
   },
   novelTitle: {
+    color: '#333',
     fontSize: 18,
     fontWeight: 'bold',
+    lineHeight: 20,
+    overflow: 'visible',
+    flexWrap: 'wrap',
   }, novelTag: {
     fontSize: 22,
     color: 'gray',

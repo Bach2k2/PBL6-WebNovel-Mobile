@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, TouchableOpacity, Pressable } from "react-native";
+import { Text, Platform, KeyboardAvoidingView, SafeAreaView, ScrollView, TextInput, View, StyleSheet, Button, Dimensions, TouchableOpacity, Pressable, Alert } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
@@ -8,6 +8,7 @@ import Toast from "react-native-toast-message";
 import { AuthContext } from "../../../context/AuthContext";
 import { postChapter } from "../../../hook/ChapterApi";
 import Pdf from "react-native-pdf";
+import Spinner from "../../../components/Spinner/Spinner";
 var RNFS = require('react-native-fs');
 
 
@@ -24,6 +25,7 @@ const CreateChapter = ({ route, navigation }: any) => {
     // const [fileChapter, setFileChapter] = useState<string | null>(null);
     var fileChapter = null;
     const { authState } = useContext(AuthContext)
+    const [isCreateLoading, setIsCreateLoading] = useState(false)
 
     const [heading1Color, setHeading1Color] = useState('black');
     const handleHead = ({ tintColor }: any) => <Text style={{ color: tintColor }}>H1</Text>;
@@ -33,12 +35,13 @@ const CreateChapter = ({ route, navigation }: any) => {
         console.log('Title', chapterTitle, 'content', chapterContent);
     }, [chapterTitle, chapterContent]);
     const handleCreateChapter = async () => {
-    
+
         if (chapterTitle == "" || chapterContent == "") {
             console.log("Thieu thong tin")
+            Alert.alert('Please fill your chapter header')
             return;
         }
-
+        setIsCreateLoading(true)
         let options = {
             html: `<html><body>${chapterContent}</body></html>`,
             // html: '<html><body><h1>Hello</h1><div><p>Hi</p></div></body></html>',
@@ -72,6 +75,8 @@ const CreateChapter = ({ route, navigation }: any) => {
             }
         } catch (error) {
             console.error('Error creating PDF:', error);
+        } finally {
+            setIsCreateLoading(false)
         }
     };
 
@@ -123,6 +128,7 @@ const CreateChapter = ({ route, navigation }: any) => {
 
     return (
         <SafeAreaView style={{ backgroundColor: '#333' }}>
+            <Spinner visible={isCreateLoading}></Spinner>
             <ScrollView style={{ height: '100%' }}>
                 <KeyboardAvoidingView behavior={Platform.OS === "android" ? "padding" : "height"} style={styles.container}>
                     <TextInput
@@ -155,10 +161,11 @@ const CreateChapter = ({ route, navigation }: any) => {
             <RichToolbar
                 editor={richText}
                 actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.heading1,
-                     actions.keyboard, actions.undo, actions.redo,
-                     'customAction',
-                    ]}
-                iconMap={{ [actions.heading1]: handleHead,
+                actions.keyboard, actions.undo, actions.redo,
+                    'customAction',
+                ]}
+                iconMap={{
+                    [actions.heading1]: handleHead,
                     // [actions.setBold]: handleBold,
                 }}
                 // iconMap={{
@@ -171,7 +178,7 @@ const CreateChapter = ({ route, navigation }: any) => {
                 //     // Get the current selected text
                 //     console.log(richText.current)
                 // }}
-                selectedButtonStyle={{fontWeight:'bold'}}
+                selectedButtonStyle={{ fontWeight: 'bold' }}
             />
         </SafeAreaView >
     );

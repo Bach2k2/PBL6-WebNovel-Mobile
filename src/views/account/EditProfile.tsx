@@ -9,6 +9,8 @@ import { ActivityIndicator, TextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 // import DatePicker from 'react-native-datepicker'
 import GetAccountApi, { UpdateAccountApi } from '../../hook/AccountApi';
+import { ImagePickerBS } from '../../components/BottomSheet/ImagePickerBS';
+import { AxiosContext } from '../../context/AxiosContext';
 
 const EditProfile = ({ navigation }: any) => {
 
@@ -21,7 +23,9 @@ const EditProfile = ({ navigation }: any) => {
     const [dateString, setDateString] = useState("");
     const [isShowDatePicker, setShowDatePicker] = useState(false);
     const [formReady, setFormReady] = useState(false);
-    const authContext = useContext(AuthContext);
+    const [image,setImage]= useState(null)
+
+    const {publicAxios,authAxios} = useContext(AxiosContext);
     const { authState, setUserData } = useContext(AuthContext)
     const [updateUser, setUpdateUser] = useState<User | null>(
         {
@@ -36,7 +40,7 @@ const EditProfile = ({ navigation }: any) => {
             imagesURL: "https://lh3.googleusercontent.com/a/ACg8ocIB4vOa8zS_5XybONwLtpIOqUftfgKmhtthODMANyBNjw=s96-c",
             phone: "",
             walletAmmount: 0,
-            creatorWallet:0,
+            creatorWallet: 0,
             isActive: true
         }
     )
@@ -81,6 +85,36 @@ const EditProfile = ({ navigation }: any) => {
     const handleIconPress = () => {
 
     }
+    const onChangeImage = (image: any) => {
+        console.log(image)
+        setUpdateUser({ ...updateUser, imagesURL: image })
+    }
+
+    const takePhotoFromCamera = () => {
+        ImagePicker.openCamera({
+            compressImageMaxWidth: 300,
+            compressImageMaxHeight: 300,
+            cropping: false,
+            compressImageQuality: 0.7
+        }).then(image => {
+            console.log(image);
+            onChangeImage(image);
+            toggleBottomSheet();
+        });
+    }
+
+    const choosePhotoFromLibrary = () => {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 300,
+            cropping: false,
+            compressImageQuality: 0.7
+        }).then(image => {
+            console.log(image);
+            onChangeImage(image);
+            toggleBottomSheet();
+        });
+    }
 
     const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
     const toggleBottomSheet = () => {
@@ -115,10 +149,10 @@ const EditProfile = ({ navigation }: any) => {
         if (formReady && updateUser) {
             await UpdateAccountApi(updateUser, authState.accessToken).then(async (res) => {
                 console.log(res);
-                const user = await GetAccountApi(updateUser.id, authState.accessToken)
+                const user = await GetAccountApi(authAxios,updateUser.id, authState.accessToken)
                 setUserData(user);
                 setUpdateUser(getUserData());
-            }).catch((e)=>{
+            }).catch((e) => {
                 console.log(e);
             });
         }
@@ -147,7 +181,7 @@ const EditProfile = ({ navigation }: any) => {
             <View style={styles.row}>
                 <View style={styles.avatar_container}>
                     <Image style={styles.avatar} source={{ uri: updateUser?.imagesURL }} />
-                    <TouchableOpacity style={styles.iconContainer} onPress={handleIconPress}>
+                    <TouchableOpacity style={styles.iconContainer} onPress={toggleBottomSheet}>
                         <Icon name="camera" size={30} color={'white'} />
                     </TouchableOpacity>
                 </View>
@@ -204,12 +238,7 @@ const EditProfile = ({ navigation }: any) => {
                     )}
                 </View>
             </View>
-            {/* <View style={{ marginTop: 10, width: '100%', alignItems: 'center', justifyContent: 'center', height: 70 }}>
-                <View>
-                    <Button title='Save' onPress={handleUpdateUser} />
-                </View>
-
-            </View> */}
+            <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} onImageSelect={onChangeImage}/>
         </View>
     );
 };

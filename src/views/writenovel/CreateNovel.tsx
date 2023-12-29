@@ -12,6 +12,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { MultipleSelectList } from 'react-native-dropdown-select-list'
 import Toast from 'react-native-toast-message';
 import Spinner from '../../components/Spinner/Spinner';
+import { ImagePickerBS } from '../../components/BottomSheet/ImagePickerBS';
 
 // type NovelDetailProps = AppNavigatorProps<'CreateNovel'>;
 type genreType = {
@@ -52,6 +53,10 @@ const CreateNovel = ({ route, navigation }: any) => {
 
     setBottomSheetVisible(!isBottomSheetVisible);
   };
+  const onChangeImage = (image: any) => {
+    setImage(image)
+    setPostNovel({ ...postNovel, File: image });
+  }
 
   const takePhotoFromCamera = () => {
     ImagePicker.openCamera({
@@ -62,7 +67,6 @@ const CreateNovel = ({ route, navigation }: any) => {
     }).then(image => {
       console.log(image);
       onChangeImage(image);
-      // setPostNovel({ ...postNovel, File: image.path });
       toggleBottomSheet();
     });
   }
@@ -76,7 +80,6 @@ const CreateNovel = ({ route, navigation }: any) => {
     }).then(image => {
       console.log(image);
       onChangeImage(image);
-      // setPostNovel({ ...postNovel, File: image.path });
       toggleBottomSheet();
     });
   }
@@ -161,35 +164,32 @@ const CreateNovel = ({ route, navigation }: any) => {
   //   setPostNovel({ ...postNovel, File: selectedImage.path });
   // };
 
-  const ImagePickerBS = ({ isVisible, onClose }: any) => {
+  // const ImagePickerBS = ({ isVisible, onClose }: any) => {
 
-    return (
-      <Modal
-        isVisible={isVisible}
-        onBackdropPress={onClose}
-        style={styles.bottomModal}
-        backdropOpacity={0.5}
-      >
-        <View style={styles.modalContent}>
-          {renderHeader}
-          {renderInner}
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.closeButton}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    );
-  };
+  //   return (
+  //     <Modal
+  //       isVisible={isVisible}
+  //       onBackdropPress={onClose}
+  //       style={styles.bottomModal}
+  //       backdropOpacity={0.5}
+  //     >
+  //       <View style={styles.modalContent}>
+  //         {renderHeader}
+  //         {renderInner}
+  //         <TouchableOpacity onPress={onClose}>
+  //           <Text style={styles.closeButton}>Close</Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </Modal>
+  //   );
+  // };
 
   const handleCreate = () => {
     if (user) {
       if (postNovel.Name && postNovel.Description && postNovel.AccountId && selectGenres.length > 0 && postNovel.File) {
+        setIsCreateLoading(true)
         createNovel(postNovel, selectGenres, authState.getAccessToken())
           .then((data) => {
-            setTimeout(() => {
-              setIsCreateLoading(true)
-            }, 2000)
-            setIsCreateLoading(false)
             Toast.show({
               type: 'success',
               text1: 'Create your novel successfully 👋',
@@ -199,7 +199,9 @@ const CreateNovel = ({ route, navigation }: any) => {
           })
           .catch(error => {
             console.error(error);
-            // Handle error
+          })
+          .finally(() => {
+            setIsCreateLoading(false);
           });
       }
       else {
@@ -270,7 +272,7 @@ const CreateNovel = ({ route, navigation }: any) => {
         <TouchableOpacity style={isDisableBtn ? styles.btnDisabled : styles.button} onPress={handleCreate} disabled={isDisableBtn}>
           <Text style={isDisableBtn ? styles.disabledText : styles.buttonText}>Publish</Text>
         </TouchableOpacity>
-        <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
+        <ImagePickerBS isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} onImageSelect={onChangeImage}/>
       </ScrollView>
 
     </SafeAreaView>

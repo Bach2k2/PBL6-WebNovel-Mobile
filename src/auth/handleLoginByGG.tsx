@@ -30,7 +30,6 @@ export const handleLoginByGG = async (authContext: any) => {
             text1: 'Login Notification!',
             text2: 'Login successfully👋'
         });
-        // await GoogleSignin.signOut();
         return userData;
 
     } catch (error: any) {

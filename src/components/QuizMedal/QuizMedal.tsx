@@ -30,7 +30,7 @@ const RankBackground = ({ rank, children }: { rank: number, children: any }) => 
             break;
         default:
             view = (
-                <View style={{ backgroundColor: 'gray', width: 35, height: 35, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
+                <View style={styles.noRankBackground}>
                     {children}
                 </View>
             );
@@ -64,12 +64,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    noRankBackground:{
+        backgroundColor: 'gray',
+        width: 35, height: 35,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
     textRank: {
-        fontSize: 18,
+        fontSize: 14,
         color: '#ffffff',
         marginBottom: 10,
         fontWeight: 'bold'
     }
-
 });
 export default QuizMedal;

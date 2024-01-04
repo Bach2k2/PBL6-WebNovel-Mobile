@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { Button, Dimensions, View } from 'react-native';
+import { Alert, Button, Dimensions, View } from 'react-native';
 import { Image, ImageBackground, SafeAreaView, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -11,6 +11,7 @@ import { useContext } from 'react'
 import { AuthContext } from '../../../context/AuthContext';
 import handleLoginByGG from '../../../auth/handleLoginByGG';
 import { LoadingAnimation } from '../../../components/Loading/LoadingAnimation';
+import Spinner from '../../../components/Spinner/Spinner';
 
 
 const heigthWindow = Dimensions.get('window').height;
@@ -47,11 +48,17 @@ const Login = ({ navigation }: { navigation: any }) => {
 
     const loginByGG = async () => {
         try {
-            const userData = handleLoginByGG(authContext)
-            setTimeout(() => {
-                setLoading(true);
+            setLoading(true);
+            handleLoginByGG(authContext).then(() => {
                 navigation.navigate('Account');
-            }, 5000);
+            }).catch(
+                (err) => {
+                    Alert.alert(err)
+                }
+            ).finally(() => {
+                setLoading(false);
+            })
+
             //setLoading(false);
         } catch (error) {
             if (await GoogleSignin.isSignedIn() === true)
@@ -61,41 +68,9 @@ const Login = ({ navigation }: { navigation: any }) => {
 
     }
 
-
-    // const googleLogin = async () => {
-    //     try {
-    //         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    //         const userInfo = await GoogleSignin.signIn();
-    //         const response = await LoginWithGoogleApi(userInfo);
-    //         const userData = await handleAuth({ authContext, response });
-    //         Toast.show({
-    //             type: 'success',
-    //             text1: 'Login Notification!',
-    //             text2: 'Login successfully👋'
-    //         });
-    //         // await GoogleSignin.signOut();
-    //         navigation.navigate('Account', userData);
-
-    //     } catch (error: any) {
-    //         if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-    //             console.log("signin cancelled");
-    //             // user cancelled the login flow
-    //         } else if (error.code === statusCodes.IN_PROGRESS) {
-    //             console.log("signin in progress");
-    //             // operation (e.g. sign in) is in progress already
-    //         } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-    //             // play services not available or outdated
-    //             console.log("signin google play services not enabled or outdated");
-    //         } else {
-    //             // some other error happened
-    //             console.log("signin error", error);
-    //         }
-    //     }
-
-    // }
-
     return (
         <ImageBackground style={styles.container} source={require('../../../assets/background/background1.jpg')}>
+            <Spinner visible={loading} />
             <SafeAreaView style={styles.safeAreaView}>
                 {/* Logo */}
                 <View style={styles.logoContainer}>
@@ -140,13 +115,12 @@ const Login = ({ navigation }: { navigation: any }) => {
                 }}>
                     <Text style={styles.createAccountText}>Create an account</Text>
                 </TouchableOpacity>
-                {loading && (
+                {/* {loading && (
                     <View style={styles.loadingContainer}>
                         <LoadingAnimation />
                     </View>
-                )}
+                )} */}
             </SafeAreaView >
-
         </ImageBackground>
     );
 }

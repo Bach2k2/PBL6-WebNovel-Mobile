@@ -1,12 +1,23 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import handleLoginByGG from '../../auth/handleLoginByGG';
 import { AuthContext } from '../../context/AuthContext';
 
+import {
+    BORDERRADIUS,
+    COLORS,
+    FONTFAMILY,
+    FONTSIZE,
+    SPACING,
+} from '../../theme/theme';
+
+const width = Dimensions.get('window').width
+const height = Dimensions.get('window').height
 const SignInBottomSheet = ({ isVisible, onClose }: any) => {
+
     const navigation = useNavigation();
     const authContext = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
@@ -25,9 +36,8 @@ const SignInBottomSheet = ({ isVisible, onClose }: any) => {
             }, 5000);
         } catch (error) {
         }
-
     }
-
+    
     return (
         <Modal
             isVisible={isVisible}
@@ -46,7 +56,7 @@ const SignInBottomSheet = ({ isVisible, onClose }: any) => {
                     <Text style={styles.bodyText}>Sign in for exclusive perks: missions, rewards, and daily check-in bonuses</Text>
                 </View>
 
-                <View style={{ width: '100%', height: '20%', justifyContent: 'flex-start', alignItems: 'center' }}>
+                <View style={styles.btnLoginContainer}>
                     <TouchableOpacity onPress={() => { loginByGG() }} style={styles.googleBtn}>
                         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                             <Image style={styles.googleBtnImage} source={require('../../assets/logo/google.png')} />
@@ -96,32 +106,29 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     modalHeader: {
-        backgroundColor: '#FFFFFF',
-        shadowColor: '#333333',
+        backgroundColor: COLORS.primaryWhiteHex,
+        shadowColor: COLORS.primaryBlackHex,
         shadowOffset: { width: -1, height: -3 },
         shadowRadius: 2,
         shadowOpacity: 0.4,
-        paddingTop: 10,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        paddingTop: SPACING.space_15,
+        borderTopLeftRadius: BORDERRADIUS.radius_20,
+        borderTopRightRadius: BORDERRADIUS.radius_20,
     },
     panelHeader: {
         alignItems: 'center',
     },
     panelHandle: {
-        width: 40,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#00000040',
-        marginBottom: 10,
+        width: SPACING.space_36,
+        height: SPACING.space_8,
+        borderRadius: BORDERRADIUS.radius_4,
+        backgroundColor: COLORS.secondaryLightGreyHex,
     },
     modalContent: {
-        backgroundColor: 'white',
-        padding: 22,
+        backgroundColor: COLORS.primaryWhiteHex,
+        padding: SPACING.space_15,
         justifyContent: 'center',
         alignItems: 'center',
-        // borderTopLeftRadius: 15,
-        // borderTopRightRadius: 15,
     },
     closeButton: {
         marginTop: 10,
@@ -133,20 +140,28 @@ const styles = StyleSheet.create({
     , titleText: {
         fontSize: 22,
         fontWeight: 'bold',
+        color: COLORS.primaryBlackHex,
     }, bodyText: {
         fontSize: 18,
+        color: COLORS.primaryBlackHex,
+    },
+    btnLoginContainer: {
+        width: '100%',
+        alignItems: 'center',
+        height:'auto',
     },
     googleBtn: {
-        // width: '70%',
-        width: '80%', // Adjusted width
-        height: 50, // Adjusted height
-        marginTop: 10,
+        width: 'auto', // Adjusted width
+        height: 'auto', // Adjusted height
+        minWidth: '80%',
+        minHeight: 50,
+        marginTop: SPACING.space_10,
         backgroundColor: 'white',
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: 'black',
+        borderColor: COLORS.primaryBlackHex,
+        color: COLORS.primaryBlackHex,
         justifyContent: 'center',
-        color: 'black'
     },
     googleBtnImage: {
         marginLeft: 10,
@@ -156,12 +171,14 @@ const styles = StyleSheet.create({
     googleText: {
         marginLeft: 40,
         color: "black",
-        fontSize: 18,
+        fontSize: FONTSIZE.size_18,
         fontWeight: 'bold',
     },
     facebookBtn: {
-        width: '80%',
-        height: 50, // Adjusted height
+        width: 'auto', // Adjusted width
+        height: 'auto', // Adjusted height
+        minWidth: '80%',
+        minHeight: 50,
         backgroundColor: "#3b5998",
         borderRadius: 10,
         borderWidth: 1,
@@ -178,11 +195,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     roundButtonsContainer: {
-        flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '70%',
-        marginTop: 60,
+        marginTop:SPACING.space_15,
     },
     roundButton: {
         width: 50,
@@ -226,7 +242,7 @@ const styles = StyleSheet.create({
     }
     , createAccountText: {
         color: 'black',
-        marginTop: 20,
+        marginTop: SPACING.space_10,
         fontSize: 18,
     }
 });

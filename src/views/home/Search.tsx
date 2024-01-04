@@ -5,6 +5,7 @@ import { Novel } from '../../models/Novel';
 import { searchNovelByKey } from '../../hook/NovelApi';
 import { ActivityIndicator } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import { useLinkTo } from '@react-navigation/native';
 
 const Search = ({ navigation }: any) => {
     const [isLoading, setIsLoading] = useState(false);

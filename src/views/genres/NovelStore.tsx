@@ -64,6 +64,17 @@ function NovelStore() {
 }
 const NovelStoreHome = ({ navigation }: { navigation: any }) => {
   const [genreDatas, setGenreData] = useState(Array<Genre>());
+  const [flatListHeight, setFlatListHeight] = useState(0);
+  const genreImg = [
+    require('../../assets/img/genres/1.jpg'),
+    require('../../assets/img/genres/2.jpg'),
+    require('../../assets/img/genres/3.jpg'),
+    require('../../assets/img/genres/4.jpg'),
+    require('../../assets/img/genres/5.jpg'),
+    require('../../assets/img/genres/6.png'),
+    require('../../assets/img/genres/7.png'),
+    require('../../assets/img/genres/8.jpg'),
+  ]
   // const navigation = useNavigation();
   useEffect(() => {
     const fetchGenreData = async () => {
@@ -75,27 +86,29 @@ const NovelStoreHome = ({ navigation }: { navigation: any }) => {
     }
     fetchGenreData();
   }, []);
+  const handleFlatListLayout = (event: any) => {
+    const { height } = event.nativeEvent.layout;
+    setFlatListHeight(height);
+  };
   return (
     <SafeAreaView>
-      <Header/>
-      <View>
-        <Text style={{ marginLeft: 10, fontSize: 16 }}>Tiểu thuyết</Text>
-      </View>
+      <Header />
       <View style={styles.content_container}>
-        <View style={styles.leftMenu}>
+        {/* <View style={styles.leftMenu}>
           <FlatList nestedScrollEnabled={true} data={[
-            { key: 'Thể loại' },
-            { key: 'Phổ biến' },
-            { key: 'Xếp hạng' }
+            { key: 'Genres' },
+            // { key: 'Phổ biến' },
+            // { key: 'Xếp hạng' }
           ]}
-            renderItem={({ item }) => <Text style={styles.leftItem}>{item.key}</Text>} />
-        </View>
+           renderItem={({ item }) => <Text style={styles.leftItem}>{item.key}</Text>} />
+        </View> */}
         {/* Flat list  */}
-        <View style={styles.rightContent}>
+        <View style={[styles.rightContent]}>
 
-          <Text style={{ marginLeft: 10, marginTop: 10, padding: 10, fontSize: 18, fontWeight: 'bold', color: 'black' }}>Ảo mộng hơn</Text>
+          <Text style={{ marginLeft: 10, marginTop: 10, padding: 10, fontSize: 18, fontWeight: 'bold', color: 'black' }}>More fantasy</Text>
           <FlatList nestedScrollEnabled={true} data={genreDatas} numColumns={2}
-            renderItem={({ item }) =>
+            // onLayout={handleFlatListLayout}
+            renderItem={({ item, index }) =>
               <View style={styles.rightItems}>
                 <TouchableOpacity onPress={() => {
                   navigation.navigate(`${item.name}`, { genre: item });
@@ -105,7 +118,7 @@ const NovelStoreHome = ({ navigation }: { navigation: any }) => {
                     flex: 1, flexDirection: 'row', justifyContent: 'center',
                     alignItems: 'center', margin: 5,
                   }}>
-                    <Image style={styles.imageGenre} source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNM19gXSwYnT8Y7_2CWZCZFnIQw1PjAGJMcF40wevB&s' }} ></Image>
+                    <Image style={styles.imageGenre} source={genreImg[index]} ></Image>
                     <View style={{ maxWidth: '70%' }}>
                       <Text numberOfLines={1} ellipsizeMode="tail" style={styles.rightItemText}>{item.name}</Text>
                     </View>
@@ -201,7 +214,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     width: '80%',
-    height: '100%',
+    // height: '60%',
+   // height: 'auto',
     backgroundColor: 'white',
     borderRadius: 30,
 
@@ -216,7 +230,9 @@ const styles = StyleSheet.create({
   }
   , leftItem: {
     padding: 10,
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight:'700',
+    color:'#333'
     // height: 44,
   },
   rightItems: {

@@ -6,6 +6,13 @@ import NovelGridSkeleton from '../Loading/NovelGridSkeleton';
 import { useNavigation } from '@react-navigation/native';
 import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
+import {
+    BORDERRADIUS,
+    COLORS,
+    FONTFAMILY,
+    FONTSIZE,
+    SPACING,
+} from '../../theme/theme';
 // Phần để recommend truyện
 const NovelGrid = ({ novelData }: any) => {
     const navigation = useNavigation();
@@ -66,11 +73,8 @@ const NovelGrid = ({ novelData }: any) => {
                         }}>
                             <View style={styles.itemWrapper}>
                                 <Image source={{ uri: item.imagesURL }} style={styles.image} />
-                                <Text numberOfLines={2} style={styles.normalText}>{item.name}</Text>
-
-                            </View>
-                            <View>
-                                <Text style={styles.subText}>{item.genreName[0]}</Text>
+                                <Text numberOfLines={2} style={styles.normalTitle}>{item.name}</Text>
+                                <Text style={styles.subTitle}>{item.genreName[0]}</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -92,7 +96,7 @@ const NovelGrid = ({ novelData }: any) => {
                     marginLeft: 10,
                     marginTop: 10,
                 }}>
-                    <Text style={{ color: "black", fontSize: 24, }}>Weekly Feature</Text>
+                    <Text style={styles.headerTitle}>Weekly Feature</Text>
                 </View>
                 <View style={styles.rcm_container}>
                     {Array.from({ length: Math.ceil(visibleNovelWeekly / 4) }, (_, i) => renderRow(i))}
@@ -115,17 +119,15 @@ const styles = StyleSheet.create({
     // for the rmd -bookmark
     gridContainer: {
         flex: 1,
-        borderRadius: 10,
-        backgroundColor: '#fff',
-        margin: 5,
-        width: '95%',
+        borderRadius: BORDERRADIUS.radius_10,
+        backgroundColor: COLORS.primaryWhiteHex,
+        width: '96%',
     },
-    // render for row
-    rcm_container: {
+    rcm_container: {    // render for row
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: SPACING.space_10,
     },
     row: {
         flexDirection: 'row',
@@ -134,62 +136,65 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     column: {
-        marginLeft: 10,
+        marginLeft: SPACING.space_10,
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
-        width: '30%', // Adjust for card
     },
     itemWrapper: {
         flex: 1,
-        justifyContent: 'flex-start', // căn chỉnh theo chiều dọc
+        justifyContent: 'flex-start',
         alignItems: 'stretch',
         alignSelf: 'stretch',
     },
     image: {
-        width: 70,
-        height: 100,
-        borderRadius: 3,
+        width: 80,
+        height: 120,
+        borderRadius: BORDERRADIUS.radius_4,
     },
-    text: {
-        marginTop: 5,
+    headerTitle: {
+        fontFamily: FONTFAMILY.poppins_semibold,
+        fontSize: FONTSIZE.size_18,
+        color: COLORS.primaryBlackHex,
         textAlign: 'left',
         overflow: 'hidden',
-
+        fontWeight:'700',
     },
-    normalText: {
-        color: 'black',
-        fontSize: 14,
-        marginTop: 5,
+    normalTitle: {
+        fontFamily: FONTFAMILY.poppins_medium,
+        color: COLORS.primaryBlackHex,
+        marginTop: SPACING.space_10,
+        fontSize: FONTSIZE.size_14,
         textAlign: 'left',
         overflow: 'hidden',
     },
-    subText: {
+    subTitle: {
         marginTop: 5,
-        fontSize: 14,
+        fontSize: FONTSIZE.size_14,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        // height: SPACING.space_32,
     },
     loadingText: {
-        color: '#fff',
-        fontSize: 16,
+        color: COLORS.primaryWhiteHex,
+        fontSize: FONTSIZE.size_12,
         textAlign: 'center', // Căn giữa văn bản
-        lineHeight: 30,
     },
     btnLoadingMore: {
         flex: 1,
-        backgroundColor: '#6c757d',
+        backgroundColor: COLORS.primaryGreenHex,
         width: '90%',
-        height: 40,
-        color: '#fff',
+        color: COLORS.primaryWhiteHex,
+        borderRadius: BORDERRADIUS.radius_8,
+        marginTop: SPACING.space_10,
+        marginBottom: SPACING.space_10,
+        paddingTop:SPACING.space_10,
+        paddingBottom:SPACING.space_10,
         justifyContent: 'center',
         alignItem: 'center',
-        borderRadius: 5,
-        marginTop: 10,
-        marginBottom: 10,
     }
 });
 

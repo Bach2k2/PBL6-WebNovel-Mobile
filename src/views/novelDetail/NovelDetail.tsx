@@ -26,6 +26,7 @@ import { User } from '../../models/User';
 import { getTimeDiff } from '../../utils/getTimeDiff';
 import ShowStars from '../../components/StarRating/ShowStars';
 import { AxiosContext } from '../../context/AxiosContext';
+import ReportIssues from '../../components/BottomSheet/ReportIssues';
 
 const NovelDetail = ({ navigation, route }: any) => {
     // const navigation = useNavigation();
@@ -51,9 +52,15 @@ const NovelDetail = ({ navigation, route }: any) => {
     const [user, setUser] = useState<User | null>()
 
     const [loading, setLoading] = useState(true);
+    const [isReportBS, setIsReportBS] = useState(false);
 
     const [generalStarCount, setGeneralStarCount] = useState(3.5);
     const [customStarCount, setCustomStarCount] = useState(2.5);
+
+    const toggleReportBS = () => {
+        setIsReportBS(!isReportBS);
+    };
+
 
     const onGeneralStarRatingPress = (rating: number) => {
         setGeneralStarCount(rating);
@@ -223,6 +230,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                 novel.isExistLib = false;
                 await postPreferenceData(user.id, novel.id, authState.accessToken).then((response) => {
                     console.log(response)
+                    setIsExistLibrary(true)
 
                 }).catch((err) => {
                     ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
@@ -298,8 +306,8 @@ const NovelDetail = ({ navigation, route }: any) => {
     // }
 
     function handleDownloadBtnPress(): void {
-        setDownloadStatus(true);
-        throw new Error("Function not implemented.");
+        // setDownloadStatus(true);
+        // throw new Error("Function not implemented.");
     }
 
     function handleReadingBtnPress(): void {
@@ -632,7 +640,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                     </View>
                     <View style={{ marginTop: 5, flexDirection: 'column' }}>
                         <Text style={{ textAlign: 'center' }}>This book is released and published by TTQBA WebNovel.All rights reserved, policy must be investigate</Text>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={()=>{toggleReportBS()}}>
                             <View style={styles.reportRow}>
                                 <Icon name="flag" size={25} />
                                 <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Report</Text>
@@ -669,7 +677,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                         <Icon name="plus" size={25} />
                     </TouchableOpacity>)}
                 </View>
-
+            <ReportIssues isVisible={isReportBS} onClose={toggleReportBS} novel={novel}/>
             </KeyboardAvoidingView >
         );
     }

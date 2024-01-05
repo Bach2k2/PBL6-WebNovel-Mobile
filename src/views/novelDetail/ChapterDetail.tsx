@@ -224,7 +224,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
 
     const renderPages = () => {
         const scrollViewRef = useRef(null);
-        console.log('locked',chapter?.isLocked)
+        console.log('locked', chapter?.isLocked)
         return (
             <ScrollView
                 ref={scrollViewRef}
@@ -314,7 +314,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
         if (user) {
             if (chapter?.isLocked) {
                 return (
-                    <>
+                    <View style={styles.blurViewContainer}>
                         <View style={styles.blurContainer}>
                             <View style={{ flexDirection: 'column', width: '70%' }}>
                                 <Text style={{ color: '#333', fontSize: 21 }}>Locked Chapter</Text>
@@ -367,7 +367,7 @@ const ChapterDetail = ({ navigation, route }: any) => {
 
                             </View>
                         </View>
-                    </>
+                    </View>
 
                 );
             } else {
@@ -576,13 +576,23 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: '55%', // Adjust the height as needed
-        zIndex: 0,
+        zIndex: 2,
         flexDirection: 'row',
         justifyContent: 'center',
-        backgroundColor: '#eae9ee'
+        backgroundColor: '#eae9ee',
+        offset: 10
         // blurRadius: 10,
         // alignSelf: 'center',
 
+    },
+    blurViewContainer: {
+        backgroundColor: 'transparent',
+        bottom: 0,
+        flex: 1,
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: 0
     },
     blurView: {
         flex: 1,

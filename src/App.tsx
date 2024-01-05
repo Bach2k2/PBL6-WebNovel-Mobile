@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, useColorScheme } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, useColorScheme, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import {
   NavigationContainer, DefaultTheme,
@@ -42,9 +42,35 @@ import CommentList from './views/novelDetail/CommentList';
 import { AxiosProvider } from './context/AxiosContext';
 import FAQ from './views/account/FAQ';
 import linking from './linking';
+import Payment from './views/account/payment/Payment';
+
+// import { notificationListeners, requestUserPermission } from './src/utils/notificationServices';
+
+
+
 const Stack = createNativeStackNavigator();
 function App() {
   const scheme = useColorScheme();
+  // useEffect(()=>{
+
+  //   if(Platform.OS == 'android'){
+  //     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then((res)=>{
+  //         console.log("res+++++",res)
+  //         if(!!res && res == 'granted'){
+  //           requestUserPermission()
+  //           notificationListeners()
+  //         }
+  //     }).catch(error=>{
+  //       alert('something wrong')
+  //     })
+  //   }else{
+  
+  //   }
+  
+  // },[])
+  
+
+ 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
@@ -77,13 +103,14 @@ function App() {
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="Register" component={Register} />
               <Stack.Screen name="CoinExchange" component={CoinExchange} options={({ route }: any) => ({ title: 'Top Up', headerTitleAlign: 'center' })} />
+              <Stack.Screen name="PaymentScreen" component={Payment} options={({ route }: any) => ({ title: 'Payments', headerTitleAlign: 'center' })} />
               <Stack.Screen name="LoginByEmail" component={LoginByEmail} />
               <Stack.Screen name="Profile" component={Profile} />
               <Stack.Screen name="EditProfile" component={EditProfile} />
               <Stack.Screen name="SettingAccount" component={SettingAccount} />
               <Stack.Screen name="EmailBox" component={MailBox} options={{ headerTitle: 'Inbox' }} />
               <Stack.Screen name="PaymentHistory" component={PaymentHistory} options={{ headerTitle: 'Payment History', headerTitleAlign: 'center' }} />
-              <Stack.Screen name="FAQ" component={FAQ} options={{ headerTitle: 'FAQ',headerTitleAlign: 'center'  }} />
+              <Stack.Screen name="FAQ" component={FAQ} options={{ headerTitle: 'FAQ', headerTitleAlign: 'center' }} />
               <Stack.Screen name="PreferenceEdit" component={PreferenceEdit} options={
                 ({ route }: any) => ({
                   title: 'Edit library',

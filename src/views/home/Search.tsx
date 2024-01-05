@@ -5,6 +5,7 @@ import { Novel } from '../../models/Novel';
 import { searchNovelByKey } from '../../hook/NovelApi';
 import { ActivityIndicator } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import { useLinkTo } from '@react-navigation/native';
 
 const Search = ({ navigation }: any) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -89,12 +90,11 @@ const Search = ({ navigation }: any) => {
                                         <Text style={styles.normalText}>{novel.author}</Text>
                                         <Text style={styles.normalText}>{novel.genreName[0]}</Text>
                                     </View>
-
-                                    <View style={{ marginLeft: 'auto', right: 10, justifyContent: 'center' }}>
+                                    {/* <View style={{ marginLeft: 'auto', right: 10, justifyContent: 'center' }}>
                                         <Pressable onPress={() => { handleAddToLib() }}>
                                             <MaterialIcons name='add-box' size={25} />
                                         </Pressable>
-                                    </View>
+                                    </View> */}
                                 </View>
                             </TouchableOpacity>
                         ))

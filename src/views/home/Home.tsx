@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator, Dimensions, ToastAndroid } from 'react-native';
+import { Image, Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, FlatList, ActivityIndicator, Dimensions, ToastAndroid, Share } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { useNavigation } from '@react-navigation/native';
+import { useLinkTo, useNavigation } from '@react-navigation/native';
 
-
-import useFetch from '../../hook/useFetch';
 import { getNovelData, getTopTrendingNovelApi } from '../../hook/NovelApi';
 import { Novel } from '../../models/Novel';
 import NovelRow from '../../components/Home/NovelRow';
@@ -19,8 +17,14 @@ import { Preference } from '../../models/Preference';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../models/User';
 import { AxiosContext } from '../../context/AxiosContext';
-import QuizMedal from '../../components/QuizMedal/QuizMedal';
-
+import { RankingList } from '../../components/Home/Rank';
+import {
+  BORDERRADIUS,
+  COLORS,
+  FONTFAMILY,
+  FONTSIZE,
+  SPACING,
+} from '../../theme/theme';
 
 function HotNovels() {
   const width = Dimensions.get("window").width;
@@ -32,6 +36,8 @@ function HotNovels() {
   const { getUserData } = useContext(AuthContext)
   const [checkedNovels, setCheckedNovels] = useState<{ [key: string]: boolean }>({});
   const { authAxios } = useContext(AxiosContext)
+
+
 
   useEffect(() => {
     setUser(getUserData());
@@ -48,7 +54,6 @@ function HotNovels() {
           setLoading(false); // Đã tải xong dữ liệu
         }).catch((err) => {
           setLoading(true); // Lỗi xảy ra, cũng đánh dấu là đã tải xong
-          // console.error("Có lỗi kết nối xảy ra, vui lòng kiểm tra đường truyền");
         })
       }
     }
@@ -89,14 +94,15 @@ function HotNovels() {
     <SafeAreaView style={{ flex: 1 }} >
       {
         novels ? (
-          <><Header />
+          <>
+            <Header />
             <ScrollView>
               <ScrollView onScroll={handleScroll}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                <View style={styles.component}>
                   <NovelGrid novelData={novels} />
                 </View>
               </ScrollView>
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+              <View style={styles.component}>
                 <NovelRow novelData={novels} />
               </View>
               <RankingList navigation={navigation} />
@@ -113,76 +119,8 @@ function HotNovels() {
     </SafeAreaView >
   );
 }
-function RankingList({ navigation }: any) {
-
-  const [loading, setLoading] = useState(true);
-  const [novels, setNovels] = useState(Array<Novel>());
-  const [error, setError] = useState(null);
-  const { getUserData } = useContext(AuthContext);
-  const authState = useContext(AuthContext);
-  const { authAxios } = useContext(AxiosContext)
-
-  const fetchNovelData = async () => {
-    await getTopTrendingNovelApi(authAxios).then((data) => {
-      setNovels(data);
-      setLoading(false);
-    }).catch((err) => {
-      console.error(err);
-    })
-  }
-
-  useEffect(() => {
-    fetchNovelData();
-  }, [])
-
-  const renderColumn = (row: number) => {
-    return (
-      <View style={{ flexDirection: 'column', width: 350, marginRight: 10, minHeight: 400 }} key={row}>
-        {novels.slice(row * 5, (row + 1) * 5).map((novel, index) =>
-        (
-          <View key={index} style={{ flexDirection: 'row'}}>
-            <TouchableOpacity style={styles.novelContainer} onPress={() => {
-              navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title });
-            }}>
-              <View>
-                <QuizMedal rank={row * 5 + index + 1} />
-              </View>
-              <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
-              <View style={styles.novelContent}>
-                <Text numberOfLines={2} style={styles.novelTitle}>{novel.name}</Text>
-                <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')}</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-    )
-  }
-  // render 
-  if (loading) {
-    return (
-      <Skeleton height={30} width={500} style={{ borderRadius: 5, marginBottom: 5 }} />
-    );
-  }
-  return (
-    <View style={styles.container}>
-      <View style={{
-        margin: 10,
-      }}>
-        <Text style={{ color: "black", fontSize: 24, }}>Rankings</Text>
-      </View>
-      <ScrollView horizontal={true}>
-        <View style={{ flex: 1, flexDirection: 'row' }}>
-          {Array.from({ length: Math.ceil(novels.length / 5) }, (_, index) => renderColumn(index))}
-        </View>
 
 
-
-      </ScrollView>
-
-    </View>
-  );
-}
 function NovelsList({ navigation }: any) {
 
   const [loading, setLoading] = useState(true);
@@ -324,9 +262,6 @@ function NovelsList({ navigation }: any) {
     }
     fetchNovelData();
     checkIsExistInLib(novels)
-    // return () => {
-    //   // Code to run when component is unmounted or updated
-    // };
   }, [user]);
 
   // get preference data
@@ -351,28 +286,26 @@ function NovelsList({ navigation }: any) {
       <View style={{
         margin: 10,
       }}>
-        <Text style={{ color: "black", fontSize: 24, }}>You may also like:</Text>
+        <Text style={styles.headerTitle}>You may also like:</Text>
       </View>
-      {novels.map((novel, index) => (
+      {novels.slice(10, 15).map((novel, index) => (
         <View key={index}>
           <TouchableOpacity style={styles.novelContainer} onPress={() => {
             navigation.navigate('NovelDetail', { novelId: novel.id, title: novel.title });
           }}>
             <Image source={{ uri: novel.imagesURL }} defaultSource={require('../../assets/img/waiting_img.jpg')} style={styles.novelImage} />
             <View style={styles.novelContent}>
-              <Text numberOfLines={1} style={styles.novelTag}>{novel.tags}</Text>
-              <Text numberOfLines={1} style={styles.novelTitle}>{novel.title}</Text>
+              <Text numberOfLines={1} style={[styles.novelTitle,{marginBottom:SPACING.space_2}]}>{novel.title}</Text>
               <Text numberOfLines={1} style={styles.novelAuthor}>{novel.author}</Text>
               <Text numberOfLines={1} style={styles.novelGenre}>{novel.genreName.slice(0, 2).join(' ')} . <Icon name='script-text-outline' size={16} color="gray" />{novel.views}</Text>
             </View>
-            <TouchableOpacity onPress={() => {
+            <TouchableOpacity style={{ right: 0 }} onPress={() => {
               handleAddToLib(novel, index)
               novel.isExistLib = !novel.isExistLib;
             }}>
               {isExistInLib[index] ?
-                (<Icon name='check' size={24} color="black" />) :
-                (<Icon name='plus-box' size={24} color="black" />)}
-
+                (<Icon name='check' size={26} color="black" />) :
+                (<Icon name='plus-box' size={26} color="black" />)}
             </TouchableOpacity>
           </TouchableOpacity>
         </View>
@@ -385,42 +318,15 @@ const styles = StyleSheet.create({
   container: {
     margin: 10,
     backgroundColor: 'white',
-    borderRadius: 7,
+    borderRadius: BORDERRADIUS.radius_8,
     width: '95%',
   },
-  header: {
-    // position: 'sticky', 
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    backgroundColor: 'lightgrey',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '70%',
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 50,
-    padding: 5
-  },
-  searchInput: {
+  component: {
     flex: 1,
-    marginLeft: 5
-  },
-  settingButton: {
-    width: '15%',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 10
   },
-
   // for the rmd -bookmark
   rcm_container: {
     flex: 1,
@@ -445,65 +351,58 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: 'center',
   },
-  // Reading Preferences
-  imageRow: {
-    flexDirection: 'row',
-    marginLeft: 10,
-  },
-  prefer_image: {
-    margin: 5,
-    width: 70,
-    height: 100,
-    borderRadius: 10,
-  },
-  textContainer: {
-    width: 50, // Match the image width
-    marginLeft: 7
-  },
-  text_imgrow: {
-    marginTop: 5,
+  headerTitle: {
+    fontFamily: FONTFAMILY.poppins_semibold,
+    fontSize: FONTSIZE.size_18,
+    color: COLORS.primaryBlackHex,
     textAlign: 'left',
-    fontSize: 14,
+    overflow: 'hidden',
+    fontWeight: '700',
   },
+  normalTitle: {
+    fontFamily: FONTFAMILY.poppins_medium,
+    color: COLORS.primaryBlackHex,
+    marginTop: SPACING.space_10,
+    fontSize: FONTSIZE.size_14,
+    textAlign: 'left',
+    overflow: 'hidden',
+  },
+  subTitle: {
+    marginTop: 5,
+    fontSize: FONTSIZE.size_14,
+  },
+ 
   // all novels
   novelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    margin: 10,
+    margin: SPACING.space_10,
   },
   novelImage: {
     width: 100,
-    height: 120,
-    marginRight: 10,  
+    height: 140,
+    marginRight: SPACING.space_10,
   },
   novelContent: {
-    // width: 350,
-    maxWidth: 200, // Điều chỉnh độ rộng tối đa của novelTitle
+    flex: 1,
     overflow: 'hidden', // Ẩn phần vượt quá độ rộng
+    alignContent:'center',
   },
   novelTitle: {
-    color: '#333',
-    fontSize: 18,
-    fontWeight: 'bold',
-    lineHeight: 20,
+    fontFamily:FONTFAMILY.poppins_bold,
+    color: COLORS.primaryBlackHex,
+    fontSize: FONTSIZE.size_18,
+    fontWeight:'bold',
     overflow: 'visible',
     flexWrap: 'wrap',
-  }, novelTag: {
-    fontSize: 22,
-    color: 'gray',
-  },
+  },    
   novelAuthor: {
-    fontSize: 14,
-    color: 'gray',
+    fontSize: FONTSIZE.size_14,
+    color: COLORS.primaryLightGreyHex,
   },
   novelGenre: {
-    fontSize: 16,
+    fontSize: FONTSIZE.size_14,
     color: 'gray',
-  },
-
-
-  containerSkeleton: {
-
   },
 });
 export default HotNovels;

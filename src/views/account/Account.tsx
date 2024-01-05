@@ -13,6 +13,15 @@ import GetAccountApi from '../../hook/AccountApi';
 import { AxiosContext } from '../../context/AxiosContext';
 import { LogBox } from 'react-native';
 
+import {
+    BORDERRADIUS,
+    COLORS,
+    FONTFAMILY,
+    FONTSIZE,
+    SPACING,
+} from '../../theme/theme';
+import Spinner from '../../components/Spinner/Spinner';
+
 LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
 ]);
@@ -51,7 +60,6 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
             const fetchUserData = async () => {
                 try {
                     setIsLoading(true);
-                    //const newUserData = await getUserData();
                     const newUserData = await GetAccountApi(authAxios, getUserData().id, authState.accessToken);
                     setUser(newUserData);
                     setUserData(newUserData);
@@ -108,24 +116,20 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
         }
     }
 
-    if (isLoading) {
-        return (
-            <ActivityIndicator size={'large'} color={'black'} />
-        );
-    }
     return (
         <View>
+            <Spinner visible={isLoading}/>
             <ScrollView>
                 {/* <Header></Header> */}
                 <View style={styles.container}>
                     <View style={styles.icon_container}>
                         <TouchableOpacity>
-                            <Icon name='mail' size={20} color={'gray'} />
+                            <Icon name='mail' size={25} color={'gray'} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => {
                             navigation.navigate('SettingAccount')
                         }}>
-                            <Icon name='settings' size={20} color={'gray'} />
+                            <Icon name='settings' size={25} color={'gray'} />
                         </TouchableOpacity>
                     </View>
                     {user ? (
@@ -155,17 +159,17 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                         </View>)
                     }
                     <View style={styles.allIn4container}>
-                        <View style={styles.infor_container}>
+                        <View style={styles.inforContainer}>
                             <View style={styles.coinRow}>
-                                <View style={styles.infor_column}>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 25, height: 25 }} />
-                                        <Text style={styles.textItem}>Coins balance</Text>
+                                <View style={styles.inforColumn}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                        <Image source={require('../../assets/icons/coin_icon.png')} style={{ width: 30, height: 30 }} />
+                                        <Text style={styles.coinText}>Coins balance</Text>
                                     </View>
 
-                                    <Text style={styles.infor_text}>{user ? user.walletAmmount : '-'}</Text>
+                                    <Text style={styles.inforText}>{user ? user.walletAmmount : '-'}</Text>
                                 </View>
-                                <View style={styles.infor_column}>
+                                <View style={styles.inforColumn}>
 
                                     <TouchableOpacity onPress={() => {
                                         handleCoinExchange();
@@ -179,17 +183,17 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
 
                                 </View>
                             </View>
-                            <View style={styles.infor_row}>
-                                <View style={styles.infor_column}>
-                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                            <View style={styles.inforRow}>
+                                <View style={styles.inforColumn}>
+                                    <Text style={styles.inforText}>{user ? 0 : '-'}</Text>
                                     <Text style={styles.textItem}>Votes</Text>
                                 </View>
-                                <View style={styles.infor_column}>
-                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                <View style={styles.inforColumn}>
+                                    <Text style={styles.inforText}>{user ? 0 : '-'}</Text>
                                     <Text style={styles.textItem}>Points</Text>
                                 </View>
-                                <View style={styles.infor_column}>
-                                    <Text style={styles.infor_text}>{user ? 0 : '-'}</Text>
+                                <View style={styles.inforColumn}>
+                                    <Text style={styles.inforText}>{user ? 0 : '-'}</Text>
                                     <Text style={styles.textItem}>Vouchers</Text>
                                 </View>
                             </View>
@@ -200,7 +204,7 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                             <TouchableOpacity onPress={() => handleNavigate('EmailBox')}>
                                 <View style={styles.row4User}>
                                     <Icon style={styles.iconItem} name='email' size={30} />
-                                    <Text style={styles.textItem} >Inbox</Text>
+                                    <Text style={styles.textItem}>Inbox</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => {
@@ -228,12 +232,12 @@ const AccountMainPage = ({ navigation }: { navigation: any }) => {
                             }}>
                                 <View style={styles.row4User}>
                                     <Icon style={styles.iconItem} name='question-mark' size={30} />
-                                    <Text style={styles.textItem} >FAQ</Text>
+                                    <Text style={styles.textItem}>FAQ</Text>
                                 </View>
                             </TouchableOpacity>
                             <View style={styles.row4User}>
                                 <Icon style={styles.iconItem} name='quickreply' size={30} />
-                                <Text style={styles.textItem} >Customer online service</Text>
+                                <Text style={styles.textItem}>Customer online service</Text>
                             </View>
                         </View>
 
@@ -255,7 +259,6 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         width: '100%',
-
     },
     icon_container: {
         padding: 10,
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 
-    infor_container: {
+    inforContainer: {
         backgroundColor: 'white',
         borderWidth: 1,
         borderRadius: 25,
@@ -301,7 +304,7 @@ const styles = StyleSheet.create({
     },
     coinRow: {
         flexDirection: 'row',
-        justifyContents: 'space-between',
+        justifyContents: 'space-around',
         borderBottomWidth: 1,
         borderBottomColor: 'gray',
         marginTop: 10,
@@ -318,20 +321,20 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    infor_row: {
+    inforRow: {
         margin: 10,
         flexDirection: 'row',
         justifyContents: 'center',
         alignItem: 'center',
         // height: 70,
     },
-    infor_column: {
+    inforColumn: {
         flex: 1,
         justifyContents: 'center',
         alignItems: 'center',
         height: 100,
     },
-    infor_text: {
+    inforText: {
         fontSize: 18,
         fontWeight: 'bold',
     }
@@ -357,15 +360,20 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     iconItem: {
-
+        color: COLORS.primaryBlackHex,
+        // fontSize: FONTSIZE.size_18,
     },
     textItem: {
-        marginLeft: 10,
-        color: '#080808',
-        fontSize: 15
+        color: COLORS.primaryBlackHex,
+        fontSize: FONTSIZE.size_18,
+        // fontWeight:'500',
+        marginLeft: SPACING.space_10,
+    },
+    coinText: {
+        color: COLORS.coinTextHex,
+        fontSize: FONTSIZE.size_18,
     }
 });
 
-const stylesSelection = StyleSheet.create({
-});
+
 export default Account;

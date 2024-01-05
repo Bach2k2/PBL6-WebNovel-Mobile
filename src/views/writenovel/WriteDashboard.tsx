@@ -7,6 +7,14 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import SignInBottomSheet from '../../components/BottomSheet/SignInBottomSheet';
+import {
+  BORDERRADIUS,
+  COLORS,
+  FONTFAMILY,
+  FONTSIZE,
+  SPACING,
+} from '../../theme/theme';
+
 function WriteDashboard() {
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const { authState } = useContext(AuthContext);
@@ -31,7 +39,7 @@ function WriteDashboard() {
       <>
         <View style={styles.container}>
           <Text numberOfLines={1} style={styles.title}>Become a writer</Text>
-          <Text>You haven't write any novel, let try to write your first novel</Text>
+          <Text style={styles.subTitle}>Start writing</Text>
           <View style={styles.boxNovelContainer}>
             <TouchableOpacity onPress={handleNavigate}>
               <View style={styles.box}>
@@ -66,16 +74,6 @@ function WriteDashboard() {
 
           <SignInBottomSheet isVisible={isBottomSheetVisible} onClose={toggleBottomSheet} />
         </View>
-        {/* <Button
-          title="Open Bottom Sheet"
-          onPress={() => sheetRef.current.snapTo(0)}
-        />
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={[450, 300, 0]}
-        borderRadius={10}
-        renderContent={renderContent}
-      /> */}
       </>
 
     );
@@ -90,25 +88,32 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   title: {
+    fontFamily: FONTFAMILY.poppins_extrabold,
     fontSize: 21,
     color: 'black',
     textAlign: 'left',
-    margin: 5,
+    marginLeft: SPACING.space_10,
+    margin:5,
     alignSelf: 'flex-start'
   },
+  subTitle:{
+    fontFamily: FONTFAMILY.poppins_medium,
+    alignSelf: 'flex-start',
+    marginLeft:10,
+  },
   boxNovelContainer: {
-    // flex: 1,
-    // justifyContent: 'space-around',
     width: '95%',
-    height: 150,
+    height: 'auto',
     backgroundColor: 'gray',
-    borderRadius: 8,
+    borderRadius: BORDERRADIUS.radius_8,
     color: 'white',
-    margin: 5,
-
-  }, box: {
+    margin: SPACING.space_10,
+    paddingBottom: SPACING.space_10,
+  }, 
+  box: {
     marginLeft: 10,
-    width: '80%'
+    width: '80%',
+    height:'auto',
   },
 
   iconContainer: {
@@ -124,28 +129,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 40,
     height: 40,
-
+  },
+  boxChapterContainer: {
+    width: '95%',
+    height: 'auto',
+    backgroundColor: '#9e5fc2',
+    borderRadius: BORDERRADIUS.radius_8, 
+    margin: SPACING.space_10,
+    paddingBottom: SPACING.space_10,
   },
 
   headerText: {
+    fontFamily:FONTFAMILY.poppins_medium,
     fontSize: 20,
-    color: 'white',
+    color: COLORS.primaryWhiteHex,
   },
   bodyText: {
-    fontSize: 14,
-    color: 'white',
+    fontFamily:FONTFAMILY.poppins_medium,
+    fontSize: FONTSIZE.size_14,
+    color: COLORS.primaryWhiteHex,
   },
 
-  boxChapterContainer: {
-    width: '95%',
-    height: 150,
-    backgroundColor: '#9e5fc2',
-    borderRadius: 8,
-    color: 'white',
-    margin: 5,
-  }
-
-
-
+ 
 });
 

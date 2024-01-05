@@ -7,9 +7,11 @@ import { AuthContext } from '../../context/AuthContext';
 import { User } from '../../models/User';
 import { Linking } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
+import Spinner from '../../components/Spinner/Spinner';
+import { Bundle } from '../../models/Bundle';
 // import Hyperlink from 'react-native-hyperlink'
 
-export default function CoinExchange({navigation}:any) {
+export default function CoinExchange({ navigation }: any) {
     // const data = [
     //     { coin: 50, money: '24000.0' },
     //     { coin: 250, money: '122000.0' },
@@ -19,7 +21,7 @@ export default function CoinExchange({navigation}:any) {
     //     { coin: 5000, money: '2450000.0' },
     // ];
     const [loading, setLoading] = React.useState(true);
-    const [bundles, setBundles] = React.useState([]);
+    const [bundles, setBundles] = React.useState<Bundle[]>([]);
     const [user, setUser] = React.useState<User | null>();
     const { authState, getUserData } = React.useContext(AuthContext);
     React.useEffect(() => {
@@ -53,33 +55,33 @@ export default function CoinExchange({navigation}:any) {
         }
     };
 
-    const handleBuyCoin = async (bundle: any) => {
-        const res = await createOrderApi(user?.id, bundle, authState.accessToken)
-        console.log(res.data);
-        const paymentRes = await createPaymentApi(res.data.OrderId, res.data.Price, authState.accessToken)
-        console.log(paymentRes);
-        console.log(paymentRes.paymentUrl)
-        redirectToVNPAY(paymentRes.paymentUrl)//
-        console.log('hello');
-        // Call handleDeepLink when the app is reopened
-        handleDeepLink();
-    }
+    // const handleBuyCoin = async (bundle: any) => {
+    //     const res = await createOrderApi(user?.id, bundle, authState.accessToken)
+    //     console.log(res.data);
+    //     const paymentRes = await createPaymentApi(res.data.OrderId, res.data.Price, authState.accessToken)
+    //     console.log(paymentRes);
+    //     console.log(paymentRes.paymentUrl)
+    //     redirectToVNPAY(paymentRes.paymentUrl)//
+    //     console.log('hello');
+    //     // Call handleDeepLink when the app is reopened
+    //     handleDeepLink();
+    // }
 
-    const handleDeepLink = async () => {
-        try {
-            const url = await Linking.getInitialURL();
+    // const handleDeepLink = async () => {
+    //     try {
+    //         const url = await Linking.getInitialURL();
 
-            if (url) {
-                console.log('Deep link URL:', url);
-                // Add your logic here based on the deep link URL
-            }
-            else {
-                console.log('Nothing ');
-            }
-        } catch (error) {
-            console.error("Error handling deep link: ", error);
-        }
-    };
+    //         if (url) {
+    //             console.log('Deep link URL:', url);
+    //             // Add your logic here based on the deep link URL
+    //         }
+    //         else {
+    //             console.log('Nothing ');
+    //         }
+    //     } catch (error) {
+    //         console.error("Error handling deep link: ", error);
+    //     }
+    // };
 
     React.useEffect(() => {
         const doWait = () => {
@@ -91,18 +93,17 @@ export default function CoinExchange({navigation}:any) {
         return () => Linking.removeAllListeners('url');
     }, [navigation])
 
-    if(loading){
-        return (
-            <ActivityIndicator size={'large'} color='black'/>
-        );
-    }
+    // if(loading){
+    //     return (
+    //         <ActivityIndicator size={'large'} color='black'/>
+    //     );
+    // }
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-
+            <Spinner visible={loading} />
             <View style={styles.container}>
                 <ScrollView>
-
                     <View style={[styles.row, { marginTop: 10 }]}>
                         <Text style={styles.header}>Top Up</Text>
                         <Text style={styles.subheader}>Unit: VND</Text>
@@ -137,8 +138,8 @@ export default function CoinExchange({navigation}:any) {
                     {
                         bundles.map((bundle, index) => (
                             <Pressable key={index} onPress={() => {
-                                console.log('press')
-                                handleBuyCoin(bundle);
+                                // handleBuyCoin(bundle);
+                                navigation.navigate("PaymentScreen", { bundle: bundle })
                             }}>
                                 <View >
                                     <View key={index} style={styles.row}>

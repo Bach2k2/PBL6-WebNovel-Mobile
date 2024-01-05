@@ -7,13 +7,13 @@ import { useNavigation } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native-paper";
 import { User } from "../../models/User";
 import { AuthContext } from "../../context/AuthContext";
+import Spinner from "../../components/Spinner/Spinner";
 const ChapterList = ({ navigation, route }: any) => {
     const [loading, setLoading] = useState(true);
     const [chapterList, setChapterList] = useState<Chapter[]>([]);
     const { novel } = route.params;
     const [user, setUser] = useState<User | null>();
     const { authState, getUserData } = useContext(AuthContext);
-    // const navigation = useNavigation();
     useEffect(() => {
         setUser(getUserData());
         setTimeout(() => {
@@ -29,13 +29,14 @@ const ChapterList = ({ navigation, route }: any) => {
         fetchChapters();
     }, [user, novel]);
 
-    if (loading) {
-        return (
-            <ActivityIndicator />
-        )
-    }
+    // if (loading) {
+    //     return (
+    //         <ActivityIndicator />
+    //     )
+    // }
     return (
         <View style={styles.container}>
+            <Spinner visible={loading}/>
             <ScrollView>
                 {chapterList.map((chapter, index) => (
                     <TouchableOpacity key={index} onPress={() => {

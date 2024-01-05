@@ -218,13 +218,7 @@ const NovelDetail = ({ navigation, route }: any) => {
         console.log('add novel into lib', novel.id);
         // console.log(preferList)
         if (user) {
-            if (
-                preferList &&
-                preferList.some(item => item.novelId === novel.id && item.accountId === user.id)
-            ) { // Trường hợp lib đã có truyện
-                novel.isExistLib = true;
-                setIsExistLibrary(true)
-            } else {
+            if (!isExistLibrary) { // Trường hợp lib đã có truyện
                 // Trường hợp lib chưa có truyện
                 setIsExistLibrary(false)
                 novel.isExistLib = false;
@@ -235,6 +229,8 @@ const NovelDetail = ({ navigation, route }: any) => {
                 }).catch((err) => {
                     ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
                 })
+            } else {
+
             }
 
         } else {
@@ -344,7 +340,7 @@ const NovelDetail = ({ navigation, route }: any) => {
     }
     async function handleSendComment() {
         if (user) {
-            if (commentText.length > 40) {
+            if (commentText.length > 0) {
                 const data = {
                     novelId: novel?.id,
                     accountId: user?.id,
@@ -356,10 +352,9 @@ const NovelDetail = ({ navigation, route }: any) => {
                     Alert.alert('Add comment successfully');
                     setCommentText('');
                     fetchCommentFromNovel();
-                    // fetchRatingFromNovel();
                 }
             } else {
-                Alert.alert('Please enter more than 40 characters')
+                Alert.alert('Please enter comments characters')
             }
         } else {
             Alert.alert('You should sign in first.')
@@ -500,11 +495,6 @@ const NovelDetail = ({ navigation, route }: any) => {
                             <View style={{ flexDirection: 'row' }}>
                                 <Text style={styles.title}>Reviews</Text>
                                 <Text style={{ marginLeft: 2, marginBottom: 3 }}>{comments.length}</Text>
-                                {/* {commentLength > 0 ?
-                                    (<Text style={{top:1}}>{commentLength}</Text>) :
-                                    (<></>)
-                                } */}
-
                             </View>
                             {
                                 comments.length > 0 ?
@@ -568,7 +558,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                         <View style={{ marginTop: 10, borderRadius: 10, borderWidth: 1, borderColor: '#EBEBEB', width: '90%', alignSelf: 'center', flexDirection: 'row', alignItems: 'center' }}>
                             <TextInput
                                 multiline numberOfLines={2}
-                                placeholder='Please write your comment here. At least 40 characters'
+                                placeholder='Please write your comment here.'
                                 value={commentText}
                                 onChangeText={(comment) => { setCommentText(comment) }}
                                 style={{ margin: 10, width: '80%', textAlignVertical: 'top' }} />
@@ -640,7 +630,7 @@ const NovelDetail = ({ navigation, route }: any) => {
                     </View>
                     <View style={{ marginTop: 5, flexDirection: 'column' }}>
                         <Text style={{ textAlign: 'center' }}>This book is released and published by TTQBA WebNovel.All rights reserved, policy must be investigate</Text>
-                        <TouchableOpacity onPress={()=>{toggleReportBS()}}>
+                        <TouchableOpacity onPress={() => { toggleReportBS() }}>
                             <View style={styles.reportRow}>
                                 <Icon name="flag" size={25} />
                                 <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Report</Text>
@@ -677,10 +667,14 @@ const NovelDetail = ({ navigation, route }: any) => {
                         <Icon name="plus" size={25} />
                     </TouchableOpacity>)}
                 </View>
-            <ReportIssues isVisible={isReportBS} onClose={toggleReportBS} novel={novel}/>
+                <ReportIssues isVisible={isReportBS} onClose={toggleReportBS} novel={novel} />
             </KeyboardAvoidingView >
         );
     }
+    useEffect(() => {
+        render();
+    }, [isExistLibrary])
+
     return render();
 };
 const styles = StyleSheet.create({

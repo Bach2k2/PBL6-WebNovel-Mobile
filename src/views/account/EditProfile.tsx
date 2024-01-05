@@ -1,7 +1,7 @@
 import { AuthContext } from '../../context/AuthContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { User } from '../../models/User';
-import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform, } from 'react-native';
+import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform, Alert, } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import ImagePicker from 'react-native-image-crop-picker';
@@ -17,6 +17,7 @@ const EditProfile = ({ navigation }: any) => {
     const [mounted, setMounted] = useState(false);
     // const [user, setUserData] = useState<User | null>(null);
     const [isLoading, setLoading] = useState(true)
+    const [isEditLoading, setEditLoading] = useState(true)
     const { getUserData } = useContext(AuthContext);
     const [avatarImg, setAvatarImg] = useState('https://external-preview.redd.it/4PE-nlL_PdMD5PrFNLnjurHQ1QKPnCvg368LTDnfM-M.png?auto=webp&s=ff4c3fbc1cce1a1856cff36b5d2a40a6d02cc1c3')
     const [date, setDate] = useState(new Date())
@@ -147,13 +148,17 @@ const EditProfile = ({ navigation }: any) => {
 
     const handleUpdateUser = async () => {
         if (formReady && updateUser) {
+            setEditLoading(true)
             await UpdateAccountApi(updateUser, authState.accessToken).then(async (res) => {
                 console.log(res);
                 const user = await GetAccountApi(authAxios,updateUser.id, authState.accessToken)
                 setUserData(user);
                 setUpdateUser(getUserData());
+                Alert.alert('Edit your profile successfully')
             }).catch((e) => {
                 console.log(e);
+            }).finally(()=>{
+                setEditLoading(false)
             });
         }
     }
@@ -198,7 +203,7 @@ const EditProfile = ({ navigation }: any) => {
                 <View style={{ marginTop: 5, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={styles.label}>Email</Text>
                     <View style={styles.inputContainer} >
-                        <TextInput style={styles.input} value={updateUser?.email} />
+                        <TextInput style={styles.input} value={updateUser?.email} disabled={true}/>
                     </View>
 
                 </View>

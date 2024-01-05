@@ -1,51 +1,30 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Payment } from '../../models/Payment';
 import { User } from '../../models/User';
 import { AuthContext } from '../../context/AuthContext';
 import { getPaymentApi } from '../../hook/PaymentApi';
-
-// const Tab = createMaterialTopTabNavigator();
-
-// const PaymentHistory = () => {
-//   return (
-//     <Tab.Navigator
-//       tabBarOptions={{
-//         activeTintColor: '#3498db',
-//         inactiveTintColor: '#555',
-//         labelStyle: { fontSize: 16, fontWeight: 'bold' },
-//         style: { backgroundColor: '#f2f2f2' },
-//       }}>
-//       <Tab.Screen name="All" component={PaymentHistoryTab} />
-//       <Tab.Screen name="Success" component={PaymentHistoryTab} />
-//       <Tab.Screen name="Fail" component={PaymentHistoryTab} />
-//     </Tab.Navigator>
-//   );
-// };
+import Spinner from '../../components/Spinner/Spinner';
 
 const PaymentHistory = () => {
   const [paymentData, setPaymentData] = useState<Payment[]>([])
   const [user, setUser] = useState<User | null>();
   const { authState, getUserData } = useContext(AuthContext);
+  const [isLoading, setLoading] = useState(false)
   useEffect(() => {
     const userData = getUserData();
     setUser(userData);
-    // const fetchPaymentData = async () => {
 
-    //   await getPaymentApi(user?.id, authState.accessToken).then((data) => {
-    //     setPaymentData(data);
-    //     console.log('data', data);
-    //   })
-    // }
     const fetchPaymentData = async () => {
-      try {
-        const data = await getPaymentApi(user?.id, authState.accessToken);
+      setLoading(true)
+      await getPaymentApi(user?.id, authState.accessToken).then((data) => {
         setPaymentData(data);
-        console.log('data', data);
-      } catch (error) {
-        console.error('Error fetching payment data', error);
-      }
+      }).catch((err) => {
+        Alert.alert('Error while get payment records')
+      }).finally(() => {
+        setLoading(false)
+      });
     };
     if (user) {
       fetchPaymentData();
@@ -55,11 +34,11 @@ const PaymentHistory = () => {
   if (paymentData.length > 0) {
     return (
       <ScrollView style={styles.container}>
-
+        <Spinner visible={isLoading} />
         {paymentData.map((item, index) => (
           <View key={index}>
             <View style={styles.header}>
-              <Text style={styles.headerText}>{item.paymentDate.slice(0,10)}</Text>
+              <Text style={styles.headerText}>{item.paymentDate.slice(0, 10)}</Text>
             </View>
             <PaymentItem key={index} {...item} />
           </View>
@@ -78,6 +57,7 @@ const PaymentHistory = () => {
 
 const PaymentItem = ({ orderId, price, coinAmount, paymentStatus }: any) => (
   <View style={styles.paymentItemContainer}>
+
     <View style={styles.row}>
       <Text style={styles.headerText}>OrderId: </Text>
       <Text style={styles.paymentItemText}>{orderId}</Text>

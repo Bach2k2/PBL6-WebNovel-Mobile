@@ -7,14 +7,12 @@ import {
     FONTSIZE,
     SPACING,
 } from '../../theme/theme';
+import { Bundle } from '../../models/Bundle';
 
-interface PriceProps {
-    price: string;
-    currency: string;
-}
+
 
 interface PaymentFooterProps {
-    bundle: PriceProps;
+    bundle: Bundle;
     buttonPressHandler: any;
     buttonTitle: string;
 }

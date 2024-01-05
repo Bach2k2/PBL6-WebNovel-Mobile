@@ -22,12 +22,12 @@ const PaymentList = [
     },
     {
         name: 'Google Pay',
-        icon: require('../../../assets/logo/vnpay.png'),
+        icon: require('../../../assets/logo/gpay.png'),
         isIcon: false,
     },
     {
         name: 'Zalo Pay',
-        icon: require('../../../assets/logo/vnpay.png'),
+        icon: require('../../../assets/logo/zalopay.png'),
         isIcon: false,
     },
 ];
@@ -136,7 +136,7 @@ const Payment = ({ navigation, route }: any) => {
                         <MaterialCommunityIcons
                             name="arrow-left"
                             color={COLORS.primaryLightGreyHex}
-                            size={FONTSIZE.size_16}
+                            size={FONTSIZE.size_28}
                         />
                     </TouchableOpacity>
                     <Text style={styles.HeaderText}>Payments</Text>
@@ -148,16 +148,6 @@ const Payment = ({ navigation, route }: any) => {
     })
     return (
         <View style={styles.ScreenContainer}>
-
-            {/* {showAnimation ? (
-                <PopUpAnimation
-                    style={styles.LottieAnimation}
-                    source={require('../lottie/successful.json')}
-                />
-            ) : (
-                <></>
-            )} */}
-
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.ScrollViewFlex}>
@@ -193,7 +183,7 @@ export default Payment
 const styles = StyleSheet.create({
     ScreenContainer: {
         flex: 1,
-        backgroundColor: COLORS.primaryBlackHex,
+        backgroundColor: COLORS.primaryWhiteHex,
     },
     LottieAnimation: {
         flex: 1,
